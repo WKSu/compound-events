@@ -1,6 +1,12 @@
+extensions [ gis ]
+
 breed[bands band]
 
 globals[
+  ; gis globals
+  europe-coastline
+  europe-grid
+
   probability-of-eruption
   duration-of-eruption
   intensity-of-eruption
@@ -40,17 +46,29 @@ to setup
   clear-all
   setup-patches
   setup-agents
+
+  reset-ticks
 end
 
 to setup-patches
-  ask patches
-  [
-    set pcolor green
-  ]
+  gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
+
+  set europe-coastline gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
+  set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
+
+  gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of europe-coastline))
+
+  gis:set-drawing-color white
+  gis:draw europe-coastline 1
+  gis:draw europe-grid 1
+
+  ; ask patches with [pxcor mod 2 = 0 and pycor mod 2 = 0] [
+  ;  set pcolor green ]
+
 end
 
 to setup-agents
-  create-bands number-of-bands[
+  create-bands number-of-bands [
     set xcor random 32
     set ycor random 32
     set health 100
@@ -76,29 +94,28 @@ end
 
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-647
-448
+723
+524
 -1
 -1
-13.0
+5.0
 1
 10
 1
 1
 1
 0
-1
-1
+0
+0
 1
 0
-32
+100
 0
-32
+100
 0
 0
 1
