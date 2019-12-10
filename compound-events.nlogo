@@ -53,14 +53,19 @@ end
 to setup-patches
   gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
 
+  ; set europe-coastline gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
   set europe-coastline gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
 
   gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of europe-coastline))
 
   gis:set-drawing-color white
+
   gis:draw europe-coastline 1
-  gis:draw europe-grid 1
+
+  if show-graticules? = True [
+      gis:draw europe-grid 1
+  ]
 
   ; ask patches with [pxcor mod 2 = 0 and pycor mod 2 = 0] [
   ;  set pcolor green ]
@@ -138,10 +143,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-63
-99
-127
-132
+16
+86
+80
+119
 Setup
 setup
 NIL
@@ -153,6 +158,17 @@ S
 NIL
 NIL
 1
+
+SWITCH
+16
+129
+164
+162
+show-graticules?
+show-graticules?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
