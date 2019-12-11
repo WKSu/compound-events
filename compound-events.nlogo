@@ -1,4 +1,4 @@
-extensions [ gis ]
+extensions [ gis profiler ]
 
 breed[bands band]
 
@@ -42,9 +42,15 @@ bands-own[
   current-home-location
 ]
 
+to startup
+   profiler:start
+   setup-patches
+   profiler:stop
+   print profiler:report
+end
+
 to setup
-  clear-all
-  setup-patches
+  clear-turtles
   setup-agents
 
   reset-ticks
@@ -95,10 +101,6 @@ to setup-agents
     set current-home-location 0
   ]
 end
-
-
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
