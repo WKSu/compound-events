@@ -62,7 +62,7 @@ to setup-patches
   ; load in the coordinate systems of the files
   gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
   ; gis:load-coordinate-system ("data/gis/Natural Earth/europe.prj")
-  ; gis:load-coordinate-system ("data/gis/world-elevation.prj")
+  gis:load-coordinate-system ("data/gis/world-elevation.prj")
 
 
   ; load in gis files of: coastline, graticules, and elevation
@@ -70,7 +70,7 @@ to setup-patches
   ; set europe-coastline gis:load-dataset "data/gis/Natural Earth/europe.shp"
 
   ; only focus on europe coastline
-  gis:set-world-envelope (gis:envelope-union-of (gis:envelope-of europe-coastline))
+  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-coastline))
 
   ; draw the coastline
   gis:set-drawing-color white
@@ -200,7 +200,7 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-1
+0
 1
 -1000
 
@@ -211,7 +211,7 @@ SWITCH
 204
 visualize-altitude?
 visualize-altitude?
-0
+1
 1
 -1000
 
