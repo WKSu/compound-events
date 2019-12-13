@@ -4,9 +4,10 @@ breed[bands band]
 
 globals[
   ; gis globals
-  europe-coastline
+  europe-altitude
   europe-grid
-  elevation-dataset
+  europe-tri
+  europe-slope
 
   probability-of-eruption
   duration-of-eruption
@@ -22,6 +23,8 @@ patches-own[
   resource-return-rate
   accessibility
   altitude
+  ruggedness-index
+  slope
 ]
 
 bands-own[
@@ -62,23 +65,15 @@ to setup-patches
   ; load in the coordinate systems of the files
   ; gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
   ; gis:load-coordinate-system ("data/gis/Natural Earth/europe.prj")
-  gis:load-coordinate-system ("data/gis/Allerod/EPHA_All_v110.prj")
-  gis:load-coordinate-system ("data/gis/world-elevation.prj")
+  ; gis:load-coordinate-system ("data/gis/world-altitude.prj")
 
-
-  ; load in gis files of: coastline, graticules, and elevation
-  ; set europe-coastline gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
-  ; set europe-coastline gis:load-dataset "data/gis/Natural Earth/europe.shp"
-  set europe-coastline gis:load-dataset "data/gis/Allerod/EPHA_All_v110.shp"
-
-  ; only focus on europe coastline
-  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-coastline))
-
-  ; draw the coastline
-  gis:set-drawing-color white
-  gis:draw europe-coastline 1
+  ; load in gis files of: coastline, graticules, and altitude
+  ; set europe-altitude gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
+  ; set europe-altitude gis:load-dataset "data/gis/Natural Earth/europe.shp"
 
   setup-altitude
+  setup-terrain-ruggedness-index
+  ; setup-slope
 
   if show-graticules? = True [
      setup-graticules
@@ -90,21 +85,40 @@ to setup-patches
 end
 
 to setup-altitude
-  set elevation-dataset gis:load-dataset "data/gis/world-elevation.asc"
+  gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
+  set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
 
-  ; apply the elevation dataset to the patches
-  gis:apply-raster elevation-dataset altitude
+  ; only focus on europe altitude
+  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-altitude))
 
-  if visualize-altitude? = True [
-    let min-elevation gis:minimum-of elevation-dataset
-    let max-elevation gis:maximum-of elevation-dataset
-    ask patches
-    [ ; note the use of the "<= 0 or >= 0" technique to filter out
-      ; "not a number" values, as discussed in the documentation.
-      if (altitude <= 0) or (altitude >= 0)
-      [ set pcolor scale-color black altitude min-elevation max-elevation ] ]
+  gis:apply-raster europe-altitude altitude
+  ; gis:paint europe-altitude 1
+
+  let min-altitude gis:minimum-of europe-altitude
+  let max-altitude gis:maximum-of europe-altitude
+
+  ask patches
+  [ ; note the use of the "<= 0 or >= 0" technique to filter out
+    ; "not a number" values, as discussed in the documentation.
+    if (altitude <= 0) or (altitude >= 0)
+    [ set pcolor scale-color black altitude min-altitude max-altitude ]
+
+    if (altitude = 781.4310302734375) or (altitude = 1133.7154541015625) or (altitude = 0) ;; easy way to idenfity water bodies
+    [ set pcolor blue ]
   ]
 end
+
+to setup-terrain-ruggedness-index
+    set europe-tri gis:load-dataset "data/gis/Allerod/europe_TRI.asc" ;; change the folder to EPHA
+    gis:apply-raster europe-tri ruggedness-index
+end
+
+to setup-slope
+  set europe-slope gis:load-dataset "data/gis/EPHA/europe_slope.asc"
+  gis:apply-raster europe-slope slope
+end
+
+
 
 to setup-graticules
   gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj")
@@ -114,8 +128,8 @@ end
 
 to setup-agents
   create-bands number-of-bands [
-    set xcor random 32
-    set ycor random 32
+    set xcor random 16
+    set ycor random 16
     set health 100
     set group-size random 50
     set food-needed 0
@@ -139,11 +153,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-723
-524
+1260
+381
 -1
 -1
-5.0
+2.0
 1
 10
 1
@@ -154,9 +168,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-100
+520
 0
-100
+180
 0
 0
 1
@@ -172,7 +186,7 @@ number-of-bands
 number-of-bands
 0
 100
-22.0
+24.0
 1
 1
 NIL
@@ -202,17 +216,6 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-0
-1
--1000
-
-SWITCH
-20
-171
-174
-204
-visualize-altitude?
-visualize-altitude?
 1
 1
 -1000
