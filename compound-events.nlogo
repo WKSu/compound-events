@@ -8,6 +8,8 @@ globals[
   europe-grid
   europe-tri
 
+  europe-prec-djf
+
   probability-of-eruption
   duration-of-eruption
   intensity-of-eruption
@@ -23,6 +25,7 @@ patches-own[
   accessibility
   altitude
   ruggedness-index
+  prec-djf
 ]
 
 bands-own[
@@ -71,6 +74,12 @@ to setup-patches
 
   setup-altitude
   setup-terrain-ruggedness-index
+  setup-precipitation
+
+    ; only focus on europe altitude
+  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-altitude)
+                                                   (gis:envelope-of europe-tri)
+                                                   (gis:envelope-of europe-prec-djf))
 
   if show-graticules? = True [
      setup-graticules
@@ -84,9 +93,6 @@ end
 to setup-altitude
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
   set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
-
-  ; only focus on europe altitude
-  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-altitude))
 
   gis:apply-raster europe-altitude altitude
   ; gis:paint europe-altitude 1
@@ -106,8 +112,19 @@ to setup-altitude
 end
 
 to setup-terrain-ruggedness-index
-    set europe-tri gis:load-dataset "data/gis/Allerod/europe_TRI.asc" ;; change the folder to EPHA
+    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc"
     gis:apply-raster europe-tri ruggedness-index
+end
+
+to setup-precipitation
+  gis:load-coordinate-system ("data/gis/PaleoView/mean_prec_DJF.prj")
+  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
+  ; gis:resample europe-prec-djf gis:envelope-of europe-altitude gis:width-of europe-altitude gis:height-of europe-altitude
+
+  gis:apply-raster europe-prec-djf prec-djf
+
+
+
 end
 
 to setup-graticules
