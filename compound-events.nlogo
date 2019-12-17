@@ -1,14 +1,17 @@
 extensions [ gis profiler ]
 
-breed[bands band]
+breed [ bands band ]
 
-globals[
+globals [
   ; gis globals
   europe-altitude
   europe-grid
   europe-tri
 
   europe-prec-djf
+  europe-prec-mam
+  europe-prec-jja
+  europe-prec-son
 
   probability-of-eruption
   duration-of-eruption
@@ -17,7 +20,7 @@ globals[
   current-season
 ]
 
-patches-own[
+patches-own [
   food-available
   resources-available
   food-return-rate
@@ -25,10 +28,14 @@ patches-own[
   accessibility
   altitude
   ruggedness-index
+
   prec-djf
+  prec-mam
+  prec-jja
+  prec-son
 ]
 
-bands-own[
+bands-own [
   group-size
   food-needed
   resources-needed
@@ -76,11 +83,6 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
 
-    ; only focus on europe altitude
-  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-altitude)
-                                                   (gis:envelope-of europe-tri)
-                                                   (gis:envelope-of europe-prec-djf))
-
   if show-graticules? = True [
      setup-graticules
   ]
@@ -117,13 +119,21 @@ to setup-terrain-ruggedness-index
 end
 
 to setup-precipitation
-  gis:load-coordinate-system ("data/gis/PaleoView/mean_prec_DJF.prj")
+  ; gis:load-coordinate-system ("data/gis/PaleoView/mean_prec_DJF.prj")
+
   set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
-  ; gis:resample europe-prec-djf gis:envelope-of europe-altitude gis:width-of europe-altitude gis:height-of europe-altitude
+  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/mean_prec_MAM.asc"
+  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/mean_prec_JJA.asc"
+  set europe-prec-son gis:load-dataset "data/gis/PaleoView/mean_prec_SON.asc"
+
+
+  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-prec-djf)
+  )
 
   gis:apply-raster europe-prec-djf prec-djf
-
-
+  gis:apply-raster europe-prec-mam prec-mam
+  gis:apply-raster europe-prec-jja prec-jja
+  gis:apply-raster europe-prec-son prec-son
 
 end
 
