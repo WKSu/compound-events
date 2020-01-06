@@ -6,6 +6,7 @@ globals[
   second_threshold_connection
   third_threshold_connection
   fourth_threshold_connection
+  seasons
 
 ]
 
@@ -49,6 +50,8 @@ to setup
   ask n-of 1 patches[
     setup-agents]
   set max_group_size 200
+  set seasons ["summer" "fall" "winter" "spring"]
+  set fourth_threshold_connection 3
 end
 
 
@@ -97,38 +100,17 @@ end
 
 to go
   interact-with-other-bands
-
-  ask bands
-  [
-    ifelse ([food_available] of patch-here >= food_needed) and ([resources_available] of patch-here >= resources_needed)
-    [
-      ;gather-food
-    ]
-    [
-      let potential_new_locations []
-      foreach known_locations_summer [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed)
-        [set potential_new_locations lput (item 0 x) potential_new_locations]
-      ]
-      set potential_new_locations patch-set potential_new_locations
-      if any? potential_new_locations[
-        ;chose the patch that is closest to my current position
-        let new_home max-one-of potential_new_locations [distance self]
-        move-to new_home
-        ;delete current knowledge on this patch in the current season
-        set known_locations_summer filter [x -> item 0 x != new_home] known_locations_summer
-        ;add the new knowledge on this patch in the current season
-        set known_locations_summer lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_summer
-      ]
-    ]
-  ]
-
+  gather_move_explore
 
   ask turtles[
     fd 1
     set current_home_location patch-here
+    set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
+        ;add the new knowledge on this patch in the current season
     set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
   ]
   tick
+  ;set season to next item in the list using a modulus based on ticks
 
 end
 
@@ -137,8 +119,6 @@ to interact-with-other-bands
   ask links[
     set updated? False
   ]
-
-
   ask bands[
     ;define the current turtle who is asked to interact
     let current_band self
@@ -159,7 +139,6 @@ to interact-with-other-bands
       ]
       ;make sure turtles don't see themselves as neighbours
       if current_band != self[
-
         ;make existing connections between neighbouring turtles stronger
         let current_link one-of my-links with [end1 = current_band or end2 = current_band]
         if [updated?] of current_link = False[
@@ -170,7 +149,19 @@ to interact-with-other-bands
           ]
 
           ifelse [strength_of_connection] of current_link > fourth_threshold_connection[
-            ;share all knowledge
+            let temporary_list_of_known_locations [known_locations_summer] of current_band
+
+            let x 0
+
+            while [x < length known_locations_summer][
+              let current_location item x known_locations_summer
+              set temporary_list_of_known_locations filter [y -> item 0 y != item 0 current_location] temporary_list_of_known_locations
+              set x x + 1
+            ]
+            foreach temporary_list_of_known_locations[y -> if length y = 3
+              [set known_locations_summer lput y known_locations_summer]
+            ]
+
             ;share technology knowledge
           ]
           [ifelse [strength_of_connection] of current_link > third_threshold_connection[
@@ -187,7 +178,6 @@ to interact-with-other-bands
                 ]
               ]
             ]
-            ;share knowledge on current season, current and next, current and next and next, or all of them based on the strength: create copy list of connection, delete all the things I already have, update my list with all their knowledge.. both agent should do this so knowledge is at both parties.
           ]
         ]
       ]
@@ -196,11 +186,34 @@ to interact-with-other-bands
 end
 
 
-
-;to merge-with-other-bands
-;  ask bands[
-;    if any? my-links with [strength-of-connection > tipping_point_merging][
-;end
+to gather_move_explore
+  ask bands
+  [
+    ifelse ([food_available] of patch-here >= food_needed) and ([resources_available] of patch-here >= resources_needed)
+    [
+      ;gather
+    ]
+    [
+      let potential_new_locations []
+      foreach known_locations_summer [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed)
+        [set potential_new_locations lput (item 0 x) potential_new_locations]
+      ]
+      set potential_new_locations patch-set potential_new_locations
+      if any? potential_new_locations[
+        ;chose the patch that is closest to my current position
+        let new_home max-one-of potential_new_locations [distance self]
+        move-to new_home
+        ;delete current knowledge on this patch in the current season
+        set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
+        ;add the new knowledge on this patch in the current season
+        set known_locations_summer lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_summer
+      ]
+      if not any? potential_new_locations[
+        ;explore
+      ]
+    ]
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -278,6 +291,23 @@ BUTTON
 154
 292
 go
+go
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+80
+207
+157
+240
+go-once
 go
 NIL
 1
