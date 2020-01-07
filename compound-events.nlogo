@@ -89,6 +89,8 @@ to setup-patches
   ; set europe-altitude gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
   ; set europe-altitude gis:load-dataset "data/gis/Natural Earth/europe.shp"
 
+  gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
+
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -104,8 +106,8 @@ to setup-patches
 end
 
 to setup-altitude
-  gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
   set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
+  gis:set-world-envelope-ds (gis:envelope-of europe-altitude)
 
   gis:apply-raster europe-altitude altitude
   ; gis:paint europe-altitude 1
@@ -130,16 +132,12 @@ to setup-terrain-ruggedness-index
 end
 
 to setup-precipitation
-  ; gis:load-coordinate-system ("data/gis/PaleoView/mean_prec_DJF.prj")
-
   set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
   set europe-prec-mam gis:load-dataset "data/gis/PaleoView/mean_prec_MAM.asc"
   set europe-prec-jja gis:load-dataset "data/gis/PaleoView/mean_prec_JJA.asc"
   set europe-prec-son gis:load-dataset "data/gis/PaleoView/mean_prec_SON.asc"
 
-
-  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-prec-djf)
-  )
+  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf)
 
   gis:apply-raster europe-prec-djf prec-djf
   gis:apply-raster europe-prec-mam prec-mam
@@ -168,8 +166,9 @@ end
 
 to setup-agents
   create-bands number-of-bands [
-    set xcor random 16
-    set ycor random 16
+    set xcor random 520
+    set ycor random 180
+    set size 5
     set health 100
     set group-size random 50
     set food-needed 0
@@ -226,7 +225,7 @@ number-of-bands
 number-of-bands
 0
 100
-24.0
+51.0
 1
 1
 NIL
@@ -256,7 +255,7 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-1
+0
 1
 -1000
 
