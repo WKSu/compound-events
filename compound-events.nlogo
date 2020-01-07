@@ -150,8 +150,14 @@ end
 
 to setup-temperature
   set europe-temp-djf gis:load-dataset "data/gis/PaleoView/mean_temp_DJF.asc"
+  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/mean_temp_mam.asc"
+  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/mean_temp_jja.asc"
+  set europe-temp-son gis:load-dataset "data/gis/PaleoView/mean_temp_son.asc"
 
   gis:apply-raster europe-temp-djf temp-djf
+  gis:apply-raster europe-temp-mam temp-mam
+  gis:apply-raster europe-temp-jja temp-jja
+  gis:apply-raster europe-temp-son temp-son
 end
 
 to setup-graticules
