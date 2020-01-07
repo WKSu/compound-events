@@ -13,6 +13,11 @@ globals [
   europe-prec-jja
   europe-prec-son
 
+  europe-temp-djf
+  europe-temp-mam
+  europe-temp-jja
+  europe-temp-son
+
   probability-of-eruption
   duration-of-eruption
   intensity-of-eruption
@@ -33,6 +38,11 @@ patches-own [
   prec-mam
   prec-jja
   prec-son
+
+  temp-djf
+  temp-mam
+  temp-jja
+  temp-son
 ]
 
 bands-own [
@@ -82,6 +92,7 @@ to setup-patches
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
+  setup-temperature
 
   if show-graticules? = True [
      setup-graticules
@@ -135,6 +146,12 @@ to setup-precipitation
   gis:apply-raster europe-prec-jja prec-jja
   gis:apply-raster europe-prec-son prec-son
 
+end
+
+to setup-temperature
+  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/mean_temp_DJF.asc"
+
+  gis:apply-raster europe-temp-djf temp-djf
 end
 
 to setup-graticules
