@@ -212,6 +212,9 @@ to update_location_knowledge [known_locations_given_season current_band]
 end
 
 
+
+
+
 to gather_move_explore
   ask bands
   [
