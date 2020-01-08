@@ -106,6 +106,7 @@ to setup-patches
 end
 
 to setup-altitude
+
   set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
   gis:set-world-envelope-ds (gis:envelope-of europe-altitude)
 
