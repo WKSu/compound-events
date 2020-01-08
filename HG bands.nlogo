@@ -31,6 +31,7 @@ bands-own[
   known_locations_spring
   known_locations_current
   current_home_location
+  previous_home_location
 
 ]
 
@@ -226,7 +227,9 @@ to gather_move_explore
       ]
       set potential_new_locations patch-set potential_new_locations
       if any? potential_new_locations[
-        move potential_new_locations
+        ;chose the patch that is closest to my current position
+        let new_home max-one-of potential_new_locations [distance self]
+        move new_home
 
       ]
       if not any? potential_new_locations[
@@ -257,11 +260,10 @@ to gather
 end
 
 
-to move [list_of_potential_locations]
-  ;chose the patch that is closest to my current position
-  let new_home max-one-of list_of_potential_locations [distance self]
+to move [new_home]
+  set previous_home_location current_home_location
   move-to new_home
-
+  set current_home_location new_home
   ;delete current knowledge on this patch in the current season
   set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
   ;add the new knowledge on this patch in the current season
@@ -283,6 +285,20 @@ to explore
   foreach list_of_explored_patches [y -> if length y = 3
     [set known_locations_current lput y known_locations_current]
   ]
+  ;decide which known location is the best possible to move to (even though it will not reach the needs) and move there
+  let best_known_locations []
+  foreach known_locations_current [y -> set best_known_locations lput (list x (([food_available] of y / food_needed) + ([resources_available] of y / food_needed)))  best_known_locations
+  ]
+
+  let current_max_patch item 0 item 0 best_known_locations
+  let current_max item 1 item 0 best_known_locations
+  foreach best_known_locations [y -> if item 1 y > current_max[
+    set current_max_patch item 0 y
+    set current_max item 1 y
+    ]
+  ]
+
+  move current_max_patch
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
