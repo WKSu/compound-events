@@ -1,12 +1,22 @@
 extensions [ gis profiler ]
 
-breed[bands band]
+breed [ bands band ]
 
-globals[
+globals [
   ; gis globals
-  europe-coastline
+  europe-altitude
   europe-grid
-  altitude-dataset
+  europe-tri
+
+  europe-prec-djf
+  europe-prec-mam
+  europe-prec-jja
+  europe-prec-son
+
+  europe-temp-djf
+  europe-temp-mam
+  europe-temp-jja
+  europe-temp-son
 
   probability-of-eruption
   duration-of-eruption
@@ -15,16 +25,27 @@ globals[
   current-season
 ]
 
-patches-own[
+patches-own [
   food-available
   resources-available
   food-return-rate
   resource-return-rate
   accessibility
   altitude
+  ruggedness-index
+
+  prec-djf
+  prec-mam
+  prec-jja
+  prec-son
+
+  temp-djf
+  temp-mam
+  temp-jja
+  temp-son
 ]
 
-bands-own[
+bands-own [
   group-size
   food-needed
   resources-needed
@@ -63,21 +84,17 @@ to setup-patches
   ; gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
   ; gis:load-coordinate-system ("data/gis/Natural Earth/europe.prj")
   ; gis:load-coordinate-system ("data/gis/world-altitude.prj")
-   gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
-
 
   ; load in gis files of: coastline, graticules, and altitude
-  ; set europe-coastline gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
-  ; set europe-coastline gis:load-dataset "data/gis/Natural Earth/europe.shp"
-  set europe-coastline gis:load-dataset "data/gis/EPHA/europe.asc"
+  ; set europe-altitude gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
+  ; set europe-altitude gis:load-dataset "data/gis/Natural Earth/europe.shp"
 
-  ; only focus on europe coastline
-  gis:set-world-envelope-ds (gis:envelope-union-of (gis:envelope-of europe-coastline))
-
-  ; draw the coastline
-  gis:set-drawing-color white
+  gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
 
   setup-altitude
+  setup-terrain-ruggedness-index
+  setup-precipitation
+  setup-temperature
 
   if show-graticules? = True [
      setup-graticules
@@ -89,11 +106,15 @@ to setup-patches
 end
 
 to setup-altitude
-  gis:apply-raster europe-coastline altitude
-  ; gis:paint europe-coastline 1
 
-  let min-altitude gis:minimum-of europe-coastline
-  let max-altitude gis:maximum-of europe-coastline
+  set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
+  gis:set-world-envelope-ds (gis:envelope-of europe-altitude)
+
+  gis:apply-raster europe-altitude altitude
+  ; gis:paint europe-altitude 1
+
+  let min-altitude gis:minimum-of europe-altitude
+  let max-altitude gis:maximum-of europe-altitude
 
   ask patches
   [ ; note the use of the "<= 0 or >= 0" technique to filter out
@@ -106,6 +127,38 @@ to setup-altitude
   ]
 end
 
+to setup-terrain-ruggedness-index
+    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc"
+    gis:apply-raster europe-tri ruggedness-index
+end
+
+to setup-precipitation
+  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
+  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/mean_prec_MAM.asc"
+  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/mean_prec_JJA.asc"
+  set europe-prec-son gis:load-dataset "data/gis/PaleoView/mean_prec_SON.asc"
+
+  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf)
+
+  gis:apply-raster europe-prec-djf prec-djf
+  gis:apply-raster europe-prec-mam prec-mam
+  gis:apply-raster europe-prec-jja prec-jja
+  gis:apply-raster europe-prec-son prec-son
+
+end
+
+to setup-temperature
+  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/mean_temp_DJF.asc"
+  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/mean_temp_mam.asc"
+  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/mean_temp_jja.asc"
+  set europe-temp-son gis:load-dataset "data/gis/PaleoView/mean_temp_son.asc"
+
+  gis:apply-raster europe-temp-djf temp-djf
+  gis:apply-raster europe-temp-mam temp-mam
+  gis:apply-raster europe-temp-jja temp-jja
+  gis:apply-raster europe-temp-son temp-son
+end
+
 to setup-graticules
   gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj")
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
@@ -114,8 +167,9 @@ end
 
 to setup-agents
   create-bands number-of-bands [
-    set xcor random 16
-    set ycor random 16
+    set xcor random 520
+    set ycor random 180
+    set size 5
     set health 100
     set group-size random 50
     set food-needed 0
@@ -172,7 +226,7 @@ number-of-bands
 number-of-bands
 0
 100
-22.0
+51.0
 1
 1
 NIL
