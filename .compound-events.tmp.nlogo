@@ -103,8 +103,8 @@ to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
 
 
-  setup-landmass
-  setup-altitude
+  ;setup-landmass
+  ; setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
