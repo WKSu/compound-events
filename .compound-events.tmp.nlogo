@@ -23,7 +23,7 @@ globals [
   duration-of-eruption
   intensity-of-eruption
   minimal-number-of-days-without-eruption
-  current-season
+  current_season
 ]
 
 patches-own [
@@ -81,6 +81,13 @@ to setup
   reset-ticks
 end
 
+to go
+  precipitation-distribution
+
+  set current_season (ticks mod 4)
+  tick
+end
+
 to setup-patches
   ; load in the coordinate systems of the files
   ; gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
@@ -94,7 +101,7 @@ to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
 
 
-  ; setup-landmass
+  setup-landmass
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -144,10 +151,10 @@ to setup-terrain-ruggedness-index
 end
 
 to setup-precipitation
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/mean_prec_MAM.asc"
-  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/mean_prec_JJA.asc"
-  set europe-prec-son gis:load-dataset "data/gis/PaleoView/mean_prec_SON.asc"
+  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
+  set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
 
   gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf)
 
@@ -155,14 +162,15 @@ to setup-precipitation
   gis:apply-raster europe-prec-mam prec-mam
   gis:apply-raster europe-prec-jja prec-jja
   gis:apply-raster europe-prec-son prec-son
-
 end
 
 to setup-temperature
-  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/mean_temp_DJF.asc"
-  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/mean_temp_mam.asc"
-  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/mean_temp_jja.asc"
-  set europe-temp-son gis:load-dataset "data/gis/PaleoView/mean_temp_son.asc"
+  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
+  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
+  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
+  set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+
+  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf)
 
   gis:apply-raster europe-temp-djf temp-djf
   gis:apply-raster europe-temp-mam temp-mam
@@ -198,6 +206,23 @@ to setup-agents
     set health 100
     set previous-home-locations []
     set current-home-location 0
+  ]
+end
+
+to precipitation-distribution
+  ask patches [
+    if current_season = 0[
+      set prec-jja random-normal prec-jja 2
+    ]
+    if current_season = 1[
+      set prec-son random-normal prec-son 2
+    ]
+    if current_season = 2[
+      set prec-djf random-normal prec-djf 2
+    ]
+    if current_season = 3[
+      set prec-mam random-normal prec-mam 2
+    ]
   ]
 end
 @#$#@#$#@
@@ -267,9 +292,43 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-0
+1
 1
 -1000
+
+BUTTON
+66
+192
+143
+225
+go-once
+go\n
+NIL
+1
+T
+OBSERVER
+NIL
+G
+NIL
+NIL
+1
+
+BUTTON
+95
+252
+187
+285
+go-forever
+go
+T
+1
+T
+OBSERVER
+NIL
+H
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
