@@ -4,6 +4,7 @@ breed [ bands band ]
 
 globals [
   ; gis globals
+  europe-landmass
   europe-altitude
   europe-grid
   europe-tri
@@ -33,6 +34,7 @@ patches-own [
   accessibility
   altitude
   ruggedness-index
+  landmass
 
   prec-djf
   prec-mam
@@ -91,6 +93,8 @@ to setup-patches
 
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
 
+
+  ; setup-landmass
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -105,28 +109,32 @@ to setup-patches
 
 end
 
-to setup-altitude
+to setup-landmass
+  set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc"
+  gis:paint europe-landmass 1
+end
 
+to setup-altitude
   set europe-altitude gis:load-dataset "data/gis/GEBCO/gebco_elevation_resampled.asc"
-  gis:set-world-envelope-ds (gis:envelope-of europe-altitude)
+  set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc"
+    gis:set-world-envelope-ds (gis:envelope-of europe-landmass)
+
+  gis:apply-raster europe-landmass landmass
 
   gis:apply-raster europe-altitude altitude
   ; gis:paint europe-altitude 1
 
-  let min-altitude gis:minimum-of europe-altitude
-  let max-altitude gis:maximum-of europe-altitude
+  let min-landmass gis:minimum-of europe-landmass
+  let max-landmass gis:maximum-of europe-landmass
 
   ask patches
   [ ; note the use of the "<= 0 or >= 0" technique to filter out
     ; "not a number" values, as discussed in the documentation.
-    if (altitude <= 0) or (altitude >= 0)
-    [ set pcolor scale-color black altitude min-altitude max-altitude ]
+  if (landmass <= 0) or (landmass >= 0)
+  [ set pcolor scale-color black landmass min-landmass max-landmass ]
 
-    ; if (altitude = 781.4310302734375) or (altitude = 1133.7154541015625) or (altitude = 0) ;; easy way to idenfity water bodies
-    ; [ set pcolor blue ]
-
-    ; quick-fix because the altitude data did not have the correct ranges - used contemporary elevation data of Mont Blanc to rescale the elevation data
-    ; set altitude altitude * (4810 / max-altitude)
+   if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+   [ set pcolor blue ]
   ]
 end
 
@@ -259,7 +267,7 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-1
+0
 1
 -1000
 
