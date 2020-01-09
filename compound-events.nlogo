@@ -50,6 +50,7 @@ patches-own [
   temp-jja
   temp-son
   temp-range
+  temp-current
 ]
 
 bands-own [
@@ -87,7 +88,7 @@ to setup
 end
 
 to go
-  precipitation-distribution
+  temperature-distribution
 
   set current_season (ticks mod 4)
   tick
@@ -206,19 +207,21 @@ to setup-agents
   ]
 end
 
-to precipitation-distribution
+to temperature-distribution
   ask patches [
+    let sd (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
+
     if current_season = 0[
-      set prec-jja random-normal prec-jja 2
+      set temp-current random-normal temp-jja sd
     ]
     if current_season = 1[
-      set prec-son random-normal prec-son 2
+      set temp-current random-normal temp-son sd
     ]
     if current_season = 2[
-      set prec-djf random-normal prec-djf 2
+      set temp-current random-normal temp-djf sd
     ]
     if current_season = 3[
-      set prec-mam random-normal prec-mam 2
+      set temp-current random-normal temp-mam sd
     ]
   ]
 end

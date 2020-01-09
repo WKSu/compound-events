@@ -50,6 +50,7 @@ patches-own [
   temp-jja
   temp-son
   temp-range
+  temp-current
 ]
 
 bands-own [
@@ -87,7 +88,7 @@ to setup
 end
 
 to go
-  precipitation-distribution
+  temperature-distribution
 
   set current_season (ticks mod 4)
   tick
@@ -112,7 +113,7 @@ to setup-altitude
   set europe-altitude gis:load-dataset "data/gis/GEBCO/gebco_elevation_resampled.asc" ; https://download.gebco.net/ - altitude data also used for the Allerod map
   set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc" ; Allerod compiled by ZBSA after Andrén et al. 2011; Björck 1995; Brooks et al. 2011; Hughes et al. 2016; Lericolais 2017; Lunkka et al. 2012; Moscon et al. 2015; Patton et al. 2017; Seguinot et al. 2018; Stroeven et al. 2016; Subetto et al. 2017; Vassiljev/Saarse 2013; Weaver et al. 2003 - full bibliography in report"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-landmass) ; set the world size to this map
+  gis:set-world-envelope-ds (gis:envelope-of europe-landmass) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
   ; assign the values to the patch attributes
   gis:apply-raster europe-altitude altitude
@@ -145,8 +146,9 @@ to setup-precipitation
   set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
   set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; set the world size to this map
+  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
+  ; assign the values to the patch attributes
   gis:apply-raster europe-prec-djf prec-djf
   gis:apply-raster europe-prec-mam prec-mam
   gis:apply-raster europe-prec-jja prec-jja
@@ -164,8 +166,9 @@ to setup-temperature
   set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
   set europe-temp-range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf)
+  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
+  ; assign the values to the patch attributes
   gis:apply-raster europe-temp-djf temp-djf
   gis:apply-raster europe-temp-mam temp-mam
   gis:apply-raster europe-temp-jja temp-jja
@@ -204,19 +207,21 @@ to setup-agents
   ]
 end
 
-to precipitation-distribution
+to temperature-distribution
   ask patches [
+    let sd (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
+
     if current_season = 0[
-      set prec-jja random-normal prec-jja 2
+      set temp-current random-normal temp-jja sd
     ]
     if current_season = 1[
-      set prec-son random-normal prec-son 2
+      set temp-current random-normal temp-son sd
     ]
     if current_season = 2[
-      set prec-djf random-normal prec-djf 2
+      set temp-current random-normal temp-djf sd
     ]
     if current_season = 3[
-      set prec-mam random-normal prec-mam 2
+      set temp-current random-normal temp-mam sd
     ]
   ]
 end
