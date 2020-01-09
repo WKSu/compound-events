@@ -19,6 +19,12 @@ globals [
   europe-temp-jja
   europe-temp-son
 
+  europe-temp-djf-min
+  europe-temp-mam-min
+  europe-temp-jja-min
+  europe-temp-son-min
+
+
   probability-of-eruption
   duration-of-eruption
   intensity-of-eruption
@@ -45,6 +51,12 @@ patches-own [
   temp-mam
   temp-jja
   temp-son
+
+  temp-djf-min
+  temp-mam-min
+  temp-jja-min
+  temp-son-min
+
 ]
 
 bands-own [
@@ -176,6 +188,27 @@ to setup-temperature
   gis:apply-raster europe-temp-mam temp-mam
   gis:apply-raster europe-temp-jja temp-jja
   gis:apply-raster europe-temp-son temp-son
+
+  set europe-temp-djf-min gis:load-dataset "data/gis/PaleoView/temperature/minimum/min_temp_DJF.asc"
+  set europe-temp-mam-min gis:load-dataset "data/gis/PaleoView/temperature/minimum/min_temp_mam.asc"
+  set europe-temp-jja-min gis:load-dataset "data/gis/PaleoView/temperature/minimum/min_temp_jja.asc"
+  set europe-temp-son-min gis:load-dataset "data/gis/PaleoView/temperature/minimum/min_temp_son.asc"
+
+  gis:apply-raster europe-temp-djf-min temp-djf-min
+  gis:apply-raster europe-temp-mam-min temp-mam-min
+  gis:apply-raster europe-temp-jja-min temp-jja-min
+  gis:apply-raster europe-temp-son-min temp-son-min
+
+
+  let min-landmass gis:minimum-of europe-temp-djf-min
+  let max-landmass gis:maximum-of europe-temp-djf-min
+
+  ask patches
+  [ ; note the use of the "<= 0 or >= 0" technique to filter out
+    ; "not a number" values, as discussed in the documentation.
+  if (temp-djf-min <= 0) or (temp-djf-min >= 0)
+    [ set pcolor scale-color black temp-djf-min min-landmass max-landmass ]]
+
 end
 
 to setup-graticules
