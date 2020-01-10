@@ -3,26 +3,31 @@ extensions [ gis profiler ]
 breed [ bands band ]
 
 globals [
-  ; gis globals
-  europe-altitude
-  europe-grid
-  europe-tri
+  ; start: GIS globals used for loading in map data
+  europe-landmass ; visualize the continent
+  europe-altitude ; altitude
+  europe-grid ; overlay a grid with graticules of 10
+  europe-tri ; terrain roughness index
 
-  europe-prec-djf
-  europe-prec-mam
-  europe-prec-jja
-  europe-prec-son
+  ; mean precipitation GIS
+  europe-prec-djf ; DJF: December, January, February
+  europe-prec-mam ; MAM: March, April, May
+  europe-prec-jja ; JJA: June, July, August
+  europe-prec-son ; September, October, November
 
+  ; mean temperature GIS
   europe-temp-djf
   europe-temp-mam
   europe-temp-jja
   europe-temp-son
+  europe-temp-range ; Annual Temeprature Range
+  ; end: GIS globals
 
   probability-of-eruption
   duration-of-eruption
   intensity-of-eruption
   minimal-number-of-days-without-eruption
-  current-season
+  current_season
 ]
 
 patches-own [
@@ -33,6 +38,7 @@ patches-own [
   accessibility
   altitude
   ruggedness-index
+  landmass
 
   prec-djf
   prec-mam
@@ -43,6 +49,8 @@ patches-own [
   temp-mam
   temp-jja
   temp-son
+  temp-range
+  temp-current
 ]
 
 bands-own [
@@ -67,7 +75,7 @@ bands-own [
 to startup
    clear-all
    profiler:start
-   setup-patches
+   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
    profiler:stop
    print profiler:report
 end
@@ -79,18 +87,17 @@ to setup
   reset-ticks
 end
 
+to go
+  temperature-distribution
+
+  set current_season (ticks mod 4)
+  tick
+end
+
 to setup-patches
-  ; load in the coordinate systems of the files
-  ; gis:load-coordinate-system ("data/gis/GISCO/Europe_coastline.prj")
-  ; gis:load-coordinate-system ("data/gis/Natural Earth/europe.prj")
-  ; gis:load-coordinate-system ("data/gis/world-altitude.prj")
+  gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
 
-  ; load in gis files of: coastline, graticules, and altitude
-  ; set europe-altitude gis:load-dataset "data/gis/GISCO/Europe_coastline.shp"
-  ; set europe-altitude gis:load-dataset "data/gis/Natural Earth/europe.shp"
-
-  gis:load-coordinate-system ("data/gis/EPHA/europe.prj")
-
+  ; load in GIS data split
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -99,68 +106,78 @@ to setup-patches
   if show-graticules? = True [
      setup-graticules
   ]
-
-  ; ask patches with [pxcor mod 2 = 0 and pycor mod 2 = 0] [
-  ;  set pcolor green ]
-
 end
 
 to setup-altitude
+  ; loading GIS datasets
+  set europe-altitude gis:load-dataset "data/gis/GEBCO/gebco_elevation_resampled.asc" ; https://download.gebco.net/ - altitude data also used for the Allerod map
+  set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc" ; Allerod compiled by ZBSA after Andrén et al. 2011; Björck 1995; Brooks et al. 2011; Hughes et al. 2016; Lericolais 2017; Lunkka et al. 2012; Moscon et al. 2015; Patton et al. 2017; Seguinot et al. 2018; Stroeven et al. 2016; Subetto et al. 2017; Vassiljev/Saarse 2013; Weaver et al. 2003 - full bibliography in report"
 
-  set europe-altitude gis:load-dataset "data/gis/EPHA/europe.asc"
-  gis:set-world-envelope-ds (gis:envelope-of europe-altitude)
+  gis:set-world-envelope-ds (gis:envelope-of europe-landmass) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
+  ; assign the values to the patch attributes
   gis:apply-raster europe-altitude altitude
-  ; gis:paint europe-altitude 1
+  gis:apply-raster europe-landmass landmass
 
-  let min-altitude gis:minimum-of europe-altitude
-  let max-altitude gis:maximum-of europe-altitude
+  ; start: coloring patches to represent european landmass 13900 - 12700BP
+  let min-landmass gis:minimum-of europe-landmass
+  let max-landmass gis:maximum-of europe-landmass
 
-  ask patches
-  [ ; note the use of the "<= 0 or >= 0" technique to filter out
-    ; "not a number" values, as discussed in the documentation.
-    if (altitude <= 0) or (altitude >= 0)
-    [ set pcolor scale-color black altitude min-altitude max-altitude ]
+  ask patches [
+   if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+   [ set pcolor scale-color black landmass min-landmass max-landmass ]
 
-    if (altitude = 781.4310302734375) or (altitude = 1133.7154541015625) or (altitude = 0) ;; easy way to idenfity water bodies
-    [ set pcolor blue ]
+   if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+   [ set pcolor blue ]
   ]
+  ; end: coloring landmass
 end
 
 to setup-terrain-ruggedness-index
-    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc"
+    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
     gis:apply-raster europe-tri ruggedness-index
 end
 
 to setup-precipitation
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/mean_prec_MAM.asc"
-  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/mean_prec_JJA.asc"
-  set europe-prec-son gis:load-dataset "data/gis/PaleoView/mean_prec_SON.asc"
+  ; loading GIS datasets
+  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
+  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
+  set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf)
+  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
+  ; assign the values to the patch attributes
   gis:apply-raster europe-prec-djf prec-djf
   gis:apply-raster europe-prec-mam prec-mam
   gis:apply-raster europe-prec-jja prec-jja
   gis:apply-raster europe-prec-son prec-son
-
 end
 
 to setup-temperature
-  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/mean_temp_DJF.asc"
-  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/mean_temp_mam.asc"
-  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/mean_temp_jja.asc"
-  set europe-temp-son gis:load-dataset "data/gis/PaleoView/mean_temp_son.asc"
+  ; loading GIS datasets
+  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
+  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
+  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
+  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
+  set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+  set europe-temp-range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
 
+  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+
+  ; assign the values to the patch attributes
   gis:apply-raster europe-temp-djf temp-djf
   gis:apply-raster europe-temp-mam temp-mam
   gis:apply-raster europe-temp-jja temp-jja
   gis:apply-raster europe-temp-son temp-son
+  gis:apply-raster europe-temp-range temp-range
 end
 
 to setup-graticules
-  gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj")
+  gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
   gis:draw europe-grid 1
 end
@@ -187,6 +204,25 @@ to setup-agents
     set health 100
     set previous-home-locations []
     set current-home-location 0
+  ]
+end
+
+to temperature-distribution
+  ask patches [
+    let sd (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
+
+    if current_season = 0[
+      set temp-current random-normal temp-jja sd
+    ]
+    if current_season = 1[
+      set temp-current random-normal temp-son sd
+    ]
+    if current_season = 2[
+      set temp-current random-normal temp-djf sd
+    ]
+    if current_season = 3[
+      set temp-current random-normal temp-mam sd
+    ]
   ]
 end
 @#$#@#$#@
@@ -256,9 +292,43 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-0
+1
 1
 -1000
+
+BUTTON
+66
+192
+143
+225
+go-once
+go\n
+NIL
+1
+T
+OBSERVER
+NIL
+G
+NIL
+NIL
+1
+
+BUTTON
+95
+252
+187
+285
+go-forever
+go
+T
+1
+T
+OBSERVER
+NIL
+H
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
