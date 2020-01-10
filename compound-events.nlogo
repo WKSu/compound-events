@@ -109,6 +109,7 @@ to setup
   set fourth_threshold_connection 3
   set max_move_time 45
   set time_available 90
+end
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
@@ -535,29 +536,28 @@ to explore
 
   move current_max_patch
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-548
-349
+1260
+381
 -1
 -1
-30.0
+2.0
 1
 10
 1
 1
 1
 0
-1
-1
+0
+0
 1
 0
-10
+520
 0
-10
+180
 0
 0
 1
@@ -573,8 +573,7 @@ number-of-bands
 number-of-bands
 0
 100
-51.0
-
+62.0
 1
 1
 NIL
@@ -609,7 +608,6 @@ show-graticules?
 -1000
 
 BUTTON
-
 66
 192
 143
@@ -617,12 +615,10 @@ BUTTON
 go-once
 go\n
 NIL
-
 1
 T
 OBSERVER
 NIL
-
 G
 NIL
 NIL
