@@ -1,28 +1,6 @@
-extensions [ gis profiler ]
+breed[bands band]
 
-breed [ bands band ]
-
-globals [
-  ; start: GIS globals used for loading in map data
-  europe-landmass ; visualize the continent
-  europe-altitude ; altitude
-  europe-grid ; overlay a grid with graticules of 10
-  europe-tri ; terrain roughness index
-
-  ; mean precipitation GIS
-  europe-prec-djf ; DJF: December, January, February
-  europe-prec-mam ; MAM: March, April, May
-  europe-prec-jja ; JJA: June, July, August
-  europe-prec-son ; September, October, November
-
-  ; mean temperature GIS
-  europe-temp-djf
-  europe-temp-mam
-  europe-temp-jja
-  europe-temp-son
-  europe-temp-range ; Annual Temeprature Range
-  ; end: GIS globals
-
+globals[
   max_group_size
   technology_sharing_threshold
   first_threshold_connection
@@ -32,9 +10,10 @@ globals [
   current_season
   time_available
   max_move_time
+
 ]
 
-bands-own [
+bands-own[
   group_size
   food_needed
   resources_needed
@@ -45,7 +24,6 @@ bands-own [
   cultural_capital
   technology_level_food
   technology_level_resources
-
   mobility
   birth_rate
   death_rate
@@ -61,6 +39,7 @@ bands-own [
   time_spent_exploring
   time_spent_moving
   time_spent_gathering
+
 ]
 
 links-own[
@@ -68,40 +47,19 @@ links-own[
   updated?
 ]
 
-patches-own [
+patches-own[
   food_available
   resources_available
-  food_return_rate
-  resource_return_rate
-  accessibility
+  roughness
   altitude
-  ruggedness_index
-  landmass
-
-  prec-djf
-  prec-mam
-  prec-jja
-  prec-son
-
-  temp-djf
-  temp-mam
-  temp-jja
-  temp-son
-  temp-range
-  temp-current
 ]
 
-to startup
-   clear-all
-   profiler:start
-   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
-   profiler:stop
-   print profiler:report
-end
+
 
 to setup
-  clear-turtles
+  clear-all
   reset-ticks
+  setup-patches
   ask n-of 1 patches[
     setup-agents]
   set max_group_size 200
@@ -111,99 +69,17 @@ to setup
   set time_available 90
 end
 
-to go
-  temperature-distribution
-
-  set current_season (ticks mod 4)
-  tick
-end
 
 to setup-patches
-  gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
-
-  ; load in GIS data split
-  setup-altitude
-  setup-terrain-ruggedness-index
-  setup-precipitation
-  setup-temperature
-
-  if show-graticules? = True [
-     setup-graticules
+  ask patches[
+    set food_available 5
+    set resources_available 5
   ]
-end
-
-to setup-altitude
-  ; loading GIS datasets
-  set europe-altitude gis:load-dataset "data/gis/GEBCO/gebco_elevation_resampled.asc" ; https://download.gebco.net/ - altitude data also used for the Allerod map
-  set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc" ; Allerod compiled by ZBSA after Andrén et al. 2011; Björck 1995; Brooks et al. 2011; Hughes et al. 2016; Lericolais 2017; Lunkka et al. 2012; Moscon et al. 2015; Patton et al. 2017; Seguinot et al. 2018; Stroeven et al. 2016; Subetto et al. 2017; Vassiljev/Saarse 2013; Weaver et al. 2003 - full bibliography in report"
-
-  gis:set-world-envelope-ds (gis:envelope-of europe-landmass) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
-
-  ; assign the values to the patch attributes
-  gis:apply-raster europe-altitude altitude
-  gis:apply-raster europe-landmass landmass
-
-  ; start: coloring patches to represent european landmass 13900 - 12700BP
-  let min-landmass gis:minimum-of europe-landmass
-  let max-landmass gis:maximum-of europe-landmass
-
-  ask patches [
-   if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-   [ set pcolor scale-color black landmass min-landmass max-landmass ]
-
-   if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
-   [ set pcolor blue ]
+  ask one-of patches[
+    set food_available 500
+    set resources_available 500
+    set pcolor green
   ]
-  ; end: coloring landmass
-end
-
-to setup-terrain-ruggedness-index
-    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
-    gis:apply-raster europe-tri ruggedness_index
-end
-
-to setup-precipitation
-  ; loading GIS datasets
-  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
-  set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
-
-  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
-
-  ; assign the values to the patch attributes
-  gis:apply-raster europe-prec-djf prec-djf
-  gis:apply-raster europe-prec-mam prec-mam
-  gis:apply-raster europe-prec-jja prec-jja
-  gis:apply-raster europe-prec-son prec-son
-end
-
-to setup-temperature
-  ; loading GIS datasets
-  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
-  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
-  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
-  set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
-  set europe-temp-range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
-
-  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
-
-  ; assign the values to the patch attributes
-  gis:apply-raster europe-temp-djf temp-djf
-  gis:apply-raster europe-temp-mam temp-mam
-  gis:apply-raster europe-temp-jja temp-jja
-  gis:apply-raster europe-temp-son temp-son
-  gis:apply-raster europe-temp-range temp-range
-end
-
-to setup-graticules
-  gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
-  set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
-  gis:draw europe-grid 1
 end
 
 
@@ -238,7 +114,7 @@ to setup-agents
 end
 
 to go
-  temperature-distribution
+
   update_bands_variables
   interact-with-other-bands
   gather_move_explore
@@ -254,25 +130,6 @@ to go
   set current_season (ticks mod 4)
   ;set season to next item in the list using a modulus based on ticks
 
-end
-
-to temperature-distribution
-  ask patches [
-    let sd (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
-
-    if current_season = 0[
-      set temp-current random-normal temp-jja sd
-    ]
-    if current_season = 1[
-      set temp-current random-normal temp-son sd
-    ]
-    if current_season = 2[
-      set temp-current random-normal temp-djf sd
-    ]
-    if current_season = 3[
-      set temp-current random-normal temp-mam sd
-    ]
-  ]
 end
 
 to update_bands_variables
@@ -385,7 +242,7 @@ to gather_move_explore
     [
       let potential_new_locations []
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
-      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and [distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time)
+      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and [distance self] of item 0 x + ([roughness] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
       set potential_new_locations patch-set potential_new_locations
@@ -494,7 +351,7 @@ end
 
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
-  let time_needed_to_move (distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
+  let time_needed_to_move (distance new_home + ([roughness] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
   set time_spent time_spent + time_needed_to_move
   set time_spent_moving time_needed_to_move
 
@@ -531,7 +388,7 @@ to explore
   foreach known_locations_current [y -> set best_known_locations lput (list item 0 y ((item 1 y / food_needed) + (item 2 y / resources_needed)))  best_known_locations
   ]
   ;Only travel to the new location if there is time to do so
-  set known_locations_current filter [y -> [distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
+  set known_locations_current filter [y -> [distance self] of item 0 y + ([roughness] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
   ;Choose the best option based on where the biggest part of the food and resources can still be gathered
   let current_max_patch item 0 item 0 best_known_locations
   let current_max item 1 item 0 best_known_locations
@@ -543,7 +400,6 @@ to explore
 
   move current_max_patch
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -581,8 +437,7 @@ number-of-bands
 number-of-bands
 0
 100
-51.0
-
+0.0
 1
 1
 NIL
@@ -612,43 +467,40 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-1
+0
 1
 -1000
 
 BUTTON
-
-66
-192
-143
-225
-go-once
-go\n
-NIL
-
-1
-T
-OBSERVER
-NIL
-
-G
-NIL
-NIL
-1
-
-BUTTON
-95
-252
-187
-285
-go-forever
+91
+259
+154
+292
+go
 go
 T
 1
 T
 OBSERVER
 NIL
-H
+NIL
+NIL
+NIL
+1
+
+BUTTON
+80
+207
+157
+240
+go-once
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
 NIL
 NIL
 1

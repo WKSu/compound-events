@@ -1,6 +1,6 @@
 extensions [ gis profiler ]
 
-breed [ bands band ]
+breed[bands band]
 
 globals [
   ; start: GIS globals used for loading in map data
@@ -34,7 +34,7 @@ globals [
   max_move_time
 ]
 
-bands-own [
+bands-own[
   group_size
   food_needed
   resources_needed
@@ -45,7 +45,6 @@ bands-own [
   cultural_capital
   technology_level_food
   technology_level_resources
-
   mobility
   birth_rate
   death_rate
@@ -111,12 +110,6 @@ to setup
   set time_available 90
 end
 
-to go
-  temperature-distribution
-
-  set current_season (ticks mod 4)
-  tick
-end
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
@@ -255,6 +248,7 @@ to go
   ;set season to next item in the list using a modulus based on ticks
 
 end
+
 
 to temperature-distribution
   ask patches [
@@ -494,7 +488,7 @@ end
 
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
-  let time_needed_to_move (distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
+  let time_needed_to_move (distance new_home + ([] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
   set time_spent time_spent + time_needed_to_move
   set time_spent_moving time_needed_to_move
 
@@ -531,7 +525,7 @@ to explore
   foreach known_locations_current [y -> set best_known_locations lput (list item 0 y ((item 1 y / food_needed) + (item 2 y / resources_needed)))  best_known_locations
   ]
   ;Only travel to the new location if there is time to do so
-  set known_locations_current filter [y -> [distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
+  set known_locations_current filter [y -> [distance self] of item 0 y + ([roughness] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
   ;Choose the best option based on where the biggest part of the food and resources can still be gathered
   let current_max_patch item 0 item 0 best_known_locations
   let current_max item 1 item 0 best_known_locations
@@ -543,7 +537,6 @@ to explore
 
   move current_max_patch
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -581,8 +574,7 @@ number-of-bands
 number-of-bands
 0
 100
-51.0
-
+0.0
 1
 1
 NIL
@@ -612,43 +604,40 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-1
+0
 1
 -1000
 
 BUTTON
-
-66
-192
-143
-225
-go-once
-go\n
-NIL
-
-1
-T
-OBSERVER
-NIL
-
-G
-NIL
-NIL
-1
-
-BUTTON
-95
-252
-187
-285
-go-forever
+91
+259
+154
+292
+go
 go
 T
 1
 T
 OBSERVER
 NIL
-H
+NIL
+NIL
+NIL
+1
+
+BUTTON
+80
+207
+157
+240
+go-once
+go
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
 NIL
 NIL
 1
