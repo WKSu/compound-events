@@ -1,6 +1,6 @@
 extensions [ gis profiler ]
 
-breed[bands band]
+breed [ bands band ]
 
 globals [
   ; start: GIS globals used for loading in map data
@@ -34,7 +34,7 @@ globals [
   max_move_time
 ]
 
-bands-own[
+bands-own [
   group_size
   food_needed
   resources_needed
@@ -45,6 +45,7 @@ bands-own[
   cultural_capital
   technology_level_food
   technology_level_resources
+
   mobility
   birth_rate
   death_rate
@@ -110,6 +111,12 @@ to setup
   set time_available 90
 end
 
+to go
+  temperature-distribution
+
+  set current_season (ticks mod 4)
+  tick
+end
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
@@ -248,7 +255,6 @@ to go
   ;set season to next item in the list using a modulus based on ticks
 
 end
-
 
 to temperature-distribution
   ask patches [
@@ -537,6 +543,7 @@ to explore
 
   move current_max_patch
 end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -574,7 +581,8 @@ number-of-bands
 number-of-bands
 0
 100
-0.0
+51.0
+
 1
 1
 NIL
@@ -604,40 +612,43 @@ SWITCH
 162
 show-graticules?
 show-graticules?
-0
+1
 1
 -1000
 
 BUTTON
-91
-259
-154
-292
-go
-go
-T
+
+66
+192
+143
+225
+go-once
+go\n
+NIL
+
 1
 T
 OBSERVER
 NIL
-NIL
+
+G
 NIL
 NIL
 1
 
 BUTTON
-80
-207
-157
-240
-go-once
+95
+252
+187
+285
+go-forever
 go
-NIL
+T
 1
 T
 OBSERVER
 NIL
-NIL
+H
 NIL
 NIL
 1
