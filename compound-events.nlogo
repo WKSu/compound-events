@@ -23,21 +23,59 @@ globals [
   europe-temp-range ; Annual Temeprature Range
   ; end: GIS globals
 
-  probability-of-eruption
-  duration-of-eruption
-  intensity-of-eruption
-  minimal-number-of-days-without-eruption
+  max_group_size
+  technology_sharing_threshold
+  first_threshold_connection
+  second_threshold_connection
+  third_threshold_connection
+  fourth_threshold_connection
   current_season
+  time_available
+  max_move_time
+]
+
+bands-own [
+  group_size
+  food_needed
+  resources_needed
+  food_owned
+  resources_owned
+  food_effectiveness
+  resource_effectiveness
+  cultural_capital
+  technology_level_food
+  technology_level_resources
+
+  mobility
+  birth_rate
+  death_rate
+  health
+  known_locations_summer
+  known_locations_fall
+  known_locations_winter
+  known_locations_spring
+  known_locations_current
+  current_home_location
+  previous_home_location
+  time_spent
+  time_spent_exploring
+  time_spent_moving
+  time_spent_gathering
+]
+
+links-own[
+  strength_of_connection
+  updated?
 ]
 
 patches-own [
-  food-available
-  resources-available
-  food-return-rate
-  resource-return-rate
+  food_available
+  resources_available
+  food_return_rate
+  resource_return_rate
   accessibility
   altitude
-  ruggedness-index
+  ruggedness_index
   landmass
 
   prec-djf
@@ -53,25 +91,6 @@ patches-own [
   temp-current
 ]
 
-bands-own [
-  group-size
-  food-needed
-  resources-needed
-  food-owned
-  resources-owned
-  food-effectiveness
-  resource-effectiveness
-  intelligence
-  technology-level-food
-  technology-level-resources
-  mobility
-  birth-rate
-  death-rate
-  health
-  previous-home-locations
-  current-home-location
-]
-
 to startup
    clear-all
    profiler:start
@@ -82,16 +101,14 @@ end
 
 to setup
   clear-turtles
-  setup-agents
-
   reset-ticks
-end
-
-to go
-  temperature-distribution
-
-  set current_season (ticks mod 4)
-  tick
+  ask n-of 1 patches[
+    setup-agents]
+  set max_group_size 200
+  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
+  set fourth_threshold_connection 3
+  set max_move_time 45
+  set time_available 90
 end
 
 to setup-patches
@@ -135,7 +152,7 @@ end
 
 to setup-terrain-ruggedness-index
     set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
-    gis:apply-raster europe-tri ruggedness-index
+    gis:apply-raster europe-tri ruggedness_index
 end
 
 to setup-precipitation
@@ -182,29 +199,54 @@ to setup-graticules
   gis:draw europe-grid 1
 end
 
+
 to setup-agents
-  create-bands number-of-bands [
-    set xcor random 520
-    set ycor random 180
-    set size 5
-    set health 100
-    set group-size random 50
-    set food-needed 0
-    set resources-needed 0
-    set food-owned 0
-    set resources-owned 0
-    set food-effectiveness random 100
-    set resource-effectiveness random 100
-    set intelligence random 100
-    set technology-level-food random 100
-    set technology-level-resources random 100
-    set mobility random 100
-    set birth-rate random 100
-    set death-rate random 100
-    set health 100
-    set previous-home-locations []
-    set current-home-location 0
+  let population_density 2
+  let number_of_bands_multiplier 1
+  if population_density > 0[
+    sprout-bands number_of_bands_multiplier * population_density[
+      set xcor random 10
+      set ycor random 10
+      set health 100
+      set group_size random 50
+      set food_needed group_size
+      set resources_needed group_size
+      set resources_owned 0
+      set food_effectiveness random 100
+      set resource_effectiveness random 100
+      set cultural_capital random 100
+      set technology_level_food random 100
+      set technology_level_resources random 100
+      set mobility random 5 + 5
+      set birth_rate random 100
+      set death_rate random 100
+      set health 100
+      set current_home_location patch-here
+      set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
+      set known_locations_fall []
+      set known_locations_winter []
+      set known_locations_spring []
+    ]
   ]
+end
+
+to go
+  temperature-distribution
+  update_bands_variables
+  interact-with-other-bands
+  gather_move_explore
+
+  ask turtles[
+    fd 1
+    set current_home_location patch-here
+    set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
+        ;add the new knowledge on this patch in the current season
+    set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
+  ]
+  tick
+  set current_season (ticks mod 4)
+  ;set season to next item in the list using a modulus based on ticks
+
 end
 
 to temperature-distribution
@@ -224,6 +266,275 @@ to temperature-distribution
       set temp-current random-normal temp-mam sd
     ]
   ]
+end
+
+to update_bands_variables
+  ;new season means the bands have all available time to move, gather and explore
+  ask turtles[
+    set time_spent 0
+    set time_spent_exploring 0
+    set time_spent_moving 0
+    set time_spent_gathering 0
+    ;as the season has changed, the bands change their knowledge about the patches to the current season
+    if current_season = 0[
+      set known_locations_current known_locations_summer
+    ]
+    if current_season = 1[
+      set known_locations_current known_locations_fall
+    ]
+    if current_season = 2[
+      set known_locations_current known_locations_winter
+    ]
+    if current_season = 3[
+      set known_locations_current known_locations_spring
+    ]
+  ]
+end
+
+to interact-with-other-bands
+  ;Make sure that links do not get updated by both of the ends (turtles)
+  ask links[
+    set updated? False
+  ]
+  ask bands[
+    ;define the current turtle who is asked to interact
+    let current_band self
+
+    ;put all the turtles on the same or a neighbouring patch in a turtleset
+    let neighbor_bands (turtle-set bands-on neighbors bands-here)
+    ask neighbor_bands[
+
+      ;if there is no link between the neighbouring bands yet...
+      if not member? current_band in-link-neighbors and current_band != self[
+
+        ;create a link between the bands
+        create-link-with current_band[
+          set strength_of_connection 0
+          set updated? False
+          set color green
+        ]
+      ]
+      ;make sure turtles don't see themselves as neighbours
+      if current_band != self[
+        ;make existing connections between neighbouring turtles stronger
+        let current_link one-of my-links with [end1 = current_band or end2 = current_band]
+        if [updated?] of current_link = False[
+          ask current_link[
+            ;increase the strength of the current link as the groups have been close to each other for another tick
+            set strength_of_connection strength_of_connection + 1
+            set updated? True
+          ]
+
+
+
+          if [strength_of_connection] of current_link = technology_sharing_threshold[
+            ;update technology knowledge
+            ]
+
+          ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
+          if [strength_of_connection] of current_link > fourth_threshold_connection[
+            update_location_knowledge known_locations_summer current_band
+          ]
+          if [strength_of_connection] of current_link > third_threshold_connection[
+            update_location_knowledge known_locations_fall current_band
+          ]
+          if [strength_of_connection] of current_link > second_threshold_connection[
+            update_location_knowledge known_locations_winter current_band
+          ]
+          if [strength_of_connection] of current_link > first_threshold_connection[
+            update_location_knowledge known_locations_spring current_band
+          ]
+        ]
+      ]
+    ]
+  ]
+end
+
+to update_location_knowledge [known_locations_given_season current_band]
+  ;Function that shares knowledge between bands (will happen twice per link as both agents have to update their knowledge)
+
+  let temporary_list_of_known_locations [known_locations_given_season] of current_band
+
+  let x 0
+  ;First delete all the other bands knowledge which the band has already (own information > foreign information)
+  while [x < length known_locations_given_season][
+    let current_location item x known_locations_given_season
+    set temporary_list_of_known_locations filter [y -> item 0 y != item 0 current_location] temporary_list_of_known_locations
+    set x x + 1
+  ]
+  ;Add all remaining knowledge of patches to complete the list of known locations (add linked bands known locations)
+  foreach temporary_list_of_known_locations[y -> if length y = 3
+    [set known_locations_given_season lput y known_locations_given_season]
+  ]
+end
+
+
+to gather_move_explore
+  ;General fucntion that creates the flow for the bands
+  ask bands
+  [
+    ;if there is no need to move, they won't, if there is a need, choose the closest location that has the needed food/resources
+    if ([food_available] of patch-here <= food_needed) or ([resources_available] of patch-here <= resources_needed)
+    [
+      let potential_new_locations []
+      ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
+      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and [distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time)
+        [set potential_new_locations lput (item 0 x) potential_new_locations]
+      ]
+      set potential_new_locations patch-set potential_new_locations
+      if any? potential_new_locations[
+        ;chose the patch that is closest to my current position
+        let new_home min-one-of potential_new_locations [distance self]
+        move new_home
+
+      ]
+      ;If there is no location available that has enough food AND resources, explore to find a patch that has enough
+      if not any? potential_new_locations[
+        explore
+
+      ;At the end of a season, the knowledge should be updated about the season that has just passed
+      ]
+      if current_season = 0[
+        set known_locations_summer known_locations_current
+      ]
+      if current_season = 1[
+        set known_locations_fall known_locations_current
+      ]
+      if current_season = 2[
+        set known_locations_winter known_locations_current
+      ]
+      if current_season = 3[
+        set known_locations_spring known_locations_current
+      ]
+    ]
+    gather
+  ]
+end
+
+
+to gather
+  ;Calculate the time left afrer exploring and moving
+  let time_left time_available - time_spent
+  set time_spent_gathering time_left
+  ;Decide how much time is needed to gather food and resources
+  let time_needed_for_food food_needed / (group_size * food_effectiveness)
+  let time_needed_for_resources resources_needed / (group_size * resource_effectiveness)
+
+  let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
+  let part_spent_resources time_left - part_spent_food
+
+  if part_spent_food > time_needed_for_food[
+    set part_spent_food time_needed_for_food
+  ]
+
+  if part_spent_resources > time_needed_for_resources[
+    set part_spent_resources time_needed_for_resources
+  ]
+
+
+  ;Find out how much food and resources the band could gather if available
+  let potential_food part_spent_food * group_size * food_effectiveness
+  let potential_resources part_spent_resources * group_size * resource_effectiveness
+
+
+  ;Gather food
+  ifelse potential_food > [food_available] of current_home_location[
+    set food_owned food_available
+
+    ask current_home_location[
+      set food_available 0
+    ]
+  ]
+  [
+    set food_owned potential_food
+    ask current_home_location[
+      set food_available food_available - potential_food
+    ]
+  ]
+  ;Gather resources
+  ifelse potential_resources > [resources_available] of current_home_location[
+    set resources_owned resources_owned + resources_available
+    ask current_home_location[
+      set resources_available 0
+    ]
+  ]
+  [
+    set resources_owned resources_owned + potential_resources
+    ask current_home_location[
+      set resources_available resources_available - potential_resources
+    ]
+    ;Spending the spare time if there is any on gathering additional resources
+    let spare_time time_left - time_needed_for_food - time_needed_for_resources
+    let potential_extra_resources group_size * resource_effectiveness * spare_time
+
+    ifelse potential_extra_resources > [resources_available] of current_home_location[
+      set resources_owned resources_owned + potential_extra_resources
+      ask current_home_location[
+        set resources_available 0
+      ]
+    ]
+    [
+      set resources_owned resources_owned + potential_extra_resources
+      ask current_home_location[
+        set resources_available resources_available - potential_extra_resources
+      ]
+    ]
+    ;create more offspring when there is time left
+    set birth_rate birth_rate + 100
+  ]
+end
+
+
+to move [new_home]
+  ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
+  let time_needed_to_move (distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
+  set time_spent time_spent + time_needed_to_move
+  set time_spent_moving time_needed_to_move
+
+  set previous_home_location current_home_location
+  move-to new_home
+  set current_home_location new_home
+  ;delete current knowledge on this patch in the current season
+  set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
+  ;add the new knowledge on this patch in the current season
+  set known_locations_current lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_current
+end
+
+to explore
+  ;Exploring takes time depending on mobility
+  set time_spent time_spent + mobility
+  set time_spent_exploring time_spent
+  let list_of_explored_patches []
+  ;Add the explored patches to the known patches
+  ask neighbors[
+    set list_of_explored_patches lput (list self [food_available] of self [resources_available] of self) list_of_explored_patches
+  ]
+  let x 0
+
+  while [x < length list_of_explored_patches][
+    let current_location item x list_of_explored_patches
+    set known_locations_current filter [y -> item 0 y != item 0 current_location] known_locations_current
+    set x x + 1
+  ]
+  foreach list_of_explored_patches [y -> if length y = 3
+    [set known_locations_current lput y known_locations_current]
+  ]
+  ;decide which known location is the best possible to move to (even though it will not reach the needs) and move there
+  let best_known_locations []
+  foreach known_locations_current [y -> set best_known_locations lput (list item 0 y ((item 1 y / food_needed) + (item 2 y / resources_needed)))  best_known_locations
+  ]
+  ;Only travel to the new location if there is time to do so
+  set known_locations_current filter [y -> [distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
+  ;Choose the best option based on where the biggest part of the food and resources can still be gathered
+  let current_max_patch item 0 item 0 best_known_locations
+  let current_max item 1 item 0 best_known_locations
+  foreach best_known_locations [y -> if item 1 y > current_max[
+    set current_max_patch item 0 y
+    set current_max item 1 y
+    ]
+  ]
+
+  move current_max_patch
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
