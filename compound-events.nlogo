@@ -38,6 +38,8 @@ globals [
   current_season
   time_available
   max_move_time
+
+  land_patches ; Agentset of landmass - does not contain water
 ]
 
 bands-own [
@@ -85,6 +87,7 @@ patches-own [
   prec-mam
   prec-jja
   prec-son
+  prec-current
 
   temp-djf
   temp-mam
@@ -124,6 +127,9 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
+  setup-food-and-resources
+
+  set land_patches patches with [ pcolor != blue ]
 
   if show-graticules? = True [
      setup-graticules
@@ -156,8 +162,14 @@ to setup-altitude
 end
 
 to setup-terrain-ruggedness-index
-    set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
-    gis:apply-raster europe-tri ruggedness_index
+  set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
+  gis:apply-raster europe-tri ruggedness_index
+
+
+  ; Make water areas inaccessible for hunter-gatherer bands
+  ; They will never move into the water
+  ask patches with [ pcolor = blue ] [
+    set ruggedness_index 1000 ]
 end
 
 to setup-precipitation
@@ -204,6 +216,22 @@ to setup-graticules
   gis:draw europe-grid 1
 end
 
+to setup-food-and-resources
+  ; 9000 is the max food for the best patch yearly
+  ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
+
+  ; 3000 is the max resource for the best patch yearly
+  ; 30 (resource units needed per tick) * 25 (average group band) * 4 (seasons)
+  ; gut feeling: they can live to 3 years with this on resources -> 9000
+
+  ; set optimal temperature, precipitation, altitude, and tri - distances to the optimal circumstances decide the initial food and resources availability
+
+
+
+
+
+end
+
 
 to setup-agents
   sprout-bands 50[
@@ -237,7 +265,7 @@ end
 
 to go
 
-  temperature-distribution
+  update-weather
   update_bands_variables
   interact-with-other-bands
   gather_move_explore
@@ -256,21 +284,23 @@ to go
 
 end
 
-to temperature-distribution
+to update-weather
   ask patches [
-    let sd (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
+    let sd-temp (temp-range / 4) ; very rough estimate of the standard deviation, assuming a normal distribution
+    ; let sd-max
 
     if current_season = 0[
-      set temp-current random-normal temp-jja sd
+      set temp-current random-normal temp-jja sd-temp
+      set prec-current random-normal prec-jja sd
     ]
     if current_season = 1[
-      set temp-current random-normal temp-son sd
+      set temp-current random-normal temp-son sd-temp
     ]
     if current_season = 2[
-      set temp-current random-normal temp-djf sd
+      set temp-current random-normal temp-djf sd-temp
     ]
     if current_season = 3[
-      set temp-current random-normal temp-mam sd
+      set temp-current random-normal temp-mam sd-temp
     ]
   ]
 end
