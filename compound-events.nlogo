@@ -1,3 +1,10 @@
+;Spawn them in the right place
+;Create compound events
+
+;show links or hide links between bands to show networks at a certain point
+;Create sliders and monitors
+;Decide about KPI's
+
 extensions [ gis profiler ]
 
 breed [ bands band ]
@@ -23,7 +30,6 @@ globals [
   europe-temp-range ; Annual Temeprature Range
   ; end: GIS globals
 
-  max_group_size
   technology_sharing_threshold
   first_threshold_connection
   second_threshold_connection
@@ -40,14 +46,11 @@ bands-own [
   resources_needed
   food_owned
   resources_owned
-  food_effectiveness
-  resource_effectiveness
+  effectiveness
   cultural_capital
-  technology_level_food
-  technology_level_resources
+  technology_level
 
   mobility
-  birth_rate
   death_rate
   health
   known_locations_summer
@@ -102,11 +105,13 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ask n-of 1 patches[
+  ask n-of 1 patches[ ;sprout agents based on the initial population density
     setup-agents]
-  set max_group_size 200
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
-  set fourth_threshold_connection 3
+  set first_threshold_connection threshold_location_knowledge
+  set second_threshold_connection 2 * threshold_location_knowledge
+  set third_threshold_connection 3 * threshold_location_knowledge
+  set fourth_threshold_connection 4 * threshold_location_knowledge
   set max_move_time 45
   set time_available 90
 end
@@ -201,40 +206,42 @@ end
 
 
 to setup-agents
-  let population_density 2
-  let number_of_bands_multiplier 1
-  if population_density > 0[
-    sprout-bands number_of_bands_multiplier * population_density[
-      set xcor random 10
-      set ycor random 10
-      set health 100
-      set group_size random 50
-      set food_needed group_size
-      set resources_needed group_size
-      set resources_owned 0
-      set food_effectiveness random 100
-      set resource_effectiveness random 100
-      set cultural_capital random 100
-      set technology_level_food random 100
-      set technology_level_resources random 100
-      set mobility random 5 + 5
-      set birth_rate random 100
-      set death_rate random 100
-      set health 100
-      set current_home_location patch-here
-      set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
-      set known_locations_fall []
-      set known_locations_winter []
-      set known_locations_spring []
+  sprout-bands 50[
+    set group_size random 30 + 10 ;decide initial group size
+    set resources_owned 0
+    if cultural_capital_distribution = "normal"[
+      set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
     ]
+    if cultural_capital_distribution = "uniform"[
+      set cultural_capital random mean_cultural_capital + 1
+    ]
+    if cultural_capital_distribution = "poisson"[
+      set cultural_capital min list 100 (round max list 1 random-poisson mean_cultural_capital)
+    ]
+
+    set food_needed group_size * 90 ;one unit per day
+    set resources_needed group_size * 30 ;one unit per 3 days
+
+    set technology_level cultural_capital
+    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
+
+    set mobility random 5 + 5
+    set health 100
+    set current_home_location patch-here
+    set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
+    set known_locations_fall []
+    set known_locations_winter []
+    set known_locations_spring []
   ]
 end
 
 to go
+
   temperature-distribution
   update_bands_variables
   interact-with-other-bands
   gather_move_explore
+  use_gathered_products
 
   ask turtles[
     fd 1
@@ -270,11 +277,19 @@ end
 
 to update_bands_variables
   ;new season means the bands have all available time to move, gather and explore
-  ask turtles[
+  ask bands[
     set time_spent 0
     set time_spent_exploring 0
     set time_spent_moving 0
     set time_spent_gathering 0
+
+
+    set food_needed group_size * 90
+    set resources_needed group_size * 30
+
+    ;Mutation of the cultural capital
+    set cultural_capital max list 1 min list 100 (cultural_capital + (random 3) - 1)
+
     ;as the season has changed, the bands change their knowledge about the patches to the current season
     if current_season = 0[
       set known_locations_current known_locations_summer
@@ -325,12 +340,6 @@ to interact-with-other-bands
             set updated? True
           ]
 
-
-
-          if [strength_of_connection] of current_link = technology_sharing_threshold[
-            ;update technology knowledge
-            ]
-
           ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
           if [strength_of_connection] of current_link > fourth_threshold_connection[
             update_location_knowledge known_locations_summer current_band
@@ -343,6 +352,7 @@ to interact-with-other-bands
           ]
           if [strength_of_connection] of current_link > first_threshold_connection[
             update_location_knowledge known_locations_spring current_band
+            set technology_level technology_level + 1  ;also share knowledge about technologies from the first threshold on
           ]
         ]
       ]
@@ -417,8 +427,8 @@ to gather
   let time_left time_available - time_spent
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
-  let time_needed_for_food food_needed / (group_size * food_effectiveness)
-  let time_needed_for_resources resources_needed / (group_size * resource_effectiveness)
+  let time_needed_for_food food_needed / (group_size * effectiveness)
+  let time_needed_for_resources resources_needed / (group_size * effectiveness)
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
   let part_spent_resources time_left - part_spent_food
@@ -433,8 +443,8 @@ to gather
 
 
   ;Find out how much food and resources the band could gather if available
-  let potential_food part_spent_food * group_size * food_effectiveness
-  let potential_resources part_spent_resources * group_size * resource_effectiveness
+  let potential_food part_spent_food * group_size * effectiveness
+  let potential_resources part_spent_resources * group_size * effectiveness
 
 
   ;Gather food
@@ -465,7 +475,7 @@ to gather
     ]
     ;Spending the spare time if there is any on gathering additional resources
     let spare_time time_left - time_needed_for_food - time_needed_for_resources
-    let potential_extra_resources group_size * resource_effectiveness * spare_time
+    let potential_extra_resources group_size * effectiveness * spare_time
 
     ifelse potential_extra_resources > [resources_available] of current_home_location[
       set resources_owned resources_owned + potential_extra_resources
@@ -478,9 +488,8 @@ to gather
       ask current_home_location[
         set resources_available resources_available - potential_extra_resources
       ]
+
     ]
-    ;create more offspring when there is time left
-    set birth_rate birth_rate + 100
   ]
 end
 
@@ -492,6 +501,14 @@ to move [new_home]
   set time_spent_moving time_needed_to_move
 
   set previous_home_location current_home_location
+
+  let resources_moved min list group_size resources_owned
+  let resources_dropped resources_owned - resources_moved
+  set resources_owned resources_moved
+  ask previous_home_location [
+    set resources_available resources_available + resources_dropped
+  ]
+
   move-to new_home
   set current_home_location new_home
   ;delete current knowledge on this patch in the current season
@@ -536,11 +553,52 @@ to explore
 
   move current_max_patch
 end
+
+
+to use_gathered_products
+  ask bands[
+    ;Change population growth
+    let shortage_food ((food_needed - food_owned) / food_needed)
+    let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
+    let shortage_total (shortage_food + shortage_resources) / 2
+
+    set health max list 0 (health - (100 * shortage_total))
+    if shortage_total = 0[
+      set health 100
+    ]
+    set food_owned 0
+    set resources_owned max list 0 (resources_owned - resources_needed)
+    ;people die before new ones are born
+
+    if health < 100 [
+      set death_rate (health / 100)
+      set group_size group_size * death_rate
+    ]
+    set group_size ceiling (group_size * standard_birth_rate)
+    if group_size = 0[
+      die
+    ]
+
+
+    ifelse cultural_capital > technology_level [
+      let potential_increase_technology_level_resources floor (resources_owned / (resources_tool * group_size))
+      let potential_increase_technology_level_cutural_capital floor (cultural_capital - technology_level)
+
+      let increase_technology_level min list potential_increase_technology_level_resources potential_increase_technology_level_cutural_capital
+
+      set technology_level technology_level + increase_technology_level
+      set resources_owned resources_owned - (increase_technology_level * resources_tool * group_size) ]
+    [
+      set technology_level floor (cultural_capital)
+    ]
+    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+455
 10
-1260
+1505
 381
 -1
 -1
@@ -573,7 +631,7 @@ number-of-bands
 number-of-bands
 0
 100
-62.0
+16.0
 1
 1
 NIL
@@ -625,10 +683,10 @@ NIL
 1
 
 BUTTON
-95
-252
-187
-285
+70
+305
+162
+338
 go-forever
 go
 T
@@ -640,6 +698,106 @@ H
 NIL
 NIL
 1
+
+SLIDER
+225
+10
+450
+43
+threshold_location_knowledge
+threshold_location_knowledge
+1
+8
+2.0
+1
+1
+Season(s)
+HORIZONTAL
+
+CHOOSER
+280
+45
+452
+90
+cultural_capital_distribution
+cultural_capital_distribution
+"normal" "uniform" "poisson"
+0
+
+SLIDER
+307
+95
+452
+128
+mean_cultural_capital
+mean_cultural_capital
+1
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+305
+130
+450
+163
+stdv_cultural_capital
+stdv_cultural_capital
+0
+50
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+172
+165
+452
+198
+max_effectiveness
+max_effectiveness
+0
+10
+6.0
+1
+1
+resource_units_per_HG_per_day
+HORIZONTAL
+
+SLIDER
+280
+285
+452
+318
+standard_birth_rate
+standard_birth_rate
+1
+1.25
+1.1
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+285
+325
+457
+358
+resources_tool
+resources_tool
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1000,5 +1158,5 @@ true
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
 @#$#@#$#@
-0
+1
 @#$#@#$#@
