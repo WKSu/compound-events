@@ -4,6 +4,7 @@
 ;show links or hide links between bands to show networks at a certain point
 ;Create sliders and monitors
 ;Decide about KPI's
+; ; KPI: Length of known locations
 
 extensions [ gis profiler ]
 
@@ -519,18 +520,18 @@ to gather
 
   ;Gather food
   ifelse potential_food > [food_available] of current_home_location [
-    set food_owned int food_available
+    set food_owned round food_available
 
     ask current_home_location[
       set food_available 0
     ]
   ]
   [
-    set food_owned int potential_food
+    set food_owned round potential_food
     print sentence "food_owned: " food_owned
 
     ask current_home_location[
-      set food_available int (food_available - potential_food)
+      set food_available round (food_available - potential_food)
     ]
   ]
 
@@ -605,7 +606,7 @@ to explore
 
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
-  ask neighbors[
+  ask patches in-radius round (mobility / 2 + 1) [
     set list_of_explored_patches lput (list self [food_available] of self [resources_available] of self) list_of_explored_patches
   ]
   let x 0
@@ -867,7 +868,7 @@ standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.1
+1.0
 0.05
 1
 NIL
