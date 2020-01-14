@@ -1,8 +1,7 @@
-;Spawn them in the right place
+;grow back resources and food on patches
 ;Create compound events
+;ending condition?
 
-;show links or hide links between bands to show networks at a certain point
-;Create sliders and monitors
 ;Decide about KPI's
 ; ; KPI: Length of known locations
 
@@ -31,7 +30,7 @@ globals [
   europe_temp_jja
   europe_temp_son
   europe_temp_range ; Annual Temeprature Range
-  ; end: GIS globals
+                    ; end: GIS globals
 
   ; standard deviation of temperature
   sd_temp_djf
@@ -114,24 +113,25 @@ patches-own [
 ]
 
 to startup
-   clear-all
-   profiler:start
-   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
-   profiler:stop
-   print profiler:report
+  clear-all
+  profiler:start
+  setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
+  profiler:stop
+  print profiler:report
 end
 
 to setup
   clear-turtles
   reset-ticks
 
-  random-seed -176624766
+  ;random-seed -176624766
+  let median_food median [food_available] of land_patches
+  let fertile_patches land_patches with [food_available > median_food]
 
-
-  while [(count bands) < number_of_bands][
-    ask max-one-of land_patches [food_available][
-      setup-agents]
+  ask n-of number_of_bands fertile_patches[
+    setup-agents
   ]
+
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
@@ -155,7 +155,7 @@ to setup-patches
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
-     setup-graticules
+    setup-graticules
   ]
 end
 
@@ -175,11 +175,11 @@ to setup-altitude
   let max-landmass gis:maximum-of europe-landmass
 
   ask patches [
-   if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-   [ set pcolor scale-color black landmass min-landmass max-landmass ]
+    if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+    [ set pcolor scale-color black landmass min-landmass max-landmass ]
 
-   if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
-   [ set pcolor blue ]
+    if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+    [ set pcolor blue ]
   ]
   ; end: coloring landmass
 end
@@ -252,8 +252,6 @@ to setup-graticules
 end
 
 to setup-food-and-resources
-
-
   ask land_patches[
     set average_temp (temp_jja + temp_son + temp_djf + temp_mam) / 4
     set average_prec (prec_jja + prec_son + prec_djf + prec_mam) / 4
@@ -284,7 +282,7 @@ to setup-food-and-resources
     ]
 
     set food_available ((temp_deviation + prec_deviation) / 2) * 9000
-    set resources_available ((temp_deviation + prec_deviation) / 2) * 3000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
 
     if abs (average_temp - optimal_temperature) > max_deviation_temp[
       set food_available 0
@@ -296,13 +294,13 @@ to setup-food-and-resources
   ]
 
   ; start: coloring patches to represent european landmass 13900 - 12700BP
-  let min-landmass min [food_available] of land_patches
-  let max-landmass max [food_available] of land_patches
+  ;let min-landmass min [food_available] of land_patches
+  ;let max-landmass max [food_available] of land_patches
 
-  ask patches [
-    if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-    [ set pcolor scale-color green food_available min-landmass max-landmass ]
-  ]
+  ;ask patches [
+  ; if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+  ;[ set pcolor scale-color green food_available min-landmass max-landmass ]
+  ;]
 
   ; 9000 is the max food for the best patch yearly
   ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
@@ -317,6 +315,9 @@ end
 to setup-agents
 
   sprout-bands 1 [
+    set shape "person"
+    set size 2
+    set color black
     set group_size random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
@@ -328,7 +329,7 @@ to setup-agents
     if cultural_capital_distribution = "poisson"[
       set cultural_capital min list 100 (round max list 1 random-poisson mean_cultural_capital)
     ]
-
+    set group_size round group_size
     set food_needed group_size * 90 ;one unit per day
     set resources_needed group_size * 30 ;one unit per 3 days
 
@@ -357,7 +358,7 @@ to go
   ask turtles[
     set current_home_location patch-here
     set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
-        ;add the new knowledge on this patch in the current season
+    ;add the new knowledge on this patch in the current season
     set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
   ]
   tick
@@ -390,6 +391,11 @@ end
 
 to update_bands_variables
   ;new season means the bands have all available time to move, gather and explore
+  if show_links = False[
+    ask links[
+      set hidden? True
+    ]
+  ]
   ask bands[
     set time_spent 0
     set time_spent_exploring 0
@@ -439,7 +445,10 @@ to interact-with-other-bands
         create-link-with current_band[
           set strength_of_connection 0
           set updated? False
-          set color green
+          set color red
+          if show_links = False[
+            set hidden? True
+          ]
         ]
       ]
       ;make sure turtles don't see themselves as neighbours
@@ -716,6 +725,7 @@ to use_gathered_products
     set health max list 0 (health - (100 * shortage_total))
     if shortage_total <= 0 [
       set health 100
+      set death_rate 1
     ]
     set food_owned 0
     set resources_owned max list 0 (resources_owned - resources_needed)
@@ -725,10 +735,11 @@ to use_gathered_products
       set death_rate (health / 100)
       set group_size group_size * death_rate
     ]
-    set group_size ceiling (group_size * standard_birth_rate)
     if group_size <= 0[
       die
     ]
+    set group_size ceiling (group_size * standard_birth_rate)
+
 
 
     ifelse cultural_capital > technology_level [
@@ -747,13 +758,13 @@ to use_gathered_products
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-455
-10
-1505
-381
+185
+120
+1503
+584
 -1
 -1
-2.0
+2.5144
 1
 10
 1
@@ -774,10 +785,10 @@ ticks
 30.0
 
 BUTTON
-16
-86
-80
-119
+5
+10
+69
+43
 Setup
 setup
 NIL
@@ -790,22 +801,11 @@ NIL
 NIL
 1
 
-SWITCH
-16
-129
-164
-162
-show-graticules?
-show-graticules?
-1
-1
--1000
-
 BUTTON
-66
-192
-143
-225
+150
+10
+215
+43
 go-once
 go\n
 NIL
@@ -819,10 +819,10 @@ NIL
 1
 
 BUTTON
-70
-305
-162
-338
+220
+10
+290
+43
 go-forever
 go
 T
@@ -836,10 +836,10 @@ NIL
 1
 
 SLIDER
-225
-10
-450
-43
+5
+50
+235
+83
 threshold_location_knowledge
 threshold_location_knowledge
 1
@@ -851,20 +851,20 @@ Season(s)
 HORIZONTAL
 
 CHOOSER
-280
-45
-452
-90
+7
+120
+152
+165
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
 0
 
 SLIDER
-307
-95
-452
-128
+2
+170
+152
+203
 mean_cultural_capital
 mean_cultural_capital
 1
@@ -876,10 +876,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-305
-130
-450
-163
+5
+205
+150
+238
 stdv_cultural_capital
 stdv_cultural_capital
 0
@@ -891,10 +891,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-172
-165
-452
-198
+5
+85
+285
+118
 max_effectiveness
 max_effectiveness
 0
@@ -906,25 +906,25 @@ resource_units_per_HG_per_day
 HORIZONTAL
 
 SLIDER
-280
-270
-452
-303
+5
+380
+177
+413
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.0
+1.1
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-280
-305
-452
-338
+5
+415
+177
+448
 resources_tool
 resources_tool
 0
@@ -936,10 +936,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-455
-385
-657
-418
+5
+485
+175
+518
 optimal_temperature
 optimal_temperature
 0
@@ -951,10 +951,10 @@ Celcius
 HORIZONTAL
 
 SLIDER
-660
-385
-832
-418
+5
+240
+130
+273
 optimal_precipitation
 optimal_precipitation
 0
@@ -966,10 +966,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-85
-85
-157
-118
+74
+9
+146
+42
 Startup
 startup
 NIL
@@ -983,10 +983,10 @@ NIL
 1
 
 SLIDER
-455
-420
-657
-453
+5
+520
+175
+553
 max_deviation_temp
 max_deviation_temp
 0
@@ -998,10 +998,10 @@ Celcius
 HORIZONTAL
 
 SLIDER
-660
-420
-832
-453
+5
+275
+130
+308
 max_deviation_prec
 max_deviation_prec
 0
@@ -1013,10 +1013,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-280
-235
-452
-268
+5
+345
+177
+378
 stdev_group_size
 stdev_group_size
 0
@@ -1028,10 +1028,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-280
-200
-452
-233
+5
+310
+177
+343
 average_group_size
 average_group_size
 1
@@ -1043,19 +1043,41 @@ NIL
 HORIZONTAL
 
 SLIDER
-280
-340
-452
-373
+5
+450
+177
+483
 number_of_bands
 number_of_bands
 1
-500
-65.0
+1000
+1000.0
 1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+5
+555
+153
+588
+show-graticules?
+show-graticules?
+1
+1
+-1000
+
+SWITCH
+240
+50
+352
+83
+show_links
+show_links
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
