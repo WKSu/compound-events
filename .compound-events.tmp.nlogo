@@ -6,6 +6,7 @@
 ;Decide about KPI's
 ; ; KPI: Length of known locations
 
+; idea - size of turtles depends on group size
 
 extensions [ gis profiler ]
 
@@ -19,17 +20,17 @@ globals [
   europe-tri ; terrain roughness index
 
   ; mean precipitation GIS
-  europe-prec-djf ; DJF: December, January, February
-  europe-prec-mam ; MAM: March, April, May
-  europe-prec-jja ; JJA: June, July, August
-  europe-prec-son ; September, October, November
+  europe_prec_djf ; DJF: December, January, February
+  europe_prec_mam ; MAM: March, April, May
+  europe_prec_jja ; JJA: June, July, August
+  europe_prec_son ; September, October, November
 
   ; mean temperature GIS
-  europe-temp-djf
-  europe-temp-mam
-  europe-temp-jja
-  europe-temp-son
-  europe-temp-range ; Annual Temeprature Range
+  europe_temp_djf
+  europe_temp_mam
+  europe_temp_jja
+  europe_temp_son
+  europe_temp_range ; Annual Temeprature Range
   ; end: GIS globals
 
   ; standard deviation of temperature
@@ -42,6 +43,8 @@ globals [
   sd_prec_mam
   sd_prec_jja
   sd_prec_son
+
+  land_patches
 
   technology_sharing_threshold
   first_threshold_connection
@@ -94,18 +97,20 @@ patches-own [
   ruggedness_index
   landmass
 
-  prec-djf
-  prec-mam
-  prec-jja
-  prec-son
-  prec-current
+  prec_djf
+  prec_mam
+  prec_jja
+  prec_son
+  average_prec
+  prec_current
 
-  temp-djf
-  temp-mam
-  temp-jja
-  temp-son
-  temp-range
-  temp-current
+  temp_djf
+  temp_mam
+  temp_jja
+  temp_son
+  temp_range
+  average_temp
+  temp_current
 ]
 
 to startup
@@ -137,8 +142,10 @@ to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
 
   ; load in GIS data split
+
   setup-altitude
   setup-terrain-ruggedness-index
+
   setup-precipitation
   setup-temperature
   setup-food-and-resources
@@ -184,44 +191,45 @@ to setup-terrain-ruggedness-index
   ; They will never move into the water
   ask patches with [ pcolor = blue ] [
     set ruggedness_index 1000 ]
+  set land_patches patches with [ pcolor != blue ]
 end
 
 to setup-precipitation
   ; loading GIS datasets
   ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
-  set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_prec_jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
+  set europe_prec_son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+  gis:set-world-envelope-ds (gis:envelope-of europe_prec_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
   ; assign the values to the patch attributes
-  gis:apply-raster europe-prec-djf prec-djf
-  gis:apply-raster europe-prec-mam prec-mam
-  gis:apply-raster europe-prec-jja prec-jja
-  gis:apply-raster europe-prec-son prec-son
+  gis:apply-raster europe_prec_djf prec_djf
+  gis:apply-raster europe_prec_mam prec_mam
+  gis:apply-raster europe_prec_jja prec_jja
+  gis:apply-raster europe_prec_son prec_son
 end
 
 to setup-temperature
   ; loading GIS datasets
   ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
-  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
-  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
-  set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
-  set europe-temp-range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_temp_djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
+  set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
+  set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
+  set europe_temp_son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+  set europe_temp_range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+  gis:set-world-envelope-ds (gis:envelope-of europe_temp_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
   ; assign the values to the patch attributes
-  gis:apply-raster europe-temp-djf temp-djf
-  gis:apply-raster europe-temp-mam temp-mam
-  gis:apply-raster europe-temp-jja temp-jja
-  gis:apply-raster europe-temp-son temp-son
-  gis:apply-raster europe-temp-range temp-range
+  gis:apply-raster europe_temp_djf temp_djf
+  gis:apply-raster europe_temp_mam temp_mam
+  gis:apply-raster europe_temp_jja temp_jja
+  gis:apply-raster europe_temp_son temp_son
+  gis:apply-raster europe_temp_range temp_range
 
   ; based on the QGIS Raster Analysis of each map
   set sd_temp_djf 8.483842584
@@ -242,6 +250,65 @@ to setup-graticules
 end
 
 to setup-food-and-resources
+
+
+  ask land_patches[
+    set average_temp (temp_jja + temp_son + temp_djf + temp_mam) / 4
+    set average_prec (prec_jja + prec_son + prec_djf + prec_mam) / 4
+
+    let min_temperature optimal_temperature - max_deviation_temp
+    let max_temperature optimal_temperature + max_deviation_temp
+
+    let min_precipitation optimal_precipitation - max_deviation_prec
+    let max_precipitation optimal_precipitation + max_deviation_prec
+
+    ;min-max feature scaling
+    let temp_deviation 0
+    if average_temp <= optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
+    ]
+    if average_temp > optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
+    ]
+
+    ;min-max feature scaling
+
+    let prec_deviation 0
+    if average_prec <= optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+    ]
+    if average_prec > optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+    ]
+
+    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 3000
+
+    if abs (average_temp - optimal_temperature) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0
+    ]
+    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0]
+
+
+    ;let temp_difference 1 - (abs (average_temp - optimal_temperature) / optimal_temperature)
+    ;let prec_difference 1 - (abs (average_prec - optimal_precipitation) / optimal_precipitation)
+
+    ;set food_available (temp_difference + prec_difference) / 2 * 9000
+    ;set resources_available (temp_difference + prec_difference) / 2 * 3000
+  ]
+
+  ; start: coloring patches to represent european landmass 13900 - 12700BP
+  let min-landmass min [food_available] of land_patches
+  let max-landmass max [food_available] of land_patches
+
+  ask patches [
+    if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+    [ set pcolor scale-color green food_available min-landmass max-landmass ]
+  ]
+
   ; 9000 is the max food for the best patch yearly
   ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
 
@@ -310,20 +377,20 @@ to update-weather
   ask patches [
 
     if current_season = 0 [
-      set temp-current random-normal temp-jja sd_temp_jja
-      set prec-current random-normal prec-jja sd_prec_jja
+      set temp_current random-normal temp_jja sd_temp_jja
+      set prec_current random-normal prec_jja sd_prec_jja
     ]
     if current_season = 1 [
-      set temp-current random-normal temp-son sd_temp_son
-      set prec-current random-normal prec-son sd_prec_son
+      set temp_current random-normal temp_son sd_temp_son
+      set prec_current random-normal prec_son sd_prec_son
     ]
     if current_season = 2 [
-      set temp-current random-normal temp-djf sd_temp_djf
-      set prec-current random-normal prec-djf sd_prec_djf
+      set temp_current random-normal temp_djf sd_temp_djf
+      set prec_current random-normal prec_djf sd_prec_djf
     ]
     if current_season = 3 [
-      set temp-current random-normal temp-mam sd_temp_mam
-      set prec-current random-normal prec-mam sd_prec_mam
+      set temp_current random-normal temp_mam sd_temp_mam
+      set prec_current random-normal prec_mam sd_prec_mam
     ]
   ]
 end
@@ -897,9 +964,9 @@ SLIDER
 418
 optimal_temperature
 optimal_temperature
--50
-50
-10.0
+0
+30
+6.0
 1
 1
 Celcius
@@ -914,7 +981,54 @@ optimal_precipitation
 optimal_precipitation
 0
 20
-50.0
+2.0
+1
+1
+NIL
+HORIZONTAL
+
+BUTTON
+85
+85
+157
+118
+Startup
+startup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+455
+420
+657
+453
+max_deviation_temp
+max_deviation_temp
+0
+30
+15.0
+1
+1
+Celcius
+HORIZONTAL
+
+SLIDER
+660
+420
+832
+453
+max_deviation_prec
+max_deviation_prec
+0
+10
+3.0
 1
 1
 NIL
