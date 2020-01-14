@@ -127,8 +127,11 @@ to setup
 
   random-seed -176624766
 
-  ask patch 120 64 [ ;sprout agents based on the initial population density
-    setup-agents]
+
+  while [(count bands) < number_of_bands][
+    ask max-one-of land_patches [food_available][
+      setup-agents]
+  ]
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
@@ -145,7 +148,6 @@ to setup-patches
 
   setup-altitude
   setup-terrain-ruggedness-index
-
   setup-precipitation
   setup-temperature
   setup-food-and-resources
@@ -291,13 +293,6 @@ to setup-food-and-resources
     if abs (average_prec - optimal_precipitation) > max_deviation_temp[
       set food_available 0
       set resources_available 0]
-
-
-    ;let temp_difference 1 - (abs (average_temp - optimal_temperature) / optimal_temperature)
-    ;let prec_difference 1 - (abs (average_prec - optimal_precipitation) / optimal_precipitation)
-
-    ;set food_available (temp_difference + prec_difference) / 2 * 9000
-    ;set resources_available (temp_difference + prec_difference) / 2 * 3000
   ]
 
   ; start: coloring patches to represent european landmass 13900 - 12700BP
@@ -316,16 +311,13 @@ to setup-food-and-resources
   ; 30 (resource units needed per tick) * 25 (average group band) * 4 (seasons)
   ; gut feeling: they can live to 3 years with this on resources -> 9000
 
-  ; set optimal temperature, precipitation, altitude, and tri - distances to the optimal circumstances decide the initial food and resources availability
-
-
-
 end
 
 
 to setup-agents
-  sprout-bands number-of-bands [
-    set group_size random 30 + 10 ;decide initial group size
+
+  sprout-bands 1 [
+    set group_size random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
       set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
@@ -351,6 +343,7 @@ to setup-agents
     set known_locations_winter []
     set known_locations_spring []
   ]
+
 end
 
 to go
@@ -554,8 +547,8 @@ to gather
   ;Calculate the time left after exploring and moving
   ; let time_left max list 0 (time_available - time_spent)
   let time_left (time_available - time_spent)
-  print sentence "time_available: " time_available
-  print sentence "time_spent: " time_spent
+  ;print sentence "time_available: " time_available
+  ;print sentence "time_spent: " time_spent
 
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
@@ -563,10 +556,10 @@ to gather
   let time_needed_for_resources resources_needed / (group_size * effectiveness)
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
-  print sentence "part spent food: "part_spent_food
-  print sentence "time_left:" time_left
-  print sentence "time_needed_food:" time_needed_for_food
-  print sentence "time_needed-resources:" time_needed_for_resources
+  ;print sentence "part spent food: "part_spent_food
+  ;print sentence "time_left:" time_left
+  ;print sentence "time_needed_food:" time_needed_for_food
+  ;print sentence "time_needed-resources:" time_needed_for_resources
 
   let part_spent_resources time_left - part_spent_food
 
@@ -581,7 +574,7 @@ to gather
 
   ;Find out how much food and resources the band could gather if available
   let potential_food part_spent_food * group_size * effectiveness
-  print sentence "potential_food: " potential_food
+  ;print sentence "potential_food: " potential_food
 
   let potential_resources part_spent_resources * group_size * effectiveness
 
@@ -596,7 +589,7 @@ to gather
   ]
   [
     set food_owned round potential_food
-    print sentence "food_owned: " food_owned
+    ;print sentence "food_owned: " food_owned
 
     ask current_home_location[
       set food_available round (food_available - potential_food)
@@ -639,13 +632,13 @@ end
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
   let time_needed_to_move ((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility
-  print sentence "time_needed_to_move: " time_needed_to_move
+  ;print sentence "time_needed_to_move: " time_needed_to_move
 
   if time_needed_to_move < max_move_time [
 
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
-    print sentence "time_spent_moving: " time_spent_moving
+    ;print sentence "time_spent_moving: " time_spent_moving
 
     set previous_home_location current_home_location
 
@@ -670,7 +663,7 @@ to explore
   let time_spent_explore 11 - mobility
   set time_spent time_spent + time_spent_explore
   set time_spent_exploring time_spent_explore
-  print sentence "time_spent_exploring: " time_spent_exploring
+  ;print sentence "time_spent_exploring: " time_spent_exploring
 
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
@@ -702,8 +695,8 @@ to explore
     ]
   ]
 
-  print sentence "Best KNown Locations: " best_known_locations
-  print sentence "Current Max Patch: " current_max_patch
+  ;print sentence "Best KNown Locations: " best_known_locations
+  ;print sentence "Current Max Patch: " current_max_patch
 
   if current_max_patch != current_home_location [
     move current_max_patch ]
@@ -714,11 +707,11 @@ to use_gathered_products
   ask bands[
     ;Change population growth
     let shortage_food ((food_needed - food_owned) / food_needed)
-    print sentence "shortage_food: " shortage_food
-    print sentence "food_owned: " food_owned
+    ;print sentence "shortage_food: " shortage_food
+    ;print sentence "food_owned: " food_owned
     let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
     let shortage_total (shortage_food + shortage_resources) / 2
-    print sentence "shortage_total: " shortage_total
+    ;print sentence "shortage_total: " shortage_total
 
     set health max list 0 (health - (100 * shortage_total))
     if shortage_total <= 0 [
@@ -774,26 +767,11 @@ GRAPHICS-WINDOW
 520
 0
 180
-0
-0
+1
+1
 1
 ticks
 30.0
-
-SLIDER
-16
-38
-188
-71
-number-of-bands
-number-of-bands
-0
-100
-1.0
-1
-1
-NIL
-HORIZONTAL
 
 BUTTON
 16
@@ -929,9 +907,9 @@ HORIZONTAL
 
 SLIDER
 280
-285
+270
 452
-318
+303
 standard_birth_rate
 standard_birth_rate
 1
@@ -943,10 +921,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-285
-325
-457
-358
+280
+305
+452
+338
 resources_tool
 resources_tool
 0
@@ -1029,6 +1007,51 @@ max_deviation_prec
 0
 10
 3.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+280
+235
+452
+268
+stdev_group_size
+stdev_group_size
+0
+30
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+280
+200
+452
+233
+average_group_size
+average_group_size
+1
+40
+19.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+280
+340
+452
+373
+number_of_bands
+number_of_bands
+1
+500
+65.0
 1
 1
 NIL
