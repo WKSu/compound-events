@@ -117,7 +117,7 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ask n-of 1 patches[ ;sprout agents based on the initial population density
+  ask patch 50 50 [ ;sprout agents based on the initial population density
     setup-agents]
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
@@ -249,13 +249,11 @@ to setup-food-and-resources
 
 
 
-
-
 end
 
 
 to setup-agents
-  sprout-bands 50[
+  sprout-bands number-of-bands [
     set group_size random 30 + 10 ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
@@ -293,7 +291,7 @@ to go
   use_gathered_products
 
   ask turtles[
-    fd 1
+
     set current_home_location patch-here
     set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
         ;add the new knowledge on this patch in the current season
@@ -440,7 +438,7 @@ to gather_move_explore
     [
       let potential_new_locations []
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
-      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and [distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time)
+      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100)) - mobility < max_move_time)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
       set potential_new_locations patch-set potential_new_locations
@@ -548,7 +546,7 @@ end
 
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
-  let time_needed_to_move (distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100)) * (mobility / 10)
+  let time_needed_to_move ((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility
   set time_spent time_spent + time_needed_to_move
   set time_spent_moving time_needed_to_move
 
@@ -593,7 +591,7 @@ to explore
   foreach known_locations_current [y -> set best_known_locations lput (list item 0 y ((item 1 y / food_needed) + (item 2 y / resources_needed)))  best_known_locations
   ]
   ;Only travel to the new location if there is time to do so
-  set known_locations_current filter [y -> [distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100) * (mobility / 10) < max_move_time] known_locations_current
+  set known_locations_current filter [y -> ([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility < max_move_time] known_locations_current
   ;Choose the best option based on where the biggest part of the food and resources can still be gathered
   let current_max_patch item 0 item 0 best_known_locations
   let current_max item 1 item 0 best_known_locations
@@ -611,6 +609,7 @@ to use_gathered_products
   ask bands[
     ;Change population growth
     let shortage_food ((food_needed - food_owned) / food_needed)
+    print shortage_food
     let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
     let shortage_total (shortage_food + shortage_resources) / 2
 
@@ -683,7 +682,7 @@ number-of-bands
 number-of-bands
 0
 100
-100.0
+1.0
 1
 1
 NIL
