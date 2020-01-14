@@ -6,6 +6,8 @@
 ;Decide about KPI's
 ; ; KPI: Length of known locations
 
+; idea - size of turtles depends on group size
+
 extensions [ gis profiler ]
 
 breed [ bands band ]
