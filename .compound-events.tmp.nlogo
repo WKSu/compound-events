@@ -117,7 +117,10 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ask patch 50 50 [ ;sprout agents based on the initial population density
+
+  random-seed -176624766
+
+  ask patch 120 64 [ ;sprout agents based on the initial population density
     setup-agents]
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
@@ -218,7 +221,7 @@ to setup-temperature
   gis:apply-raster europe-temp-son temp-son
   gis:apply-raster europe-temp-range temp-range
 
-  ; based on the QGIS Raster Analysis of each map -
+  ; based on the QGIS Raster Analysis of each map
   set sd_temp_djf 8.483842584
   set sd_temp_mam 3.492836109
   set sd_temp_jja 3.487510518
@@ -228,7 +231,6 @@ to setup-temperature
   set sd_prec_mam 0.785912515
   set sd_prec_jja 0.76655715
   set sd_prec_son 1.126944302
-
 end
 
 to setup-graticules
@@ -291,7 +293,6 @@ to go
   use_gathered_products
 
   ask turtles[
-
     set current_home_location patch-here
     set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
         ;add the new knowledge on this patch in the current season
@@ -430,57 +431,74 @@ end
 
 
 to gather_move_explore
-  ;General fucntion that creates the flow for the bands
+  ;General function that creates the flow for the bands
   ask bands
   [
     ;if there is no need to move, they won't, if there is a need, choose the closest location that has the needed food/resources
-    if ([food_available] of patch-here <= food_needed) or ([resources_available] of patch-here <= resources_needed)
+    ifelse ([food_available] of patch-here <= food_needed) or ([resources_available] of patch-here <= resources_needed)
     [
       let potential_new_locations []
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
-      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100)) - mobility < max_move_time)
+      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) - mobility) < max_move_time)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
       set potential_new_locations patch-set potential_new_locations
       if any? potential_new_locations[
         ;chose the patch that is closest to my current position
         let new_home min-one-of potential_new_locations [distance self]
-        move new_home
+        if new_home != current_home_location [
+          move new_home ]
 
       ]
       ;If there is no location available that has enough food AND resources, explore to find a patch that has enough
       if not any? potential_new_locations[
         explore
+      ]
 
-      ;At the end of a season, the knowledge should be updated about the season that has just passed
-      ]
-      if current_season = 0[
-        set known_locations_summer known_locations_current
-      ]
-      if current_season = 1[
-        set known_locations_fall known_locations_current
-      ]
-      if current_season = 2[
-        set known_locations_winter known_locations_current
-      ]
-      if current_season = 3[
-        set known_locations_spring known_locations_current
-      ]
     ]
+    [
+      ;delete current knowledge on this patch in the current season
+      set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
+      ;add the new knowledge on this patch in the current season
+      set known_locations_current lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_current
+    ]
+
     gather
+    ;At the end of a season, the knowledge should be updated about the season that has just passed
+    if current_season = 0[
+      set known_locations_summer known_locations_current
+    ]
+    if current_season = 1[
+      set known_locations_fall known_locations_current
+    ]
+    if current_season = 2[
+      set known_locations_winter known_locations_current
+    ]
+    if current_season = 3[
+      set known_locations_spring known_locations_current
+    ]
   ]
 end
 
 
 to gather
-  ;Calculate the time left afrer exploring and moving
-  let time_left time_available - time_spent
+  ;Calculate the time left after exploring and moving
+  ; let time_left max list 0 (time_available - time_spent)
+  let time_left (time_available - time_spent)
+  print sentence "time_available: " time_available
+  print sentence "time_spent: " time_spent
+
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
   let time_needed_for_food food_needed / (group_size * effectiveness)
   let time_needed_for_resources resources_needed / (group_size * effectiveness)
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
+  print sentence "part spent food: "part_spent_food
+  print sentence "time_left:" time_left
+  print sentence "time_needed_food:" time_needed_for_food
+  print sentence "time_needed-resources:" time_needed_for_resources
+
   let part_spent_resources time_left - part_spent_food
 
   if part_spent_food > time_needed_for_food[
@@ -494,23 +512,28 @@ to gather
 
   ;Find out how much food and resources the band could gather if available
   let potential_food part_spent_food * group_size * effectiveness
+  print sentence "potential_food: " potential_food
+
   let potential_resources part_spent_resources * group_size * effectiveness
 
 
   ;Gather food
-  ifelse potential_food > [food_available] of current_home_location[
-    set food_owned food_available
+  ifelse potential_food > [food_available] of current_home_location [
+    set food_owned int food_available
 
     ask current_home_location[
       set food_available 0
     ]
   ]
   [
-    set food_owned potential_food
+    set food_owned int potential_food
+    print sentence "food_owned: " food_owned
+
     ask current_home_location[
-      set food_available food_available - potential_food
+      set food_available int (food_available - potential_food)
     ]
   ]
+
   ;Gather resources
   ifelse potential_resources > [resources_available] of current_home_location[
     set resources_owned resources_owned + resources_available
@@ -547,30 +570,39 @@ end
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
   let time_needed_to_move ((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility
-  set time_spent time_spent + time_needed_to_move
-  set time_spent_moving time_needed_to_move
+  print sentence "time_needed_to_move: " time_needed_to_move
 
-  set previous_home_location current_home_location
+  if time_needed_to_move < max_move_time [
 
-  let resources_moved min list group_size resources_owned
-  let resources_dropped resources_owned - resources_moved
-  set resources_owned resources_moved
-  ask previous_home_location [
-    set resources_available resources_available + resources_dropped
-  ]
+    set time_spent time_spent + time_needed_to_move
+    set time_spent_moving time_needed_to_move
+    print sentence "time_spent_moving: " time_spent_moving
 
-  move-to new_home
-  set current_home_location new_home
-  ;delete current knowledge on this patch in the current season
-  set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
-  ;add the new knowledge on this patch in the current season
-  set known_locations_current lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_current
+    set previous_home_location current_home_location
+
+    let resources_moved min list group_size resources_owned
+    let resources_dropped resources_owned - resources_moved
+    set resources_owned resources_moved
+    ask previous_home_location [
+      set resources_available resources_available + resources_dropped
+    ]
+
+    move-to new_home
+    set current_home_location new_home
+    ;delete current knowledge on this patch in the current season
+    set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
+    ;add the new knowledge on this patch in the current season
+    set known_locations_current lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_current ]
+
 end
 
 to explore
   ;Exploring takes time depending on mobility
-  set time_spent time_spent + mobility
-  set time_spent_exploring time_spent
+  let time_spent_explore 11 - mobility
+  set time_spent time_spent + time_spent_explore
+  set time_spent_exploring time_spent_explore
+  print sentence "time_spent_exploring: " time_spent_exploring
+
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
   ask neighbors[
@@ -588,10 +620,10 @@ to explore
   ]
   ;decide which known location is the best possible to move to (even though it will not reach the needs) and move there
   let best_known_locations []
-  foreach known_locations_current [y -> set best_known_locations lput (list item 0 y ((item 1 y / food_needed) + (item 2 y / resources_needed)))  best_known_locations
+  foreach known_locations_current [y -> set best_known_locations lput (list item 0 y (min list 1 ((item 1 y / food_needed)) + (min list 1 (item 2 y / resources_needed))))  best_known_locations
   ]
   ;Only travel to the new location if there is time to do so
-  set known_locations_current filter [y -> ([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility < max_move_time] known_locations_current
+  set known_locations_current filter [y -> (([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility) < max_move_time] known_locations_current
   ;Choose the best option based on where the biggest part of the food and resources can still be gathered
   let current_max_patch item 0 item 0 best_known_locations
   let current_max item 1 item 0 best_known_locations
@@ -601,7 +633,11 @@ to explore
     ]
   ]
 
-  move current_max_patch
+  print sentence "Best KNown Locations: " best_known_locations
+  print sentence "Current Max Patch: " current_max_patch
+
+  if current_max_patch != current_home_location [
+    move current_max_patch ]
 end
 
 
@@ -609,12 +645,14 @@ to use_gathered_products
   ask bands[
     ;Change population growth
     let shortage_food ((food_needed - food_owned) / food_needed)
-    print shortage_food
+    print sentence "shortage_food: " shortage_food
+    print sentence "food_owned: " food_owned
     let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
     let shortage_total (shortage_food + shortage_resources) / 2
+    print sentence "shortage_total: " shortage_total
 
     set health max list 0 (health - (100 * shortage_total))
-    if shortage_total = 0[
+    if shortage_total <= 0 [
       set health 100
     ]
     set food_owned 0
@@ -626,7 +664,7 @@ to use_gathered_products
       set group_size group_size * death_rate
     ]
     set group_size ceiling (group_size * standard_birth_rate)
-    if group_size = 0[
+    if group_size <= 0[
       die
     ]
 
@@ -844,6 +882,36 @@ resources_tool
 resources_tool
 0
 100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+455
+385
+657
+418
+optimal_temperature
+optimal_temperature
+-50
+50
+10.0
+1
+1
+Celcius
+HORIZONTAL
+
+SLIDER
+660
+385
+832
+418
+optimal_precipitation
+optimal_precipitation
+0
+20
 50.0
 1
 1
