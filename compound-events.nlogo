@@ -1,8 +1,7 @@
-;Spawn them in the right place
+;grow back resources and food on patches
 ;Create compound events
+;ending condition?
 
-;show links or hide links between bands to show networks at a certain point
-;Create sliders and monitors
 ;Decide about KPI's
 ; ; KPI: Length of known locations
 
@@ -20,18 +19,18 @@ globals [
   europe-tri ; terrain roughness index
 
   ; mean precipitation GIS
-  europe-prec-djf ; DJF: December, January, February
-  europe-prec-mam ; MAM: March, April, May
-  europe-prec-jja ; JJA: June, July, August
-  europe-prec-son ; September, October, November
+  europe_prec_djf ; DJF: December, January, February
+  europe_prec_mam ; MAM: March, April, May
+  europe_prec_jja ; JJA: June, July, August
+  europe_prec_son ; September, October, November
 
   ; mean temperature GIS
-  europe-temp-djf
-  europe-temp-mam
-  europe-temp-jja
-  europe-temp-son
-  europe-temp-range ; Annual Temeprature Range
-  ; end: GIS globals
+  europe_temp_djf
+  europe_temp_mam
+  europe_temp_jja
+  europe_temp_son
+  europe_temp_range ; Annual Temeprature Range
+                    ; end: GIS globals
 
   ; standard deviation of temperature
   sd_temp_djf
@@ -43,6 +42,8 @@ globals [
   sd_prec_mam
   sd_prec_jja
   sd_prec_son
+
+  land_patches
 
   technology_sharing_threshold
   first_threshold_connection
@@ -95,36 +96,42 @@ patches-own [
   ruggedness_index
   landmass
 
-  prec-djf
-  prec-mam
-  prec-jja
-  prec-son
-  prec-current
+  prec_djf
+  prec_mam
+  prec_jja
+  prec_son
+  average_prec
+  prec_current
 
-  temp-djf
-  temp-mam
-  temp-jja
-  temp-son
-  temp-range
-  temp-current
+  temp_djf
+  temp_mam
+  temp_jja
+  temp_son
+  temp_range
+  average_temp
+  temp_current
 ]
 
 to startup
-   clear-all
-   profiler:start
-   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
-   profiler:stop
-   print profiler:report
+  clear-all
+  profiler:start
+  setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
+  profiler:stop
+  print profiler:report
 end
 
 to setup
   clear-turtles
   reset-ticks
 
-  random-seed -176624766
+  ;random-seed -176624766
+  let median_food median [food_available] of land_patches
+  let fertile_patches land_patches with [food_available > median_food]
 
-  ask patch 120 64 [ ;sprout agents based on the initial population density
-    setup-agents]
+  ask n-of number_of_bands fertile_patches[
+    setup-agents
+  ]
+
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
@@ -138,6 +145,7 @@ to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
 
   ; load in GIS data split
+
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -147,7 +155,7 @@ to setup-patches
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
-     setup-graticules
+    setup-graticules
   ]
 end
 
@@ -167,11 +175,11 @@ to setup-altitude
   let max-landmass gis:maximum-of europe-landmass
 
   ask patches [
-   if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-   [ set pcolor scale-color black landmass min-landmass max-landmass ]
+    if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+    [ set pcolor scale-color black landmass min-landmass max-landmass ]
 
-   if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
-   [ set pcolor blue ]
+    if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+    [ set pcolor blue ]
   ]
   ; end: coloring landmass
 end
@@ -185,44 +193,45 @@ to setup-terrain-ruggedness-index
   ; They will never move into the water
   ask patches with [ pcolor = blue ] [
     set ruggedness_index 1000 ]
+  set land_patches patches with [ pcolor != blue ]
 end
 
 to setup-precipitation
   ; loading GIS datasets
   ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-prec-jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
-  set europe-prec-son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_prec_jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
+  set europe_prec_son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-prec-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+  gis:set-world-envelope-ds (gis:envelope-of europe_prec_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
   ; assign the values to the patch attributes
-  gis:apply-raster europe-prec-djf prec-djf
-  gis:apply-raster europe-prec-mam prec-mam
-  gis:apply-raster europe-prec-jja prec-jja
-  gis:apply-raster europe-prec-son prec-son
+  gis:apply-raster europe_prec_djf prec_djf
+  gis:apply-raster europe_prec_mam prec_mam
+  gis:apply-raster europe_prec_jja prec_jja
+  gis:apply-raster europe_prec_son prec_son
 end
 
 to setup-temperature
   ; loading GIS datasets
   ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe-prec-djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe-prec-mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
-  set europe-temp-djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
-  set europe-temp-mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
-  set europe-temp-jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
-  set europe-temp-son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
-  set europe-temp-range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_temp_djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
+  set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
+  set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
+  set europe_temp_son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+  set europe_temp_range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
 
-  gis:set-world-envelope-ds (gis:envelope-of europe-temp-djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+  gis:set-world-envelope-ds (gis:envelope-of europe_temp_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
 
   ; assign the values to the patch attributes
-  gis:apply-raster europe-temp-djf temp-djf
-  gis:apply-raster europe-temp-mam temp-mam
-  gis:apply-raster europe-temp-jja temp-jja
-  gis:apply-raster europe-temp-son temp-son
-  gis:apply-raster europe-temp-range temp-range
+  gis:apply-raster europe_temp_djf temp_djf
+  gis:apply-raster europe_temp_mam temp_mam
+  gis:apply-raster europe_temp_jja temp_jja
+  gis:apply-raster europe_temp_son temp_son
+  gis:apply-raster europe_temp_range temp_range
 
   ; based on the QGIS Raster Analysis of each map
   set sd_temp_djf 8.483842584
@@ -243,6 +252,56 @@ to setup-graticules
 end
 
 to setup-food-and-resources
+  ask land_patches[
+    set average_temp (temp_jja + temp_son + temp_djf + temp_mam) / 4
+    set average_prec (prec_jja + prec_son + prec_djf + prec_mam) / 4
+
+    let min_temperature optimal_temperature - max_deviation_temp
+    let max_temperature optimal_temperature + max_deviation_temp
+
+    let min_precipitation optimal_precipitation - max_deviation_prec
+    let max_precipitation optimal_precipitation + max_deviation_prec
+
+    ;min-max feature scaling
+    let temp_deviation 0
+    if average_temp <= optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
+    ]
+    if average_temp > optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
+    ]
+
+    ;min-max feature scaling
+
+    let prec_deviation 0
+    if average_prec <= optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+    ]
+    if average_prec > optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+    ]
+
+    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
+
+    if abs (average_temp - optimal_temperature) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0
+    ]
+    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0]
+  ]
+
+  ; start: coloring patches to represent european landmass 13900 - 12700BP
+  ;let min-landmass min [food_available] of land_patches
+  ;let max-landmass max [food_available] of land_patches
+
+  ;ask patches [
+  ; if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+  ;[ set pcolor scale-color green food_available min-landmass max-landmass ]
+  ;]
+
   ; 9000 is the max food for the best patch yearly
   ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
 
@@ -250,16 +309,16 @@ to setup-food-and-resources
   ; 30 (resource units needed per tick) * 25 (average group band) * 4 (seasons)
   ; gut feeling: they can live to 3 years with this on resources -> 9000
 
-  ; set optimal temperature, precipitation, altitude, and tri - distances to the optimal circumstances decide the initial food and resources availability
-
-
-
 end
 
 
 to setup-agents
-  sprout-bands number-of-bands [
-    set group_size random 30 + 10 ;decide initial group size
+
+  sprout-bands 1 [
+    set shape "person"
+    set size 2
+    set color black
+    set group_size random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
       set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
@@ -270,7 +329,7 @@ to setup-agents
     if cultural_capital_distribution = "poisson"[
       set cultural_capital min list 100 (round max list 1 random-poisson mean_cultural_capital)
     ]
-
+    set group_size round group_size
     set food_needed group_size * 90 ;one unit per day
     set resources_needed group_size * 30 ;one unit per 3 days
 
@@ -285,6 +344,7 @@ to setup-agents
     set known_locations_winter []
     set known_locations_spring []
   ]
+
 end
 
 to go
@@ -298,7 +358,7 @@ to go
   ask turtles[
     set current_home_location patch-here
     set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
-        ;add the new knowledge on this patch in the current season
+    ;add the new knowledge on this patch in the current season
     set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
   ]
   tick
@@ -311,26 +371,31 @@ to update-weather
   ask patches [
 
     if current_season = 0 [
-      set temp-current random-normal temp-jja sd_temp_jja
-      set prec-current random-normal prec-jja sd_prec_jja
+      set temp_current random-normal temp_jja sd_temp_jja
+      set prec_current random-normal prec_jja sd_prec_jja
     ]
     if current_season = 1 [
-      set temp-current random-normal temp-son sd_temp_son
-      set prec-current random-normal prec-son sd_prec_son
+      set temp_current random-normal temp_son sd_temp_son
+      set prec_current random-normal prec_son sd_prec_son
     ]
     if current_season = 2 [
-      set temp-current random-normal temp-djf sd_temp_djf
-      set prec-current random-normal prec-djf sd_prec_djf
+      set temp_current random-normal temp_djf sd_temp_djf
+      set prec_current random-normal prec_djf sd_prec_djf
     ]
     if current_season = 3 [
-      set temp-current random-normal temp-mam sd_temp_mam
-      set prec-current random-normal prec-mam sd_prec_mam
+      set temp_current random-normal temp_mam sd_temp_mam
+      set prec_current random-normal prec_mam sd_prec_mam
     ]
   ]
 end
 
 to update_bands_variables
   ;new season means the bands have all available time to move, gather and explore
+  if show_links = False[
+    ask links[
+      set hidden? True
+    ]
+  ]
   ask bands[
     set time_spent 0
     set time_spent_exploring 0
@@ -380,7 +445,10 @@ to interact-with-other-bands
         create-link-with current_band[
           set strength_of_connection 0
           set updated? False
-          set color green
+          set color red
+          if show_links = False[
+            set hidden? True
+          ]
         ]
       ]
       ;make sure turtles don't see themselves as neighbours
@@ -488,8 +556,8 @@ to gather
   ;Calculate the time left after exploring and moving
   ; let time_left max list 0 (time_available - time_spent)
   let time_left (time_available - time_spent)
-  print sentence "time_available: " time_available
-  print sentence "time_spent: " time_spent
+  ;print sentence "time_available: " time_available
+  ;print sentence "time_spent: " time_spent
 
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
@@ -497,10 +565,10 @@ to gather
   let time_needed_for_resources resources_needed / (group_size * effectiveness)
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
-  print sentence "part spent food: "part_spent_food
-  print sentence "time_left:" time_left
-  print sentence "time_needed_food:" time_needed_for_food
-  print sentence "time_needed-resources:" time_needed_for_resources
+  ;print sentence "part spent food: "part_spent_food
+  ;print sentence "time_left:" time_left
+  ;print sentence "time_needed_food:" time_needed_for_food
+  ;print sentence "time_needed-resources:" time_needed_for_resources
 
   let part_spent_resources time_left - part_spent_food
 
@@ -515,7 +583,7 @@ to gather
 
   ;Find out how much food and resources the band could gather if available
   let potential_food part_spent_food * group_size * effectiveness
-  print sentence "potential_food: " potential_food
+  ;print sentence "potential_food: " potential_food
 
   let potential_resources part_spent_resources * group_size * effectiveness
 
@@ -530,7 +598,7 @@ to gather
   ]
   [
     set food_owned round potential_food
-    print sentence "food_owned: " food_owned
+    ;print sentence "food_owned: " food_owned
 
     ask current_home_location[
       set food_available round (food_available - potential_food)
@@ -573,13 +641,13 @@ end
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
   let time_needed_to_move ((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility
-  print sentence "time_needed_to_move: " time_needed_to_move
+  ;print sentence "time_needed_to_move: " time_needed_to_move
 
   if time_needed_to_move < max_move_time [
 
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
-    print sentence "time_spent_moving: " time_spent_moving
+    ;print sentence "time_spent_moving: " time_spent_moving
 
     set previous_home_location current_home_location
 
@@ -604,7 +672,7 @@ to explore
   let time_spent_explore 11 - mobility
   set time_spent time_spent + time_spent_explore
   set time_spent_exploring time_spent_explore
-  print sentence "time_spent_exploring: " time_spent_exploring
+  ;print sentence "time_spent_exploring: " time_spent_exploring
 
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
@@ -636,8 +704,8 @@ to explore
     ]
   ]
 
-  print sentence "Best KNown Locations: " best_known_locations
-  print sentence "Current Max Patch: " current_max_patch
+  ;print sentence "Best KNown Locations: " best_known_locations
+  ;print sentence "Current Max Patch: " current_max_patch
 
   if current_max_patch != current_home_location [
     move current_max_patch ]
@@ -648,15 +716,16 @@ to use_gathered_products
   ask bands[
     ;Change population growth
     let shortage_food ((food_needed - food_owned) / food_needed)
-    print sentence "shortage_food: " shortage_food
-    print sentence "food_owned: " food_owned
+    ;print sentence "shortage_food: " shortage_food
+    ;print sentence "food_owned: " food_owned
     let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
     let shortage_total (shortage_food + shortage_resources) / 2
-    print sentence "shortage_total: " shortage_total
+    ;print sentence "shortage_total: " shortage_total
 
     set health max list 0 (health - (100 * shortage_total))
     if shortage_total <= 0 [
       set health 100
+      set death_rate 1
     ]
     set food_owned 0
     set resources_owned max list 0 (resources_owned - resources_needed)
@@ -666,10 +735,11 @@ to use_gathered_products
       set death_rate (health / 100)
       set group_size group_size * death_rate
     ]
-    set group_size ceiling (group_size * standard_birth_rate)
     if group_size <= 0[
       die
     ]
+    set group_size ceiling (group_size * standard_birth_rate)
+
 
 
     ifelse cultural_capital > technology_level [
@@ -688,13 +758,13 @@ to use_gathered_products
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-455
-10
-1505
-381
+185
+120
+1503
+584
 -1
 -1
-2.0
+2.5144
 1
 10
 1
@@ -708,32 +778,17 @@ GRAPHICS-WINDOW
 520
 0
 180
-0
-0
+1
+1
 1
 ticks
 30.0
 
-SLIDER
-16
-38
-188
-71
-number-of-bands
-number-of-bands
-0
-100
-1.0
-1
-1
-NIL
-HORIZONTAL
-
 BUTTON
-16
-86
-80
-119
+5
+10
+69
+43
 Setup
 setup
 NIL
@@ -746,22 +801,11 @@ NIL
 NIL
 1
 
-SWITCH
-16
-129
-164
-162
-show-graticules?
-show-graticules?
-1
-1
--1000
-
 BUTTON
-66
-192
-143
-225
+150
+10
+215
+43
 go-once
 go\n
 NIL
@@ -775,10 +819,10 @@ NIL
 1
 
 BUTTON
-70
-305
-162
-338
+220
+10
+290
+43
 go-forever
 go
 T
@@ -792,10 +836,10 @@ NIL
 1
 
 SLIDER
-225
-10
-450
-43
+5
+50
+235
+83
 threshold_location_knowledge
 threshold_location_knowledge
 1
@@ -807,20 +851,20 @@ Season(s)
 HORIZONTAL
 
 CHOOSER
-280
-45
-452
-90
+7
+120
+152
+165
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
 0
 
 SLIDER
-307
-95
-452
-128
+2
+170
+152
+203
 mean_cultural_capital
 mean_cultural_capital
 1
@@ -832,10 +876,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-305
-130
-450
-163
+5
+205
+150
+238
 stdv_cultural_capital
 stdv_cultural_capital
 0
@@ -847,10 +891,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-172
-165
-452
-198
+5
+85
+285
+118
 max_effectiveness
 max_effectiveness
 0
@@ -862,25 +906,25 @@ resource_units_per_HG_per_day
 HORIZONTAL
 
 SLIDER
-280
-285
-452
-318
+5
+380
+177
+413
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.0
+1.1
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-285
-325
-457
-358
+5
+415
+177
+448
 resources_tool
 resources_tool
 0
@@ -892,34 +936,148 @@ NIL
 HORIZONTAL
 
 SLIDER
-455
-385
-657
-418
+5
+485
+175
+518
 optimal_temperature
 optimal_temperature
--50
-50
-10.0
+0
+30
+6.0
 1
 1
 Celcius
 HORIZONTAL
 
 SLIDER
-660
-385
-832
-418
+5
+240
+130
+273
 optimal_precipitation
 optimal_precipitation
 0
 20
-50.0
+2.0
 1
 1
 NIL
 HORIZONTAL
+
+BUTTON
+74
+9
+146
+42
+Startup
+startup
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+5
+520
+175
+553
+max_deviation_temp
+max_deviation_temp
+0
+30
+15.0
+1
+1
+Celcius
+HORIZONTAL
+
+SLIDER
+5
+275
+130
+308
+max_deviation_prec
+max_deviation_prec
+0
+10
+3.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+345
+177
+378
+stdev_group_size
+stdev_group_size
+0
+30
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+310
+177
+343
+average_group_size
+average_group_size
+1
+40
+19.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+450
+177
+483
+number_of_bands
+number_of_bands
+1
+1000
+1000.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+5
+555
+153
+588
+show-graticules?
+show-graticules?
+1
+1
+-1000
+
+SWITCH
+240
+50
+352
+83
+show_links
+show_links
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
