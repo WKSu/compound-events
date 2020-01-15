@@ -123,6 +123,7 @@ end
 to setup
   clear-turtles
   reset-ticks
+  setup-food-and-resources
 
   ;random-seed -176624766
   let median_food median [food_available] of land_patches
@@ -150,7 +151,7 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
-  setup-food-and-resources
+
 
   update-weather ; added so that tick 0 also has current weather and precipitation
 
@@ -404,7 +405,10 @@ to update_bands_variables
 
 
     set food_needed group_size * 90
-    set resources_needed group_size * 30
+    set resources_needed (group_size * 30) - resources_owned
+    if resources_needed < 0[
+      set resources_needed 0
+    ]
 
     ;Mutation of the cultural capital
     set cultural_capital max list 1 min list 100 (cultural_capital + (random 3) - 1)
@@ -640,7 +644,7 @@ end
 
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
-  let time_needed_to_move ((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility
+  let time_needed_to_move max list 1 (((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility)
   ;print sentence "time_needed_to_move: " time_needed_to_move
 
   if time_needed_to_move < max_move_time [
@@ -691,7 +695,12 @@ to explore
   ]
   ;decide which known location is the best possible to move to (even though it will not reach the needs) and move there
   let best_known_locations []
-  foreach known_locations_current [y -> set best_known_locations lput (list item 0 y (min list 1 ((item 1 y / food_needed)) + (min list 1 (item 2 y / resources_needed))))  best_known_locations
+  ifelse resources_needed > 0[
+    foreach known_locations_current [y -> set best_known_locations lput (list item 0 y (min list 1 ((item 1 y / food_needed)) + (min list 1 (item 2 y / resources_needed))))  best_known_locations
+    ]
+  ]
+  [foreach known_locations_current [y -> set best_known_locations lput (list item 0 y (min list 1 ((item 1 y / food_needed)) + 1))  best_known_locations
+    ]
   ]
   ;Only travel to the new location if there is time to do so
   set known_locations_current filter [y -> (([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility) < max_move_time] known_locations_current
@@ -718,7 +727,10 @@ to use_gathered_products
     let shortage_food ((food_needed - food_owned) / food_needed)
     ;print sentence "shortage_food: " shortage_food
     ;print sentence "food_owned: " food_owned
-    let shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
+    let shortage_resources 0
+    if resources_needed > 0[
+      set shortage_resources max list 0 ((resources_needed - resources_owned) / resources_needed)
+    ]
     let shortage_total (shortage_food + shortage_resources) / 2
     ;print sentence "shortage_total: " shortage_total
 
@@ -735,7 +747,7 @@ to use_gathered_products
       set death_rate (health / 100)
       set group_size group_size * death_rate
     ]
-    if group_size <= 0[
+    if group_size < 1[
       die
     ]
     set group_size ceiling (group_size * standard_birth_rate)
@@ -759,12 +771,12 @@ end
 @#$#@#$#@
 GRAPHICS-WINDOW
 185
-120
-1503
-584
+125
+1235
+496
 -1
 -1
-2.5144
+2.0
 1
 10
 1
@@ -914,7 +926,7 @@ standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.1
+1.2
 0.05
 1
 NIL
@@ -944,7 +956,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-6.0
+4.0
 1
 1
 Celcius
@@ -959,7 +971,7 @@ optimal_precipitation
 optimal_precipitation
 0
 20
-2.0
+6.0
 1
 1
 NIL
@@ -991,7 +1003,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-15.0
+14.0
 1
 1
 Celcius
