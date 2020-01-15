@@ -128,6 +128,7 @@ end
 
 to setup
   clear-turtles
+  clear-all-plots
   reset-ticks
   setup-food-and-resources
 
@@ -1069,7 +1070,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-14.0
+9.0
 1
 1
 Celcius
@@ -1084,7 +1085,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-7.0
+3.0
 1
 1
 NIL
@@ -1129,7 +1130,7 @@ number_of_bands
 number_of_bands
 1
 1000
-1000.0
+109.0
 1
 1
 NIL
@@ -1156,6 +1157,78 @@ show_links
 0
 1
 -1000
+
+PLOT
+1240
+125
+1440
+275
+Number of bands
+Time
+Number
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count bands"
+
+PLOT
+1240
+280
+1440
+430
+Mean group size of bands
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ group_size ] of bands"
+
+PLOT
+1445
+125
+1645
+275
+Mean Temperature
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ average_temp ] of land_patches"
+
+PLOT
+1445
+280
+1645
+430
+Mean Precipitation
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
 @#$#@#$#@
 ## WHAT IS IT?
