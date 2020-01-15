@@ -349,8 +349,8 @@ to setup-agents
 end
 
 to go
-
   update-weather
+  update-food-and-resources
   update_bands_variables
   interact-with-other-bands
   gather_move_explore
@@ -373,20 +373,60 @@ to update-weather
 
     if current_season = 0 [
       set temp_current random-normal temp_jja sd_temp_jja
-      set prec_current random-normal prec_jja sd_prec_jja
+      set prec_current max list 0 random-normal prec_jja sd_prec_jja
     ]
     if current_season = 1 [
       set temp_current random-normal temp_son sd_temp_son
-      set prec_current random-normal prec_son sd_prec_son
+      set prec_current max list 0 random-normal prec_son sd_prec_son
     ]
     if current_season = 2 [
       set temp_current random-normal temp_djf sd_temp_djf
-      set prec_current random-normal prec_djf sd_prec_djf
+      set prec_current max list 0 random-normal prec_djf sd_prec_djf
     ]
     if current_season = 3 [
       set temp_current random-normal temp_mam sd_temp_mam
-      set prec_current random-normal prec_mam sd_prec_mam
+      set prec_current max list 0 random-normal prec_mam sd_prec_mam
     ]
+  ]
+end
+
+to update-food-and-resources
+    ask land_patches[
+    let min_temperature optimal_temperature - max_deviation_temp
+    let max_temperature optimal_temperature + max_deviation_temp
+
+    let min_precipitation optimal_precipitation - max_deviation_prec
+    let max_precipitation optimal_precipitation + max_deviation_prec
+
+    ;min-max feature scaling
+    let temp_deviation 0
+    if temp_current <= optimal_temperature[
+      set temp_deviation (1 - (temp_current - optimal_temperature) / (min_temperature - optimal_temperature))
+    ]
+    if temp_current > optimal_temperature[
+      set temp_deviation (1 - (temp_current - optimal_temperature) / (max_temperature - optimal_temperature))
+    ]
+
+    ;min-max feature scaling
+
+    let prec_deviation 0
+    if prec_current <= optimal_precipitation[
+      set prec_deviation (1 - (prec_current - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+    ]
+    if prec_current > optimal_precipitation[
+      set prec_deviation (1 - (prec_current - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+    ]
+
+    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
+
+    if abs (temp_current - optimal_temperature) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0
+    ]
+    if abs (prec_current - optimal_precipitation) > max_deviation_temp[
+      set food_available 0
+      set resources_available 0]
   ]
 end
 
@@ -1018,7 +1058,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-3.0
+7.0
 1
 1
 NIL
