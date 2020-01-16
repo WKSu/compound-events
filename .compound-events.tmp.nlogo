@@ -3,7 +3,6 @@
 ;ending condition?
 
 ;Decide about KPI's
-
 ; idea - size of turtles depends on group size
 
 ;Felix Riede Comments on the Model
@@ -547,8 +546,8 @@ to update_bands_variables
       set resources_needed 0
     ]
 
-    ;Mutation of the cultural capital
-    set cultural_capital max list 1 min list 100 cultural_capital + (random 3) - 1)
+    ;Mutation of the cultural capital - normal distribution
+    set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
 
     ;as the season has changed, the bands change their knowledge about the patches to the current season
     if current_season = 0[
@@ -1578,15 +1577,15 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-15
-715
-202
-748
+0
+685
+187
+718
 cultural_capital_mutation
 cultural_capital_mutation
 1
 10
-2.0
+8.0
 1
 1
 NIL

@@ -1,10 +1,11 @@
 ;grow back resources and food on patches
 ;Create compound events
 ;ending condition?
-
 ;Decide about KPI's
-
 ; idea - size of turtles depends on group size
+
+; Things to figure out:
+;- Why do so many bands die?
 
 ;Felix Riede Comments on the Model
 ;Ireland was not settled
