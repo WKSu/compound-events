@@ -305,7 +305,7 @@ to setup-food-and-resources
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > [
+    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
       set food_available 0
       set resources_available 0]
   ]
@@ -453,11 +453,11 @@ to update-food-and-resources
     set food_available ((temp_deviation + prec_deviation) / 2) * 9000
     set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
 
-    if abs (average_temp - optimal_temperature) > max_deviation_temp[
+    if abs (average_temp - optimal_temperature) > max_deviation_temp [
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
+    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
       set food_available 0
       set resources_available 0]
   ]
@@ -1029,7 +1029,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-4.0
+11.0
 1
 1
 Celcius
@@ -1044,7 +1044,7 @@ optimal_precipitation
 optimal_precipitation
 0
 20
-6.0
+3.0
 1
 1
 NIL
@@ -1076,7 +1076,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-9.0
+6.0
 1
 1
 Celcius
@@ -1091,7 +1091,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-3.0
+2.0
 1
 1
 NIL
