@@ -53,6 +53,12 @@ globals [
   current_season
   time_available
   max_move_time
+
+
+  ; global variables keeping track of statistics in the model
+  extinct_bands
+  total_movement
+
 ]
 
 bands-own [
@@ -136,9 +142,15 @@ to setup
   clear-turtles
   clear-all-plots
   reset-ticks
-  setup-food-and-resources
 
   ;random-seed -176624766
+
+  ; statistics
+  set total_movement 0
+  set extinct_bands 0
+
+
+  setup-food-and-resources
   let median_food median [food_available] of land_patches
   let fertile_patches land_patches with [food_available > median_food]
 
@@ -151,7 +163,7 @@ to setup
   set second_threshold_connection 2 * threshold_location_knowledge
   set third_threshold_connection 3 * threshold_location_knowledge
   set fourth_threshold_connection 4 * threshold_location_knowledge
-  set max_move_time 45
+  set max_move_time maximum_days_moving
   set time_available 90
 end
 
@@ -164,9 +176,7 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
-
-
-
+  setup-volcano
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
@@ -260,6 +270,32 @@ to setup-temperature
   set sd_prec_son 1.126944302
 end
 
+to setup-volcano
+  ; set up the map size in coordinates
+  let topleftx -12
+  let toplefty 60
+  let bottomrightx 42
+  let bottomrighty 40
+
+  let laachersee_lat 7.266867
+  let laachersee_lon 50.412276
+
+
+  ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
+  let lengthx bottomrightx - topleftx ; length of the map in coordinate units
+  let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
+  let xcoordinates max-pxcor * (deltax / lengthx)
+
+  let lengthy toplefty - bottomrighty
+  let deltay laachersee_lon - bottomrighty
+  let ycoordinates max-pycor * (deltay / lengthy)
+
+  ask patch xcoordinates ycoordinates [
+    set pcolor red
+    ask neighbors [ set pcolor red ] ; increase visibility of the area of the volcano, it is not up to scale!
+  ]
+end
+
 to setup-graticules
   gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
@@ -299,16 +335,22 @@ to setup-food-and-resources
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
     ]
 
-    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
-    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
+    set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
 
-    if abs (average_temp - optimal_temperature) > max_deviation_temp[
+    if abs (average_temp - optimal_temperature) > max_deviation_temp or altitude > max_altitude_food_available [
       set food_available 0
       set resources_available 0
     ]
     if abs (average_prec - optimal_precipitation) > max_deviation_prec [
       set food_available 0
       set resources_available 0]
+
+    ; economic factors such as resources (mining) might still be possible in high altitudes
+    ; West, J. B. (2002). Highest permanent human habitation. High altitude medicine & biology, 3(4), 401-407.
+    ; Highest contemporary altitude where people are living is 2480m https://www.wikiwand.com/en/List_of_highest_towns_by_country
+    if altitude > max_altitude_food_available [
+      set food_available 0 ]
   ]
 
   ; start: coloring patches to represent european landmass 13900 - 12700BP
@@ -328,7 +370,6 @@ to setup-food-and-resources
   ; gut feeling: they can live to 3 years with this on resources -> 9000
 
 end
-
 
 to setup-agents
 
@@ -364,34 +405,6 @@ to setup-agents
   ]
 
 end
-
-to setup-volcano
-  ; set up the map size in coordinates
-  let topleftx -12
-  let toplefty 60
-  let bottomrightx 42
-  let bottomrighty 40
-
-  ; coordinates of the Laacher See
-  let laachersee_lat 7.16
-  let laachersee_lon 50.24
-
-
-  ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
-  let lengthx bottomrightx - topleftx ; length of the map in coordinate units
-  let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
-  let xcoordinates max-pxcor * (deltax / lengthx)
-
-  let lengthy toplefty - bottomrighty
-  let deltay laachersee_lon - bottomrighty
-  let ycoordinates max-pycor * (deltay / lengthy)
-
-  ask patch xcoordinates ycoordinates [
-    set pcolor red
-    ask neighbors [ set pcolor red ]
-  ]
-end
-
 
 to go
   update-weather
@@ -479,8 +492,8 @@ to update-food-and-resources
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
     ]
 
-    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
-    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
+    set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
 
     if abs (average_temp - optimal_temperature) > max_deviation_temp [
       set food_available 0
@@ -753,6 +766,7 @@ to move [new_home]
 
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
+    set total_movement total_movement + time_spent_moving ; count the total time which is spent on moving
     ;print sentence "time_spent_moving: " time_spent_moving
 
     set previous_home_location current_home_location
@@ -850,6 +864,7 @@ to use_gathered_products
       set group_size group_size * death_rate
     ]
     if group_size < 1[
+      set extinct_bands extinct_bands + 1
       die
     ]
     set group_size ceiling (group_size * standard_birth_rate)
@@ -872,10 +887,10 @@ to use_gathered_products
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-185
-125
-1235
-496
+315
+10
+1365
+381
 -1
 -1
 2.0
@@ -900,9 +915,9 @@ ticks
 
 BUTTON
 5
-10
+30
 69
-43
+63
 Setup
 setup
 NIL
@@ -917,9 +932,9 @@ NIL
 
 BUTTON
 150
-10
+30
 215
-43
+63
 go-once
 go\n
 NIL
@@ -934,9 +949,9 @@ NIL
 
 BUTTON
 220
-10
+30
 290
-43
+63
 go-forever
 go
 T
@@ -950,50 +965,50 @@ NIL
 1
 
 SLIDER
-5
-50
-235
-83
+0
+580
+280
+613
 threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-2.0
+4.0
 1
 1
 Season(s)
 HORIZONTAL
 
 CHOOSER
-7
-120
-152
-165
+65
+400
+210
+445
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
 0
 
 SLIDER
-2
-170
-152
-203
+0
+370
+140
+403
 mean_cultural_capital
 mean_cultural_capital
 1
 100
-50.0
+51.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-205
-150
-238
+140
+370
+280
+403
 stdv_cultural_capital
 stdv_cultural_capital
 0
@@ -1005,30 +1020,30 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-85
-285
-118
+0
+615
+280
+648
 max_effectiveness
 max_effectiveness
 0
 10
-6.0
+7.0
 1
 1
 resource_units_per_HG_per_day
 HORIZONTAL
 
 SLIDER
-5
-380
-177
-413
+140
+295
+280
+328
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.2
+1.1
 0.05
 1
 NIL
@@ -1036,9 +1051,9 @@ HORIZONTAL
 
 SLIDER
 5
-415
-177
-448
+450
+145
+483
 resources_tool
 resources_tool
 0
@@ -1050,10 +1065,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-485
-175
-518
+125
+195
+295
+228
 optimal_temperature
 optimal_temperature
 0
@@ -1065,10 +1080,10 @@ Celcius
 HORIZONTAL
 
 SLIDER
-5
-240
-130
-273
+0
+195
+125
+228
 optimal_precipitation
 optimal_precipitation
 0
@@ -1081,9 +1096,9 @@ HORIZONTAL
 
 BUTTON
 74
-9
+29
 146
-42
+62
 Startup
 startup
 NIL
@@ -1097,40 +1112,40 @@ NIL
 1
 
 SLIDER
-5
-520
-175
-553
+125
+230
+295
+263
 max_deviation_temp
 max_deviation_temp
 0
 30
-6.0
+10.0
 1
 1
 Celcius
 HORIZONTAL
 
 SLIDER
-5
-275
-130
-308
+0
+230
+125
+263
 max_deviation_prec
 max_deviation_prec
 0
 10
-2.0
+5.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-345
-177
-378
+140
+330
+280
+363
 stdev_group_size
 stdev_group_size
 0
@@ -1142,40 +1157,40 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-310
-177
-343
+0
+330
+140
+363
 average_group_size
 average_group_size
 1
 40
-19.0
+25.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-450
-177
-483
+0
+295
+140
+328
 number_of_bands
 number_of_bands
 1
-1000
-466.0
+2000
+369.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-5
-555
-153
-588
+80
+130
+215
+163
 show-graticules?
 show-graticules?
 1
@@ -1183,10 +1198,10 @@ show-graticules?
 -1000
 
 SWITCH
-240
-50
-352
-83
+80
+95
+192
+128
 show_links
 show_links
 0
@@ -1194,10 +1209,10 @@ show_links
 -1000
 
 PLOT
-1240
-125
-1440
-275
+315
+385
+515
+535
 Number of bands
 Time
 Number
@@ -1212,11 +1227,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count bands"
 
 PLOT
-1240
-280
-1440
-430
-Mean group size of bands
+515
+385
+715
+535
+Mean Group Size Bands
 NIL
 NIL
 0.0
@@ -1230,10 +1245,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ group_size ] of bands"
 
 PLOT
-1445
-125
-1645
-275
+1375
+25
+1575
+175
 Mean Temperature
 NIL
 NIL
@@ -1248,10 +1263,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_temp ] of land_patches"
 
 PLOT
-1445
-280
-1645
-430
+1575
+25
+1775
+175
 Mean Precipitation
 NIL
 NIL
@@ -1266,15 +1281,261 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
 SWITCH
-360
-50
-463
-83
+195
+95
+298
+128
 debug?
 debug?
 0
 1
 -1000
+
+TEXTBOX
+10
+10
+160
+28
+Controls
+11
+0.0
+1
+
+TEXTBOX
+10
+75
+160
+93
+Policy Levers
+11
+0.0
+1
+
+TEXTBOX
+0
+180
+150
+198
+External Factors
+11
+0.0
+1
+
+TEXTBOX
+0
+280
+150
+298
+Initialization Model
+11
+0.0
+1
+
+TEXTBOX
+5
+495
+155
+513
+Assumptions
+11
+0.0
+1
+
+SLIDER
+0
+650
+155
+683
+maximum_days_moving
+maximum_days_moving
+0
+100
+45.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+0
+510
+135
+543
+max_food_patch
+max_food_patch
+0
+18000
+9000.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+135
+510
+290
+543
+max_resource_patch
+max_resource_patch
+0
+18000
+9000.0
+100
+1
+NIL
+HORIZONTAL
+
+SLIDER
+0
+545
+227
+578
+max_altitude_food_available
+max_altitude_food_available
+1000
+5000
+2500.0
+100
+1
+m
+HORIZONTAL
+
+TEXTBOX
+1380
+10
+1530
+28
+Environment
+11
+0.0
+1
+
+PLOT
+1375
+180
+1575
+330
+Average Food Availability
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ food_available ] of land_patches"
+
+PLOT
+1575
+180
+1775
+330
+Average Resource Available
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ resources_available ] of land_patches"
+
+PLOT
+715
+385
+915
+535
+Mean Cultural Capital
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ cultural_capital ] of bands"
+
+PLOT
+315
+535
+515
+685
+Extinct Bands
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot extinct_bands"
+
+PLOT
+515
+535
+715
+685
+Number of Connections
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count links "
+
+PLOT
+715
+535
+915
+685
+Total Time Moving
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"clear-all-plots " ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot total_movement"
+
+PLOT
+915
+385
+1115
+535
+Mean Technology Level
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
 
 @#$#@#$#@
 ## WHAT IS IT?
