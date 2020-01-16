@@ -3,9 +3,31 @@
 ;ending condition?
 
 ;Decide about KPI's
-; ; KPI: Length of known locations
 
 ; idea - size of turtles depends on group size
+
+;Felix Riede Comments on the Model
+;Ireland was not settled
+
+;Movement
+;- Change the mobility based on the relation between resources and mobility (more resources, higher mobility)
+;- Costs resources and time to move
+;- Group size has an influence on mobility (the smaller you are, the more mobile)
+;
+;Territorial Dominance
+;- The biggest group gets priority
+;
+;Band Alliances
+;- Keep the knowledge from the biggest group during merging
+;- Merge if the patch has enough resources to support the group
+;- Split into smaller groups if they are not viable anymore - new groups should still be big enough to survive
+;- Depends on the mobility
+;- Connections should merge over time
+
+;Compound Events
+;Implement the spread of the ash
+;Normal / Skewed distribution of the center
+;The effect of the ash fall is time limited
 
 extensions [ gis profiler ]
 
@@ -58,29 +80,36 @@ globals [
   ; global variables keeping track of statistics in the model
   extinct_bands
   total_movement
-
 ]
 
 bands-own [
   group_size
+
   food_needed
   resources_needed
   food_owned
   resources_owned
+
   effectiveness
   cultural_capital
   technology_level
-
   mobility
+
   death_rate
   health
+
   known_locations_summer
   known_locations_fall
   known_locations_winter
   known_locations_spring
   known_locations_current
+  count_known_locations_current
+
+
   current_home_location
   previous_home_location
+
+
   time_spent
   time_spent_exploring
   time_spent_moving
@@ -125,6 +154,9 @@ patches-own [
 ]
 
 to startup
+  ; startup command only applies these functions during the initial start of the model
+  ; it saves time by not loading in all the GIS data everytime a new run is started!
+
   clear-all
   profiler:start
   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
@@ -133,6 +165,7 @@ to startup
 end
 
 to debug [string]
+  ; small function for debugging
   if debug? [
     print string
   ]
@@ -140,38 +173,49 @@ end
 
 to setup
   clear-turtles
-  clear-all-plots
   reset-ticks
-
   ;random-seed -176624766
 
-  ; statistics
+  setup-globals
+  setup-food-and-resources
+  spread-population
+
+  clear-all-plots
+end
+
+to setup-globals
+  ; resetting statistics
   set total_movement 0
   set extinct_bands 0
 
-
-  setup-food-and-resources
-  let median_food median [food_available] of land_patches
-  let fertile_patches land_patches with [food_available > median_food]
-
-  ask n-of number_of_bands fertile_patches[
-    setup-agents
-  ]
-
-  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
+  ; setting the threshold (how long they have to be in close proximity to each other) to create a link
+  ; linear growth, the longer they are in close proximity, the more they will share
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
   set third_threshold_connection 3 * threshold_location_knowledge
   set fourth_threshold_connection 4 * threshold_location_knowledge
+
   set max_move_time maximum_days_moving
   set time_available 90
+  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
 end
+
+to spread-population
+  ; this function looks at the initial food availability and tries to spawn bands in locations where there is food available
+  ; ensures that no band is spawned on uninhabitable patches!
+  let median_food median [food_available] of land_patches
+  let fertile_patches land_patches with [food_available > median_food]
+
+  ask n-of number_of_bands fertile_patches [
+    setup-agents
+  ]
+end
+
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
 
   ; load in GIS data split
-
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
@@ -290,6 +334,7 @@ to setup-volcano
   let deltay laachersee_lon - bottomrighty
   let ycoordinates max-pycor * (deltay / lengthy)
 
+  ; color the Laacher See area in red
   ask patch xcoordinates ycoordinates [
     set pcolor red
     ask neighbors [ set pcolor red ] ; increase visibility of the area of the volcano, it is not up to scale!
@@ -304,6 +349,7 @@ end
 
 to setup-food-and-resources
   ask land_patches[
+    ; average for temperature and precipitation based on initial setup data
     set temp_year (list temp_jja temp_son temp_djf temp_mam)
     set average_temp mean temp_year
 
@@ -316,8 +362,9 @@ to setup-food-and-resources
     set min_precipitation optimal_precipitation - max_deviation_prec
     set max_precipitation optimal_precipitation + max_deviation_prec
 
-    ;min-max feature scaling
+    ;min-max feature scaling (linear)
     let temp_deviation 0
+
     if average_temp <= optimal_temperature[
       set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
     ]
@@ -325,8 +372,7 @@ to setup-food-and-resources
       set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
     ]
 
-    ;min-max feature scaling
-
+    ;min-max feature scaling (linear)
     let prec_deviation 0
     if average_prec <= optimal_precipitation[
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
@@ -338,7 +384,8 @@ to setup-food-and-resources
     set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
     set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
 
-    if abs (average_temp - optimal_temperature) > max_deviation_temp or altitude > max_altitude_food_available [
+    ; set the food availability and resources on 0 when they are not able meet the right conditions
+    if abs (average_temp - optimal_temperature) > max_deviation_temp [
       set food_available 0
       set resources_available 0
     ]
@@ -352,23 +399,6 @@ to setup-food-and-resources
     if altitude > max_altitude_food_available [
       set food_available 0 ]
   ]
-
-  ; start: coloring patches to represent european landmass 13900 - 12700BP
-  ;let min-landmass min [food_available] of land_patches
-  ;let max-landmass max [food_available] of land_patches
-
-  ;ask patches [
-  ; if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-  ;[ set pcolor scale-color green food_available min-landmass max-landmass ]
-  ;]
-
-  ; 9000 is the max food for the best patch yearly
-  ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
-
-  ; 3000 is the max resource for the best patch yearly
-  ; 30 (resource units needed per tick) * 25 (average group band) * 4 (seasons)
-  ; gut feeling: they can live to 3 years with this on resources -> 9000
-
 end
 
 to setup-agents
@@ -414,16 +444,11 @@ to go
   gather_move_explore
   use_gathered_products
 
-  ask turtles[
-    set current_home_location patch-here
-    set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
-    ;add the new knowledge on this patch in the current season
-    set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
-  ]
-  tick
-  set current_season (ticks mod 4)
-  ;set season to next item in the list using a modulus based on ticks
+  ask bands [
+    set count_known_locations_current length known_locations_current ]
 
+  tick
+  set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
 end
 
 to update-weather
@@ -452,7 +477,6 @@ to update-food-and-resources
     ask land_patches[
 
     ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
-
     if current_season = 0 [
       set temp_year replace-item 0 temp_year temp_current
       set prec_year replace-item 0 prec_year prec_current
@@ -483,7 +507,6 @@ to update-food-and-resources
     ]
 
     ;min-max feature scaling
-
     let prec_deviation 0
     if average_prec <= optimal_precipitation[
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
@@ -518,7 +541,6 @@ to update_bands_variables
     set time_spent_moving 0
     set time_spent_gathering 0
 
-
     set food_needed group_size * 90
     set resources_needed (group_size * 30) - resources_owned
     if resources_needed < 0[
@@ -526,7 +548,7 @@ to update_bands_variables
     ]
 
     ;Mutation of the cultural capital
-    set cultural_capital max list 1 min list 100 (cultural_capital + (random 3) - 1)
+    set cultural_capital max list 1 min list 100 cultural_capital + (random 3) - 1)
 
     ;as the season has changed, the bands change their knowledge about the patches to the current season
     if current_season = 0[
@@ -1416,7 +1438,7 @@ PLOT
 180
 1575
 330
-Average Food Availability
+Mean Food Availability
 NIL
 NIL
 0.0
@@ -1434,7 +1456,7 @@ PLOT
 180
 1775
 330
-Average Resource Available
+Mean Resource Available
 NIL
 NIL
 0.0
@@ -1536,6 +1558,39 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
+
+PLOT
+915
+535
+1115
+685
+Mean Knowledge on Locations
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
+
+SLIDER
+15
+715
+202
+748
+cultural_capital_mutation
+cultural_capital_mutation
+1
+10
+2.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
