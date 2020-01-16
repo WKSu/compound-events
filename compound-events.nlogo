@@ -164,8 +164,7 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
-
-
+  setup-volcano
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
@@ -259,6 +258,33 @@ to setup-temperature
   set sd_prec_son 1.126944302
 end
 
+to setup-volcano
+  ; set up the map size in coordinates
+  let topleftx -12
+  let toplefty 60
+  let bottomrightx 42
+  let bottomrighty 40
+
+  ; coordinates of the Laacher See
+  let laachersee_lat 7.16
+  let laachersee_lon 50.24
+
+
+  ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
+  let lengthx bottomrightx - topleftx ; length of the map in coordinate units
+  let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
+  let xcoordinates max-pxcor * (deltax / lengthx)
+
+  let lengthy toplefty - bottomrighty
+  let deltay laachersee_lon - bottomrighty
+  let ycoordinates max-pycor * (deltay / lengthy)
+
+  ask patch xcoordinates ycoordinates [
+    set pcolor red
+    ask neighbors [ set pcolor red ]
+  ]
+end
+
 to setup-graticules
   gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
@@ -327,7 +353,6 @@ to setup-food-and-resources
   ; gut feeling: they can live to 3 years with this on resources -> 9000
 
 end
-
 
 to setup-agents
 
@@ -409,7 +434,7 @@ end
 to update-food-and-resources
     ask land_patches[
 
-    ; temp_year temp_jja temp_son temp_djf temp_mam
+    ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
 
     if current_season = 0 [
       set temp_year replace-item 0 temp_year temp_current
@@ -1029,7 +1054,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-11.0
+7.0
 1
 1
 Celcius
