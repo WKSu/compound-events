@@ -126,6 +126,12 @@ to startup
   print profiler:report
 end
 
+to debug [string]
+  if debug? [
+    print string
+  ]
+end
+
 to setup
   clear-turtles
   clear-all-plots
@@ -299,7 +305,7 @@ to setup-food-and-resources
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
+    if abs (average_prec - optimal_precipitation) > [
       set food_available 0
       set resources_available 0]
   ]
@@ -1130,7 +1136,7 @@ number_of_bands
 number_of_bands
 1
 1000
-109.0
+466.0
 1
 1
 NIL
@@ -1229,6 +1235,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
+
+SWITCH
+360
+50
+463
+83
+debug?
+debug?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
