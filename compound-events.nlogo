@@ -6,6 +6,7 @@
 
 ; Things to figure out:
 ;- Why do so many bands die?
+; Not enough movement.. they settle in hotspots and create more and more babies
 
 ;Felix Riede Comments on the Model
 ;Ireland was not settled
@@ -14,16 +15,7 @@
 ;- Change the mobility based on the relation between resources and mobility (more resources, higher mobility)
 ;- Costs resources and time to move
 ;- Group size has an influence on mobility (the smaller you are, the more mobile)
-;
-;Territorial Dominance
-;- The biggest group gets priority
-;
-;Band Alliances
-;- Keep the knowledge from the biggest group during merging
-;- Merge if the patch has enough resources to support the group
-;- Split into smaller groups if they are not viable anymore - new groups should still be big enough to survive
-;- Depends on the mobility
-;- Connections should merge over time
+
 
 ;Compound Events
 ;Implement the spread of the ash
@@ -205,7 +197,7 @@ to spread-population
   ; this function looks at the initial food availability and tries to spawn bands in locations where there is food available
   ; ensures that no band is spawned on uninhabitable patches!
   let median_food median [food_available] of land_patches
-  let fertile_patches land_patches with [food_available > median_food]
+  let fertile_patches land_patches with [food_available >= median_food]
 
   ask n-of number_of_bands fertile_patches [
     setup-agents
@@ -408,7 +400,7 @@ to setup-agents
     set shape "person"
     set size 2
     set color black
-    set group_size random-normal average_group_size stdev_group_size ;decide initial group size
+    set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
       set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
@@ -424,7 +416,7 @@ to setup-agents
     set resources_needed group_size * 30 ;one unit per 3 days
 
     set technology_level cultural_capital
-    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
+    set effectiveness max_effectiveness * (technology_level / 100)
 
     set mobility random 10 + 1
     set health 100
@@ -445,10 +437,14 @@ to go
   gather_move_explore
   use_gathered_products
 
-  ask bands [
+  ask bands[
+    if group_size > merge_max_size and (group_size / 2) > split_min_size[
+      set group_size round (group_size / 2)
+      hatch 1
+    ]
     set count_known_locations_current length known_locations_current ]
 
-  tick
+    tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
 end
 
@@ -565,12 +561,19 @@ to update_bands_variables
       set known_locations_current known_locations_spring
     ]
   ]
+
 end
 
 to interact-with-other-bands
   ;Make sure that links do not get updated by both of the ends (turtles)
   ask links[
     set updated? False
+    if ticks mod 4 = 0[
+      set strength_of_connection strength_of_connection - 1
+    ]
+    if strength_of_connection < 1[
+      die
+    ]
   ]
   ask bands[
     ;define the current turtle who is asked to interact
@@ -604,23 +607,35 @@ to interact-with-other-bands
             set updated? True
           ]
 
-          ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
-          if [strength_of_connection] of current_link > fourth_threshold_connection[
+
+          if [strength_of_connection] of current_link > second_threshold_connection[
             update_location_knowledge known_locations_summer current_band
-          ]
-          if [strength_of_connection] of current_link > third_threshold_connection[
             update_location_knowledge known_locations_fall current_band
           ]
-          if [strength_of_connection] of current_link > second_threshold_connection[
-            update_location_knowledge known_locations_winter current_band
-          ]
           if [strength_of_connection] of current_link > first_threshold_connection[
+            update_location_knowledge known_locations_winter current_band
             update_location_knowledge known_locations_spring current_band
             set technology_level technology_level + 1  ;also share knowledge about technologies from the first threshold on
+          ]
+          ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
+          if [strength_of_connection] of current_link > fourth_threshold_connection[
+            merge current_band
           ]
         ]
       ]
     ]
+
+  ]
+end
+
+
+to merge [current_band]
+  if group_size + [group_size] of current_band <= merge_max_size and [food_available] of patch-here >= 90 * group_size + [group_size] of current_band[
+    ask current_band[
+      set group_size group_size + [group_size] of myself
+      set resources_owned resources_owned + [resources_owned] of myself
+    ]
+    die
   ]
 end
 
@@ -645,8 +660,8 @@ end
 
 to gather_move_explore
   ;General function that creates the flow for the bands
-  ask bands
-  [
+  foreach sort-on [group_size] bands
+  [ one_of_bands -> ask one_of_bands [
     ;if there is no need to move, they won't, if there is a need, choose the closest location that has the needed food/resources
     ifelse ([food_available] of patch-here <= food_needed) or ([resources_available] of patch-here <= resources_needed)
     [
@@ -690,7 +705,7 @@ to gather_move_explore
     if current_season = 3[
       set known_locations_spring known_locations_current
     ]
-  ]
+  ] ]
 end
 
 
@@ -703,12 +718,14 @@ to gather
 
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
-  let time_needed_for_food food_needed / (group_size * effectiveness)
-  let time_needed_for_resources resources_needed / (group_size * effectiveness)
+  let time_needed_for_food 90 / effectiveness
+  let time_needed_for_resources 30 / effectiveness
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
   ;print sentence "part spent food: "part_spent_food
   ;print sentence "time_left:" time_left
+  ;print sentence "technology_level" technology_level
+  ;print sentence "food_needed" food_needed
   ;print sentence "time_needed_food:" time_needed_for_food
   ;print sentence "time_needed-resources:" time_needed_for_resources
 
@@ -741,6 +758,7 @@ to gather
   [
     set food_owned round potential_food
     ;print sentence "food_owned: " food_owned
+    ;print ""
 
     ask current_home_location[
       set food_available round (food_available - potential_food)
@@ -761,12 +779,13 @@ to gather
     ]
     ;Spending the spare time if there is any on gathering additional resources
     let spare_time time_left - time_needed_for_food - time_needed_for_resources
-    let potential_extra_resources group_size * effectiveness * spare_time
+    let potential_extra_resources min list (group_size * 30)(group_size * effectiveness * spare_time)
 
     ifelse potential_extra_resources > [resources_available] of current_home_location[
-      set resources_owned resources_owned + potential_extra_resources
+      let resources_gathered min list (group_size * 30) ([resources_available] of current_home_location)
+      set resources_owned resources_owned + resources_gathered
       ask current_home_location[
-        set resources_available 0
+        set resources_available max list 0 (resources_available - resources_gathered)
       ]
     ]
     [
@@ -905,7 +924,7 @@ to use_gathered_products
     [
       set technology_level floor (cultural_capital)
     ]
-    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
+    set effectiveness max_effectiveness * (technology_level / 100)
   ]
 end
 @#$#@#$#@
@@ -996,7 +1015,7 @@ threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-4.0
+2.0
 1
 1
 Season(s)
@@ -1010,7 +1029,7 @@ CHOOSER
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
-0
+1
 
 SLIDER
 0
@@ -1021,7 +1040,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-51.0
+100.0
 1
 1
 NIL
@@ -1036,7 +1055,7 @@ stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-5.0
+10.0
 1
 1
 NIL
@@ -1051,7 +1070,7 @@ max_effectiveness
 max_effectiveness
 0
 10
-7.0
+10.0
 1
 1
 resource_units_per_HG_per_day
@@ -1066,7 +1085,7 @@ standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.1
+1.05
 0.05
 1
 NIL
@@ -1079,9 +1098,9 @@ SLIDER
 483
 resources_tool
 resources_tool
-0
+1
 100
-50.0
+60.0
 1
 1
 NIL
@@ -1096,7 +1115,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-7.0
+13.0
 1
 1
 Celcius
@@ -1143,7 +1162,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-10.0
+6.0
 1
 1
 Celcius
@@ -1158,7 +1177,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-5.0
+10.0
 1
 1
 NIL
@@ -1173,7 +1192,7 @@ stdev_group_size
 stdev_group_size
 0
 30
-5.0
+10.0
 1
 1
 NIL
@@ -1203,7 +1222,7 @@ number_of_bands
 number_of_bands
 1
 2000
-369.0
+321.0
 1
 1
 NIL
@@ -1373,7 +1392,7 @@ maximum_days_moving
 maximum_days_moving
 0
 100
-45.0
+100.0
 1
 1
 NIL
@@ -1403,7 +1422,7 @@ max_resource_patch
 max_resource_patch
 0
 18000
-9000.0
+4000.0
 100
 1
 NIL
@@ -1587,7 +1606,37 @@ cultural_capital_mutation
 cultural_capital_mutation
 1
 10
-8.0
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+160
+650
+290
+683
+merge_max_size
+merge_max_size
+2
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+190
+685
+290
+718
+split_min_size
+split_min_size
+1
+100
+59.0
 1
 1
 NIL
