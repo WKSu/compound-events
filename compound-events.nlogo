@@ -8,14 +8,10 @@
 ;- Why do so many bands die?
 ; Not enough movement.. they settle in hotspots and create more and more babies
 
-;Felix Riede Comments on the Model
-;Ireland was not settled
-
 ;Movement
 ;- Change the mobility based on the relation between resources and mobility (more resources, higher mobility)
 ;- Costs resources and time to move
 ;- Group size has an influence on mobility (the smaller you are, the more mobile)
-
 
 ;Compound Events
 ;Implement the spread of the ash
@@ -98,10 +94,8 @@ bands-own [
   known_locations_current
   count_known_locations_current
 
-
   current_home_location
   previous_home_location
-
 
   time_spent
   time_spent_exploring
@@ -198,8 +192,13 @@ to spread-population
   ; ensures that no band is spawned on uninhabitable patches!
   let median_food median [food_available] of land_patches
   let fertile_patches land_patches with [food_available >= median_food]
+  set fertile_patches fertile_patches with [pycor > 135 or pycor < 86 or pxcor > 70 ]
+  let ireland_patches land_patches with [pycor < 135 and pycor > 86 and pxcor < 70]
 
-  ask n-of number_of_bands fertile_patches [
+  ask n-of (number_of_bands - 1) fertile_patches [
+    setup-agents
+  ]
+  ask one-of ireland_patches with [food_available >= median_food][
     setup-agents
   ]
 end
@@ -1115,7 +1114,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-13.0
+9.0
 1
 1
 Celcius
@@ -1220,9 +1219,9 @@ SLIDER
 328
 number_of_bands
 number_of_bands
-1
+2
 2000
-321.0
+1648.0
 1
 1
 NIL
