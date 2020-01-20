@@ -132,6 +132,7 @@ patches-own [
   ; compound event impact
   volcano_impact?
   ash_impact?
+  ash_fall
 ]
 
 to startup
@@ -160,6 +161,7 @@ to setup
   setup-globals
   setup-food-and-resources
   spread-population
+  visualize-impact-volcano
   setup-volcano
 
   clear-all-plots
@@ -320,7 +322,7 @@ to setup-volcano
 
   ; color the Laacher See area in red
   ask patch xcoordinates ycoordinates [
-   sprout-volcanoes 1 [
+    sprout-volcanoes 1 [
       set shape "volcano"
       set size 10
       set heading 0
@@ -340,6 +342,7 @@ to setup-food-and-resources
     ; reset the values for the compound events
     set volcano_impact? false
     set ash_impact? false
+    set ash_fall 0
 
     ; average for temperature and precipitation based on initial setup data
     set temp_year (list temp_jja temp_son temp_djf temp_mam)
@@ -438,13 +441,14 @@ to go
   compound_event_impact
 
   ask bands[
+
     if group_size > merge_max_size and (group_size / 2) > split_min_size[
       set group_size round (group_size / 2)
       hatch 1
     ]
     set count_known_locations_current length known_locations_current ]
 
-    tick
+  tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
 end
 
@@ -471,7 +475,7 @@ to update-weather
 end
 
 to update-food-and-resources
-    ask land_patches[
+  ask land_patches[
 
     ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
     if current_season = 0 [
@@ -809,7 +813,7 @@ to move [new_home]
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
     set total_movement total_movement + time_spent_moving ; count the total time which is spent on moving
-    ;print sentence "time_spent_moving: " time_spent_moving
+                                                          ;print sentence "time_spent_moving: " time_spent_moving
 
     set previous_home_location current_home_location
 
@@ -933,13 +937,15 @@ to compound_event_impact
   ; patch 186 94 is the patch location found for the volcano in setup-volcano
 
 
+  ; the Laacher See Eruption most-likely started in late spring/early summer (H.-J. Schweitzer Entstehung und Flora des Trasses im nördlichen Laacher See-Gebiet Eiszeitalter und Gegenwart, 9 (1958), pp. 28-48)
+  ; the bulk of the magma volume was erupted in 10 hours, the ash fall lasted a few weeks but not more than a few months Schmincke, H. U., Park, C., & Harms, E. (1999). Evolution and environmental impacts of the eruption of Laacher See Volcano (Germany) 12,900 a BP. Quaternary International, 61(1), 61-72.
+  ; this is why the compound event is modelled into one tick
   if ticks = start_event [
     ; create the volcano impact
     ask volcanoes [
       ; in-radius asks all patches that is inside this distance
-      ask patches in-radius volcano_eruption_distance_1  [
+      ask patches in-radius volcano_eruption_distance  [
         set volcano_impact? true
-        ; set pcolor scale-color grey distance patch 186 95 0 volcano_eruption
       ]
     ]
 
@@ -949,36 +955,100 @@ to compound_event_impact
       ; take into account NE > S > SW from The eruptive centre of the late Quaternary Laacher See tephra Geologische Rundschau, 73 (3) (1984), pp. 933-980
       ; initial parameters are set so ash fall is similar to figure 1 in Reinig, F., Cherubini, P., Engels, S., Esper, J., Guidobaldi, G., Jöris, O., ... & Pfanz, H. (2020). Towards a dendrochronologically refined date of the Laacher See eruption around 13,000 years ago. Quaternary Science Reviews, 229, 106128.
 
-      ; set the ash to a specific wind direction, eruption distance, and spread of this cone
-      set heading ash_wind_direction_1
-      ask patches in-cone ash_eruption_distance_1 ash_eruption_angle_1 [
-        set ash_impact? true
+
+      if ash_fallout = "in-radius" [
+        ask patches in-radius ash_eruption_radius [
+          set ash_impact? true
+        ]
       ]
 
-      set heading ash_wind_direction_2
-      ask patches in-cone ash_eruption_distance_2 ash_eruption_angle_2 [
-        set ash_impact? true
+      if ash_fallout = "wind-cones" [
+        ; set the ash to a specific wind direction, eruption distance, and spread of this cone
+        set heading ash_wind_direction_1
+        ask patches in-cone ash_eruption_distance_1 ash_eruption_angle_1 [
+          set ash_impact? true
+        ]
+
+        set heading ash_wind_direction_2
+        ask patches in-cone ash_eruption_distance_2 ash_eruption_angle_2 [
+          set ash_impact? true
+        ]
+
+        ; take the average of the distances for 'random' ash fall
+        let average_distance (ash_eruption_distance_1 + ash_eruption_distance_2) / 2
+        let available_patches average_distance ^ 2 * 3.14
+        let random_patches round (available_patches * ( random_ash_fall / 100 ))
+
+        ask n-of random_patches patches in-radius average_distance [
+          ; random impact of ash fall on the world to create ash outside the cones
+          set ash_impact? true
+          ask one-of neighbors [ set ash_impact? true ]
+        ]
+
+        set heading 0 ; set the volcano back to its original location
       ]
 
-      ; take the average of the distances for 'random' ash fall
-
-      let average_distance (ash_eruption_distance_1 + ash_eruption_distance_2) / 2
-      let available_patches average_distance ^ 2
-      let random_patches available_patches * ( random_ash_fall / 100 )
-
-      ask n-of available_patches patches in-radius average_distance [
-        ; random impact of ash fall on the world to create ash outside the cones
-        set ash_impact? true
     ]
 
-      set heading 0 ; set the volcano back to its original location
+    ; create either a normal or skewed distribution of the ash eruption
+    ; normalize ash impact between 0 and 100
+    if ash_eruption_distribution = "normal" [
+      ask patches with [ ash_impact? = true ] [
+        set ash_fall random-normal mean_ash_intensity stdv_ash_intensity ]
     ]
-    ; create a box around the volcano
+
+    if ash_eruption_distribution = "skewed far" [
+      let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2
+
+      ask patches with [ ash_impact? = true ] [
+        set ash_fall random-poisson (distance patch 186 95) / (max_distance) * 100 ]
+    ]
+
+    if ash_eruption_distribution = "skewed near" [
+      let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2
+
+      ask patches with [ ash_impact? = true ] [
+        set ash_fall random-poisson ((1 - (distance patch 186 95 / max_distance)) * 100)
+      ]
+    ]
+
+    visualize-impact-volcano
+
   ]
+
+
+  ; impact of the LSE could have lasted for 6 years     Kaiser, K.F., 1993. Klimageschichte vom späten Hochglazial bis ins frühe Holozän, rekonstruiert mit Jahrringen und Molluskenschalen aus verschiedenen Vereisungsgebieten. Eidgenössische Forschungsanstalt für Wald, Schnee und Landschaft, Zürich, pp. 1–203.
+
+
 
 
   ; is there a delay in the compound events?
   ;
+end
+
+to visualize-impact-volcano
+  if ticks = 0 [
+    ; start: coloring patches to represent european landmass 13900 - 12700BP
+    let min-landmass gis:minimum-of europe-landmass
+    let max-landmass gis:maximum-of europe-landmass
+
+    ask patches [
+      if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+      [ set pcolor scale-color black landmass min-landmass max-landmass ]
+
+      if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+      [ set pcolor blue ]
+    ]
+  ]
+
+
+  if show_impact = true [
+    ask patches with [ volcano_impact? = true ] [ set pcolor red ]
+    ask patches with [ ash_impact? = true ] [
+      set pcolor scale-color orange ash_fall 0 100
+
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1168,7 +1238,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-10.0
+6.0
 1
 1
 Celcius
@@ -1389,7 +1459,7 @@ debug?
 TEXTBOX
 10
 10
-160
+55
 28
 Controls
 11
@@ -1676,7 +1746,7 @@ growback_rate
 growback_rate
 4
 100
-12.0
+28.0
 4
 1
 NIL
@@ -1701,12 +1771,12 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
 
 SLIDER
-5
-600
-262
-633
-volcano_eruption_distance_1
-volcano_eruption_distance_1
+520
+675
+730
+708
+volcano_eruption_distance
+volcano_eruption_distance
 0
 100
 10.0
@@ -1716,10 +1786,10 @@ patches
 HORIZONTAL
 
 SLIDER
-520
-640
-752
-673
+735
+590
+935
+623
 ash_eruption_distance_1
 ash_eruption_distance_1
 0
@@ -1731,10 +1801,10 @@ patches
 HORIZONTAL
 
 SLIDER
-520
-675
-755
-708
+735
+625
+935
+658
 ash_eruption_angle_1
 ash_eruption_angle_1
 0
@@ -1746,55 +1816,55 @@ degree
 HORIZONTAL
 
 SLIDER
-520
-605
-755
-638
+735
+555
+935
+588
 ash_wind_direction_1
 ash_wind_direction_1
 0
 360
-51.0
+50.0
 1
 1
 heading
 HORIZONTAL
 
 SLIDER
-775
-605
-947
-638
+935
+555
+1135
+588
 ash_wind_direction_2
 ash_wind_direction_2
 0
 360
-200.0
+205.0
 5
 1
-NIL
+heading
 HORIZONTAL
 
 SLIDER
-775
-640
-1007
-673
+935
+590
+1135
+623
 ash_eruption_distance_2
 ash_eruption_distance_2
 0
 100
-60.0
+45.0
 5
 1
 patches
 HORIZONTAL
 
 SLIDER
-775
-675
-987
-708
+935
+625
+1135
+658
 ash_eruption_angle_2
 ash_eruption_angle_2
 0
@@ -1807,29 +1877,145 @@ HORIZONTAL
 
 INPUTBOX
 520
-540
-672
-600
+555
+595
+635
 start_event
-10.0
+5.0
 1
 0
 Number
 
 SLIDER
-1020
-600
-1192
-633
+520
+640
+730
+673
 random_ash_fall
 random_ash_fall
 0
 3
-0.05
+0.3
 0.05
 1
 %
 HORIZONTAL
+
+SWITCH
+600
+555
+730
+588
+show_impact
+show_impact
+0
+1
+-1000
+
+CHOOSER
+1140
+555
+1302
+600
+ash_eruption_distribution
+ash_eruption_distribution
+"normal" "skewed far" "skewed near"
+1
+
+SLIDER
+1140
+605
+1312
+638
+mean_ash_intensity
+mean_ash_intensity
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1140
+640
+1312
+673
+stdv_ash_intensity
+stdv_ash_intensity
+0
+50
+10.0
+1
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+600
+590
+730
+635
+ash_fallout
+ash_fallout
+"in-radius" "wind-cones"
+1
+
+SLIDER
+735
+670
+935
+703
+ash_eruption_radius
+ash_eruption_radius
+0
+100
+50.0
+1
+1
+patches
+HORIZONTAL
+
+TEXTBOX
+520
+535
+670
+553
+Volcano Eruption\n
+11
+0.0
+1
+
+TEXTBOX
+737
+657
+797
+675
+If in-radius:
+11
+0.0
+1
+
+TEXTBOX
+735
+540
+885
+558
+If wind-cones
+11
+0.0
+1
+
+TEXTBOX
+1145
+540
+1340
+566
+Changes to ash eruption distribution
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
