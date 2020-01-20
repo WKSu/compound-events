@@ -9,6 +9,9 @@
 ;Normal / Skewed distribution of the center
 ;The effect of the ash fall is time limited
 
+; Bugs:
+- Volcano somehow disappears after it erupts.. no intentional code.. but also not
+
 extensions [ gis profiler ]
 
 breed [ bands band ]
@@ -519,11 +522,11 @@ to update-food-and-resources
     set food_available min list (((temp_deviation + prec_deviation) / 2) * max_food_patch) (food_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_food_patch) / growback_rate)
     set resources_available min list (((temp_deviation + prec_deviation) / 2) * max_resource_patch) (resources_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_resource_patch) / growback_rate)
 
-    if abs (average_temp - optimal_temperature) > max_deviation_temp [
+    if abs (average_temp - optimal_temperature) > max_deviation_temp or volcano_impact? = true  [
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
+    if abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true  [
       set food_available 0
       set resources_available 0]
   ]
@@ -936,7 +939,6 @@ to compound_event_impact
   ; create the compound event around the location of the volcano - use it as epicenter
   ; patch 186 94 is the patch location found for the volcano in setup-volcano
 
-
   ; the Laacher See Eruption most-likely started in late spring/early summer (H.-J. Schweitzer Entstehung und Flora des Trasses im nördlichen Laacher See-Gebiet Eiszeitalter und Gegenwart, 9 (1958), pp. 28-48)
   ; the bulk of the magma volume was erupted in 10 hours, the ash fall lasted a few weeks but not more than a few months Schmincke, H. U., Park, C., & Harms, E. (1999). Evolution and environmental impacts of the eruption of Laacher See Volcano (Germany) 12,900 a BP. Quaternary International, 61(1), 61-72.
   ; this is why the compound event is modelled into one tick
@@ -1016,10 +1018,9 @@ to compound_event_impact
 
   ]
 
-
   ; impact of the LSE could have lasted for 6 years     Kaiser, K.F., 1993. Klimageschichte vom späten Hochglazial bis ins frühe Holozän, rekonstruiert mit Jahrringen und Molluskenschalen aus verschiedenen Vereisungsgebieten. Eidgenössische Forschungsanstalt für Wald, Schnee und Landschaft, Zürich, pp. 1–203.
 
-
+  interaction_volcano
 
 
   ; is there a delay in the compound events?
@@ -1048,6 +1049,26 @@ to visualize-impact-volcano
       set pcolor scale-color orange ash_fall 0 100
 
     ]
+  ]
+end
+
+to interaction_volcano
+
+  ; kill all hunter-gatherer bands from the eruption of the volcano
+  ;
+  if ticks = start_event [
+    ask patches with [ volcano_impact? = true ] [
+      ask turtles-here [ die ]
+      set food_available 0
+      set resources_available 0
+    ]
+  ]
+
+  if ticks = start_event + volcano_duration_effect [
+    ask patches with [ volcano_impact? = true ] [
+      set volcano_impact? false
+    ]
+
   ]
 end
 @#$#@#$#@
@@ -1345,7 +1366,7 @@ number_of_bands
 number_of_bands
 2
 2000
-146.0
+130.0
 1
 1
 NIL
@@ -1881,7 +1902,7 @@ INPUTBOX
 595
 635
 start_event
-5.0
+10.0
 1
 0
 Number
@@ -1960,12 +1981,12 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-0
+1
 
 SLIDER
 735
 670
-942
+935
 703
 ash_eruption_radius
 ash_eruption_radius
@@ -2016,6 +2037,21 @@ Changes to ash eruption distribution
 11
 0.0
 1
+
+SLIDER
+1390
+565
+1602
+598
+volcano_duration_effect
+volcano_duration_effect
+0
+1000
+10.0
+10
+1
+ticks
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
