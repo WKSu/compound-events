@@ -160,6 +160,7 @@ to setup
   setup-globals
   setup-food-and-resources
   spread-population
+  setup-volcano
 
   clear-all-plots
 end
@@ -205,7 +206,6 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
-  setup-volcano
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
@@ -630,7 +630,6 @@ to interact-with-other-bands
   ]
 end
 
-
 to merge [current_band]
   if group_size + [group_size] of current_band <= merge_max_size and [food_available] of patch-here >= 90 * group_size + [group_size] of current_band[
     ask current_band[
@@ -658,7 +657,6 @@ to update_location_knowledge [known_locations_given_season current_band]
     [set known_locations_given_season lput y known_locations_given_season]
   ]
 end
-
 
 to gather_move_explore
   ;General function that creates the flow for the bands
@@ -711,7 +709,6 @@ to gather_move_explore
     ]
   ] ]
 end
-
 
 to gather
   ;Calculate the time left after exploring and moving
@@ -801,7 +798,6 @@ to gather
     ]
   ]
 end
-
 
 to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
@@ -936,26 +932,49 @@ to compound_event_impact
   ; create the compound event around the location of the volcano - use it as epicenter
   ; patch 186 94 is the patch location found for the volcano in setup-volcano
 
-  ; create the volcano impact
-  ask patch 186 94 [
-    ; in-radius asks all patches that is inside this distance
-    ask patches in-radius volcano_eruption_distance [
-      set volcano_impact? true
-      ; set pcolor scale-color grey distance patch 186 95 0 volcano_eruption
+
+  if ticks = start_event [
+    ; create the volcano impact
+    ask volcanoes [
+      ; in-radius asks all patches that is inside this distance
+      ask patches in-radius volcano_eruption_distance_1  [
+        set volcano_impact? true
+        ; set pcolor scale-color grey distance patch 186 95 0 volcano_eruption
+      ]
     ]
-  ]
 
-  ask patch 186 94 [
-    ask patches in-radius ash_eruption_distance [
-      ; take into account NE > S > SW
-      set ash_impact? true
+    ask volcanoes [
+      ; in cone asks for a distance and the angle
+      ; because ash falls based on the wind this can be used
+      ; take into account NE > S > SW from The eruptive centre of the late Quaternary Laacher See tephra Geologische Rundschau, 73 (3) (1984), pp. 933-980
+      ; initial parameters are set so ash fall is similar to figure 1 in Reinig, F., Cherubini, P., Engels, S., Esper, J., Guidobaldi, G., Jöris, O., ... & Pfanz, H. (2020). Towards a dendrochronologically refined date of the Laacher See eruption around 13,000 years ago. Quaternary Science Reviews, 229, 106128.
+
+      ; set the ash to a specific wind direction, eruption distance, and spread of this cone
+      set heading ash_wind_direction_1
+      ask patches in-cone ash_eruption_distance_1 ash_eruption_angle_1 [
+        set ash_impact? true
+      ]
+
+      set heading ash_wind_direction_2
+      ask patches in-cone ash_eruption_distance_2 ash_eruption_angle_2 [
+        set ash_impact? true
+      ]
+
+      ; take the average of the distances for 'random' ash fall
+
+      let average_distance (ash_eruption_distance_1 + ash_eruption_distance_2) / 2
+      let available_patches average_distance ^ 2
+      let random_patches available_patches * ( random_ash_fall / 100 )
+
+      ask n-of available_patches patches in-radius average_distance [
+        ; random impact of ash fall on the world to create ash outside the cones
+        set ash_impact? true
     ]
+
+      set heading 0 ; set the volcano back to its original location
+    ]
+    ; create a box around the volcano
   ]
-
-
-
-  ; create a box around the volcano
-
 
 
   ; is there a delay in the compound events?
@@ -1063,7 +1082,7 @@ CHOOSER
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
-1
+0
 
 SLIDER
 5
@@ -1149,7 +1168,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-9.0
+10.0
 1
 1
 Celcius
@@ -1196,7 +1215,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-7.0
+11.0
 1
 1
 Celcius
@@ -1256,7 +1275,7 @@ number_of_bands
 number_of_bands
 2
 2000
-1009.0
+146.0
 1
 1
 NIL
@@ -1446,7 +1465,7 @@ max_resource_patch
 max_resource_patch
 0
 18000
-4000.0
+4600.0
 100
 1
 NIL
@@ -1657,7 +1676,7 @@ growback_rate
 growback_rate
 4
 100
-16.0
+12.0
 4
 1
 NIL
@@ -1684,10 +1703,10 @@ PENS
 SLIDER
 5
 600
-247
+262
 633
-volcano_eruption_distance
-volcano_eruption_distance
+volcano_eruption_distance_1
+volcano_eruption_distance_1
 0
 100
 10.0
@@ -1697,18 +1716,119 @@ patches
 HORIZONTAL
 
 SLIDER
-5
-635
-227
-668
-ash_eruption_distance
-ash_eruption_distance
+520
+640
+752
+673
+ash_eruption_distance_1
+ash_eruption_distance_1
 0
 100
-50.0
-1
+70.0
+5
 1
 patches
+HORIZONTAL
+
+SLIDER
+520
+675
+755
+708
+ash_eruption_angle_1
+ash_eruption_angle_1
+0
+180
+30.0
+5
+1
+degree
+HORIZONTAL
+
+SLIDER
+520
+605
+755
+638
+ash_wind_direction_1
+ash_wind_direction_1
+0
+360
+51.0
+1
+1
+heading
+HORIZONTAL
+
+SLIDER
+775
+605
+947
+638
+ash_wind_direction_2
+ash_wind_direction_2
+0
+360
+200.0
+5
+1
+NIL
+HORIZONTAL
+
+SLIDER
+775
+640
+1007
+673
+ash_eruption_distance_2
+ash_eruption_distance_2
+0
+100
+60.0
+5
+1
+patches
+HORIZONTAL
+
+SLIDER
+775
+675
+987
+708
+ash_eruption_angle_2
+ash_eruption_angle_2
+0
+180
+110.0
+5
+1
+degree
+HORIZONTAL
+
+INPUTBOX
+520
+540
+672
+600
+start_event
+10.0
+1
+0
+Number
+
+SLIDER
+1020
+600
+1192
+633
+random_ash_fall
+random_ash_fall
+0
+3
+0.05
+0.05
+1
+%
 HORIZONTAL
 
 @#$#@#$#@
@@ -2096,12 +2216,6 @@ Polygon -7500403 true true 30 75 75 30 270 225 225 270
 NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
-1.0
-    org.nlogo.sdm.gui.AggregateDrawing 2
-        org.nlogo.sdm.gui.StockFigure "attributes" "attributes" 1 "FillColor" "Color" 225 225 182 83 68 60 40
-            org.nlogo.sdm.gui.WrappedStock "" "" 0
-        org.nlogo.sdm.gui.ConverterFigure "attributes" "attributes" 1 "FillColor" "Color" 130 188 183 235 113 50 50
-            org.nlogo.sdm.gui.WrappedConverter "" ""
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
