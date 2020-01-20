@@ -4,15 +4,6 @@
 ;Decide about KPI's
 ; idea - size of turtles depends on group size
 
-; Things to figure out:
-;- Why do so many bands die?
-; Not enough movement.. they settle in hotspots and create more and more babies
-
-;Movement
-;- Change the mobility based on the relation between resources and mobility (more resources, higher mobility)
-;- Costs resources and time to move
-;- Group size has an influence on mobility (the smaller you are, the more mobile)
-
 ;Compound Events
 ;Implement the spread of the ash
 ;Normal / Skewed distribution of the center
@@ -82,6 +73,7 @@ bands-own [
   effectiveness
   cultural_capital
   technology_level
+  initial_mobility
   mobility
 
   death_rate
@@ -417,7 +409,7 @@ to setup-agents
     set technology_level cultural_capital
     set effectiveness max_effectiveness * (technology_level / 100)
 
-    set mobility random 10 + 1
+    set initial_mobility random 10 + 1
     set health 100
     set current_home_location patch-here
     set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
@@ -511,8 +503,8 @@ to update-food-and-resources
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
     ]
 
-    set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
-    set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
+    set food_available min list max_food_patch (food_available + (((temp_deviation + prec_deviation) / 2) * max_food_patch) / growback_rate)
+    set resources_available min list max_resource_patch (resources_available + (((temp_deviation + prec_deviation) / 2) * max_resource_patch) / growback_rate)
 
     if abs (average_temp - optimal_temperature) > max_deviation_temp [
       set food_available 0
@@ -536,6 +528,8 @@ to update_bands_variables
     set time_spent_exploring 0
     set time_spent_moving 0
     set time_spent_gathering 0
+    ;mobility is dependent on group_size
+    set mobility max list 1 (initial_mobility - (round (group_size / 10)))
 
     set food_needed group_size * 90
     set resources_needed (group_size * 30) - resources_owned
@@ -666,6 +660,8 @@ to gather_move_explore
     [
       let potential_new_locations []
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
+      ;The cost to move to a new patch is built up from the distance to that patch, the ruggedness_index of the patch and the relative altitude of the patch
+      ;The underlying relationship between resources_available on a patch and the ease with which the patch is crosses can be seen in the ruggedness_index. If a patch is rugged, there isn't much food and the other way around.
       foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) - mobility) < max_move_time)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
@@ -1620,7 +1616,7 @@ merge_max_size
 merge_max_size
 2
 100
-100.0
+50.0
 1
 1
 NIL
@@ -1635,8 +1631,23 @@ split_min_size
 split_min_size
 1
 100
-59.0
+25.0
 1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+300
+720
+472
+753
+growback_rate
+growback_rate
+4
+24
+4.0
+4
 1
 NIL
 HORIZONTAL
