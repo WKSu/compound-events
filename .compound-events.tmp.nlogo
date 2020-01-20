@@ -1623,9 +1623,9 @@ HORIZONTAL
 
 PLOT
 315
-535
+565
 515
-685
+715
 Mean strength of links
 NIL
 NIL
