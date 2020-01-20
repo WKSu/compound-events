@@ -12,6 +12,7 @@
 extensions [ gis profiler ]
 
 breed [ bands band ]
+breed [ volcanoes volcano ]
 
 globals [
   ; start: GIS globals used for loading in map data
@@ -127,6 +128,10 @@ patches-own [
   temp_current
   min_precipitation
   max_precipitation
+
+  ; compound event impact
+  volcano_impact?
+  ash_impact?
 ]
 
 to startup
@@ -191,7 +196,6 @@ to spread-population
     setup-agents
   ]
 end
-
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
@@ -305,7 +309,6 @@ to setup-volcano
   let laachersee_lat 7.266867
   let laachersee_lon 50.412276
 
-
   ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
   let lengthx bottomrightx - topleftx ; length of the map in coordinate units
   let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
@@ -317,8 +320,12 @@ to setup-volcano
 
   ; color the Laacher See area in red
   ask patch xcoordinates ycoordinates [
-    set pcolor red
-    ask neighbors [ set pcolor red ] ; increase visibility of the area of the volcano, it is not up to scale!
+   sprout-volcanoes 1 [
+      set shape "volcano"
+      set size 10
+      set heading 0
+    ]
+    ; increase visibility of the area of the volcano, it is not up to scale!
   ]
 end
 
@@ -330,6 +337,10 @@ end
 
 to setup-food-and-resources
   ask land_patches[
+    ; reset the values for the compound events
+    set volcano_impact? false
+    set ash_impact? false
+
     ; average for temperature and precipitation based on initial setup data
     set temp_year (list temp_jja temp_son temp_djf temp_mam)
     set average_temp mean temp_year
@@ -424,6 +435,7 @@ to go
   interact-with-other-bands
   gather_move_explore
   use_gathered_products
+  compound_event_impact
 
   ask bands[
     if group_size > merge_max_size and (group_size / 2) > split_min_size[
@@ -918,6 +930,36 @@ to use_gathered_products
     ]
     set effectiveness max_effectiveness * (technology_level / 100)
   ]
+end
+
+to compound_event_impact
+  ; create the compound event around the location of the volcano - use it as epicenter
+  ; patch 186 94 is the patch location found for the volcano in setup-volcano
+
+  ; create the volcano impact
+  ask patch 186 94 [
+    ; in-radius asks all patches that is inside this distance
+    ask patches in-radius volcano_eruption_distance [
+      set volcano_impact? true
+      ; set pcolor scale-color grey distance patch 186 95 0 volcano_eruption
+    ]
+  ]
+
+  ask patch 186 94 [
+    ask patches in-radius ash_eruption_distance [
+      ; take into account NE > S > SW
+      set ash_impact? true
+    ]
+  ]
+
+
+
+  ; create a box around the volcano
+
+
+
+  ; is there a delay in the compound events?
+  ;
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1639,6 +1681,36 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
 
+SLIDER
+5
+600
+247
+633
+volcano_eruption_distance
+volcano_eruption_distance
+0
+100
+10.0
+5
+1
+patches
+HORIZONTAL
+
+SLIDER
+5
+635
+227
+668
+ash_eruption_distance
+ash_eruption_distance
+0
+100
+50.0
+1
+1
+patches
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 Social Consequences of Past Compound Events
@@ -1959,6 +2031,42 @@ Polygon -10899396 true false 132 85 134 64 107 51 108 17 150 2 192 18 192 52 169
 Polygon -10899396 true false 85 204 60 233 54 254 72 266 85 252 107 210
 Polygon -7500403 true true 119 75 179 75 209 101 224 135 220 225 175 261 128 261 81 224 74 135 88 99
 
+volcano
+true
+0
+Rectangle -955883 false false 120 105 180 105
+Rectangle -955883 false false 105 90 195 105
+Rectangle -955883 true false 105 90 195 105
+Rectangle -955883 true false 90 105 225 105
+Rectangle -955883 true false 105 75 195 90
+Rectangle -955883 true false 105 75 150 90
+Rectangle -1184463 true false 105 75 150 105
+Rectangle -955883 true false 120 120 165 165
+Rectangle -955883 true false 135 165 165 180
+Rectangle -6459832 true false 15 195 285 270
+Rectangle -6459832 true false 15 195 285 225
+Rectangle -6459832 true false 45 180 270 195
+Rectangle -6459832 true false 75 165 135 165
+Rectangle -6459832 true false 60 165 135 165
+Rectangle -6459832 true false 60 165 135 180
+Rectangle -6459832 true false 165 165 240 180
+Rectangle -6459832 true false 165 150 225 165
+Rectangle -6459832 true false 75 150 120 165
+Rectangle -6459832 true false 75 135 120 150
+Rectangle -6459832 true false 75 120 120 135
+Rectangle -6459832 true false 165 120 225 135
+Rectangle -6459832 true false 165 135 225 150
+Rectangle -955883 true false 105 105 195 105
+Rectangle -955883 true false 90 105 210 120
+Rectangle -16777216 true false 210 180 225 210
+Rectangle -16777216 true false 75 195 90 225
+Rectangle -16777216 true false 150 225 165 255
+Circle -955883 true false 120 120 30
+Rectangle -955883 true false 195 60 210 45
+Rectangle -955883 true false 210 45 225 60
+Rectangle -955883 true false 75 45 90 60
+Rectangle -955883 true false 135 15 150 30
+
 wheel
 false
 0
@@ -1988,6 +2096,12 @@ Polygon -7500403 true true 30 75 75 30 270 225 225 270
 NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
+1.0
+    org.nlogo.sdm.gui.AggregateDrawing 2
+        org.nlogo.sdm.gui.StockFigure "attributes" "attributes" 1 "FillColor" "Color" 225 225 182 83 68 60 40
+            org.nlogo.sdm.gui.WrappedStock "" "" 0
+        org.nlogo.sdm.gui.ConverterFigure "attributes" "attributes" 1 "FillColor" "Color" 130 188 183 235 113 50 50
+            org.nlogo.sdm.gui.WrappedConverter "" ""
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

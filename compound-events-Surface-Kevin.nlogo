@@ -1,18 +1,15 @@
 ;grow back resources and food on patches
 ;Create compound events
 ;ending condition?
-;Decide about KPI's
-; idea - size of turtles depends on group size
 
-;Compound Events
-;Implement the spread of the ash
-;Normal / Skewed distribution of the center
-;The effect of the ash fall is time limited
+;Decide about KPI's
+; ; KPI: Length of known locations
+
+; idea - size of turtles depends on group size
 
 extensions [ gis profiler ]
 
 breed [ bands band ]
-breed [ volcanoes volcano ]
 
 globals [
   ; start: GIS globals used for loading in map data
@@ -56,40 +53,28 @@ globals [
   current_season
   time_available
   max_move_time
-
-
-  ; global variables keeping track of statistics in the model
-  extinct_bands
-  total_movement
 ]
 
 bands-own [
   group_size
-
   food_needed
   resources_needed
   food_owned
   resources_owned
-
   effectiveness
   cultural_capital
   technology_level
-  initial_mobility
-  mobility
 
+  mobility
   death_rate
   health
-
   known_locations_summer
   known_locations_fall
   known_locations_winter
   known_locations_spring
   known_locations_current
-  count_known_locations_current
-
   current_home_location
   previous_home_location
-
   time_spent
   time_spent_exploring
   time_spent_moving
@@ -104,6 +89,9 @@ links-own[
 patches-own [
   food_available
   resources_available
+  food_return_rate
+  resource_return_rate
+  accessibility
   altitude
   ruggedness_index
   landmass
@@ -128,16 +116,9 @@ patches-own [
   temp_current
   min_precipitation
   max_precipitation
-
-  ; compound event impact
-  volcano_impact?
-  ash_impact?
 ]
 
 to startup
-  ; startup command only applies these functions during the initial start of the model
-  ; it saves time by not loading in all the GIS data everytime a new run is started!
-
   clear-all
   profiler:start
   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
@@ -145,67 +126,39 @@ to startup
   print profiler:report
 end
 
-to debug [string]
-  ; small function for debugging
-  if debug? [
-    print string
-  ]
-end
-
 to setup
   clear-turtles
-  reset-ticks
-  ;random-seed -176624766
-
-  setup-globals
-  setup-food-and-resources
-  spread-population
-
   clear-all-plots
-end
+  reset-ticks
+  setup-food-and-resources
 
-to setup-globals
-  ; resetting statistics
-  set total_movement 0
-  set extinct_bands 0
+  random-seed -176624766
+  print sentence "Setup Random: " random 100
+  let median_food median [food_available] of land_patches
+  let fertile_patches land_patches with [food_available > median_food]
 
-  ; setting the threshold (how long they have to be in close proximity to each other) to create a link
-  ; linear growth, the longer they are in close proximity, the more they will share
+  ask n-of number_of_bands fertile_patches[
+    setup-agents
+  ]
+
+  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
   set third_threshold_connection 3 * threshold_location_knowledge
   set fourth_threshold_connection 4 * threshold_location_knowledge
-
-  set max_move_time maximum_days_moving
+  set max_move_time 45
   set time_available 90
-  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
-end
-
-to spread-population
-  ; this function looks at the initial food availability and tries to spawn bands in locations where there is food available
-  ; ensures that no band is spawned on uninhabitable patches!
-  let median_food median [food_available] of land_patches
-  let fertile_patches land_patches with [food_available >= median_food]
-  set fertile_patches fertile_patches with [pycor > 135 or pycor < 86 or pxcor > 70 ]
-  let ireland_patches land_patches with [pycor < 135 and pycor > 86 and pxcor < 70]
-
-  ask n-of (number_of_bands - 1) fertile_patches [
-    setup-agents
-  ]
-  ask one-of ireland_patches with [food_available >= median_food][
-    setup-agents
-  ]
 end
 
 to setup-patches
   gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
 
   ; load in GIS data split
+
   setup-altitude
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
-  setup-volcano
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
@@ -299,36 +252,6 @@ to setup-temperature
   set sd_prec_son 1.126944302
 end
 
-to setup-volcano
-  ; set up the map size in coordinates
-  let topleftx -12
-  let toplefty 60
-  let bottomrightx 42
-  let bottomrighty 40
-
-  let laachersee_lat 7.266867
-  let laachersee_lon 50.412276
-
-  ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
-  let lengthx bottomrightx - topleftx ; length of the map in coordinate units
-  let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
-  let xcoordinates max-pxcor * (deltax / lengthx)
-
-  let lengthy toplefty - bottomrighty
-  let deltay laachersee_lon - bottomrighty
-  let ycoordinates max-pycor * (deltay / lengthy)
-
-  ; color the Laacher See area in red
-  ask patch xcoordinates ycoordinates [
-   sprout-volcanoes 1 [
-      set shape "volcano"
-      set size 10
-      set heading 0
-    ]
-    ; increase visibility of the area of the volcano, it is not up to scale!
-  ]
-end
-
 to setup-graticules
   gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
@@ -337,11 +260,6 @@ end
 
 to setup-food-and-resources
   ask land_patches[
-    ; reset the values for the compound events
-    set volcano_impact? false
-    set ash_impact? false
-
-    ; average for temperature and precipitation based on initial setup data
     set temp_year (list temp_jja temp_son temp_djf temp_mam)
     set average_temp mean temp_year
 
@@ -354,9 +272,8 @@ to setup-food-and-resources
     set min_precipitation optimal_precipitation - max_deviation_prec
     set max_precipitation optimal_precipitation + max_deviation_prec
 
-    ;min-max feature scaling (linear)
+    ;min-max feature scaling
     let temp_deviation 0
-
     if average_temp <= optimal_temperature[
       set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
     ]
@@ -364,7 +281,8 @@ to setup-food-and-resources
       set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
     ]
 
-    ;min-max feature scaling (linear)
+    ;min-max feature scaling
+
     let prec_deviation 0
     if average_prec <= optimal_precipitation[
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
@@ -373,25 +291,36 @@ to setup-food-and-resources
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
     ]
 
-    set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
-    set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
+    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
 
-    ; set the food availability and resources on 0 when they are not able meet the right conditions
-    if abs (average_temp - optimal_temperature) > max_deviation_temp [
+    if abs (average_temp - optimal_temperature) > max_deviation_temp[
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
+    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
       set food_available 0
       set resources_available 0]
-
-    ; economic factors such as resources (mining) might still be possible in high altitudes
-    ; West, J. B. (2002). Highest permanent human habitation. High altitude medicine & biology, 3(4), 401-407.
-    ; Highest contemporary altitude where people are living is 2480m https://www.wikiwand.com/en/List_of_highest_towns_by_country
-    if altitude > max_altitude_food_available [
-      set food_available 0 ]
   ]
+
+  ; start: coloring patches to represent european landmass 13900 - 12700BP
+  ;let min-landmass min [food_available] of land_patches
+  ;let max-landmass max [food_available] of land_patches
+
+  ;ask patches [
+  ; if (food_available <= 0) or (food_available >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+  ;[ set pcolor scale-color green food_available min-landmass max-landmass ]
+  ;]
+
+  ; 9000 is the max food for the best patch yearly
+  ; 90 (food units needed per tick) * 25 (average group band) * 4 (seasons)
+
+  ; 3000 is the max resource for the best patch yearly
+  ; 30 (resource units needed per tick) * 25 (average group band) * 4 (seasons)
+  ; gut feeling: they can live to 3 years with this on resources -> 9000
+
 end
+
 
 to setup-agents
 
@@ -399,7 +328,7 @@ to setup-agents
     set shape "person"
     set size 2
     set color black
-    set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
+    set group_size random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
     if cultural_capital_distribution = "normal"[
       set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
@@ -415,9 +344,9 @@ to setup-agents
     set resources_needed group_size * 30 ;one unit per 3 days
 
     set technology_level cultural_capital
-    set effectiveness max_effectiveness * (technology_level / 100)
+    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
 
-    set initial_mobility random 10 + 1
+    set mobility random 10 + 1
     set health 100
     set current_home_location patch-here
     set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
@@ -435,17 +364,19 @@ to go
   interact-with-other-bands
   gather_move_explore
   use_gathered_products
-  compound_event_impact
 
-  ask bands[
-    if group_size > merge_max_size and (group_size / 2) > split_min_size[
-      set group_size round (group_size / 2)
-      hatch 1
-    ]
-    set count_known_locations_current length known_locations_current ]
+  ask turtles[
+    set current_home_location patch-here
+    set known_locations_summer filter [x -> item 0 x != patch-here] known_locations_summer
+    ;add the new knowledge on this patch in the current season
+    set known_locations_summer lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_summer
+  ]
 
-    tick
-  set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
+  print sentence "Random Go: " random 100
+  tick
+  set current_season (ticks mod 4)
+  ;set season to next item in the list using a modulus based on ticks
+
 end
 
 to update-weather
@@ -473,7 +404,8 @@ end
 to update-food-and-resources
     ask land_patches[
 
-    ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
+    ; temp_year temp_jja temp_son temp_djf temp_mam
+
     if current_season = 0 [
       set temp_year replace-item 0 temp_year temp_current
       set prec_year replace-item 0 prec_year prec_current
@@ -504,22 +436,23 @@ to update-food-and-resources
     ]
 
     ;min-max feature scaling
+
     let prec_deviation 0
     if average_prec <= optimal_precipitation[
-      set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+      set prec_deviation (1 - (abs average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
     ]
     if average_prec > optimal_precipitation[
-      set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+      set prec_deviation (1 - (abs average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
     ]
 
-    set food_available min list (((temp_deviation + prec_deviation) / 2) * max_food_patch) (food_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_food_patch) / growback_rate)
-    set resources_available min list (((temp_deviation + prec_deviation) / 2) * max_resource_patch) (resources_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_resource_patch) / growback_rate)
+    set food_available ((temp_deviation + prec_deviation) / 2) * 9000
+    set resources_available ((temp_deviation + prec_deviation) / 2) * 9000
 
-    if abs (average_temp - optimal_temperature) > max_deviation_temp [
+    if abs (average_temp - optimal_temperature) > max_deviation_temp[
       set food_available 0
       set resources_available 0
     ]
-    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
+    if abs (average_prec - optimal_precipitation) > max_deviation_temp[
       set food_available 0
       set resources_available 0]
   ]
@@ -537,8 +470,7 @@ to update_bands_variables
     set time_spent_exploring 0
     set time_spent_moving 0
     set time_spent_gathering 0
-    ;mobility is dependent on group_size
-    set mobility max list 1 (initial_mobility - (round (group_size / 10)))
+
 
     set food_needed group_size * 90
     set resources_needed (group_size * 30) - resources_owned
@@ -546,8 +478,8 @@ to update_bands_variables
       set resources_needed 0
     ]
 
-    ;Mutation of the cultural capital - normal distribution
-    set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
+    ;Mutation of the cultural capital
+    set cultural_capital max list 1 min list 100 (cultural_capital + (random 3) - 1)
 
     ;as the season has changed, the bands change their knowledge about the patches to the current season
     if current_season = 0[
@@ -563,19 +495,12 @@ to update_bands_variables
       set known_locations_current known_locations_spring
     ]
   ]
-
 end
 
 to interact-with-other-bands
   ;Make sure that links do not get updated by both of the ends (turtles)
   ask links[
     set updated? False
-    if ticks mod 4 = 0[
-      set strength_of_connection strength_of_connection - 1
-    ]
-    if strength_of_connection < 1[
-      die
-    ]
   ]
   ask bands[
     ;define the current turtle who is asked to interact
@@ -609,35 +534,23 @@ to interact-with-other-bands
             set updated? True
           ]
 
-
-          if [strength_of_connection] of current_link > second_threshold_connection[
-            update_location_knowledge known_locations_summer current_band
-            update_location_knowledge known_locations_fall current_band
-          ]
-          if [strength_of_connection] of current_link > first_threshold_connection[
-            update_location_knowledge known_locations_winter current_band
-            update_location_knowledge known_locations_spring current_band
-            set technology_level technology_level + 1  ;also share knowledge about technologies from the first threshold on
-          ]
           ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
           if [strength_of_connection] of current_link > fourth_threshold_connection[
-            merge current_band
+            update_location_knowledge known_locations_summer current_band
+          ]
+          if [strength_of_connection] of current_link > third_threshold_connection[
+            update_location_knowledge known_locations_fall current_band
+          ]
+          if [strength_of_connection] of current_link > second_threshold_connection[
+            update_location_knowledge known_locations_winter current_band
+          ]
+          if [strength_of_connection] of current_link > first_threshold_connection[
+            update_location_knowledge known_locations_spring current_band
+            set technology_level technology_level + 1  ;also share knowledge about technologies from the first threshold on
           ]
         ]
       ]
     ]
-
-  ]
-end
-
-
-to merge [current_band]
-  if group_size + [group_size] of current_band <= merge_max_size and [food_available] of patch-here >= 90 * group_size + [group_size] of current_band[
-    ask current_band[
-      set group_size group_size + [group_size] of myself
-      set resources_owned resources_owned + [resources_owned] of myself
-    ]
-    die
   ]
 end
 
@@ -662,15 +575,13 @@ end
 
 to gather_move_explore
   ;General function that creates the flow for the bands
-  foreach sort-on [group_size] bands
-  [ one_of_bands -> ask one_of_bands [
+  ask bands
+  [
     ;if there is no need to move, they won't, if there is a need, choose the closest location that has the needed food/resources
     ifelse ([food_available] of patch-here <= food_needed) or ([resources_available] of patch-here <= resources_needed)
     [
       let potential_new_locations []
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
-      ;The cost to move to a new patch is built up from the distance to that patch, the ruggedness_index of the patch and the relative altitude of the patch
-      ;The underlying relationship between resources_available on a patch and the ease with which the patch is crosses can be seen in the ruggedness_index. If a patch is rugged, there isn't much food and the other way around.
       foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) - mobility) < max_move_time)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
@@ -709,7 +620,7 @@ to gather_move_explore
     if current_season = 3[
       set known_locations_spring known_locations_current
     ]
-  ] ]
+  ]
 end
 
 
@@ -722,14 +633,12 @@ to gather
 
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
-  let time_needed_for_food 90 / effectiveness
-  let time_needed_for_resources 30 / effectiveness
+  let time_needed_for_food food_needed / (group_size * effectiveness)
+  let time_needed_for_resources resources_needed / (group_size * effectiveness)
 
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
   ;print sentence "part spent food: "part_spent_food
   ;print sentence "time_left:" time_left
-  ;print sentence "technology_level" technology_level
-  ;print sentence "food_needed" food_needed
   ;print sentence "time_needed_food:" time_needed_for_food
   ;print sentence "time_needed-resources:" time_needed_for_resources
 
@@ -762,7 +671,6 @@ to gather
   [
     set food_owned round potential_food
     ;print sentence "food_owned: " food_owned
-    ;print ""
 
     ask current_home_location[
       set food_available round (food_available - potential_food)
@@ -783,13 +691,12 @@ to gather
     ]
     ;Spending the spare time if there is any on gathering additional resources
     let spare_time time_left - time_needed_for_food - time_needed_for_resources
-    let potential_extra_resources min list (group_size * 30)(group_size * effectiveness * spare_time)
+    let potential_extra_resources group_size * effectiveness * spare_time
 
     ifelse potential_extra_resources > [resources_available] of current_home_location[
-      let resources_gathered min list (group_size * 30) ([resources_available] of current_home_location)
-      set resources_owned resources_owned + resources_gathered
+      set resources_owned resources_owned + potential_extra_resources
       ask current_home_location[
-        set resources_available max list 0 (resources_available - resources_gathered)
+        set resources_available 0
       ]
     ]
     [
@@ -812,7 +719,6 @@ to move [new_home]
 
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
-    set total_movement total_movement + time_spent_moving ; count the total time which is spent on moving
     ;print sentence "time_spent_moving: " time_spent_moving
 
     set previous_home_location current_home_location
@@ -910,7 +816,6 @@ to use_gathered_products
       set group_size group_size * death_rate
     ]
     if group_size < 1[
-      set extinct_bands extinct_bands + 1
       die
     ]
     set group_size ceiling (group_size * standard_birth_rate)
@@ -928,48 +833,18 @@ to use_gathered_products
     [
       set technology_level floor (cultural_capital)
     ]
-    set effectiveness max_effectiveness * (technology_level / 100)
+    set effectiveness max_effectiveness * ( (technology_level * cultural_capital) / 10000)
   ]
-end
-
-to compound_event_impact
-  ; create the compound event around the location of the volcano - use it as epicenter
-  ; patch 186 94 is the patch location found for the volcano in setup-volcano
-
-  ; create the volcano impact
-  ask patch 186 94 [
-    ; in-radius asks all patches that is inside this distance
-    ask patches in-radius volcano_eruption_distance [
-      set volcano_impact? true
-      ; set pcolor scale-color grey distance patch 186 95 0 volcano_eruption
-    ]
-  ]
-
-  ask patch 186 94 [
-    ask patches in-radius ash_eruption_distance [
-      ; take into account NE > S > SW
-      set ash_impact? true
-    ]
-  ]
-
-
-
-  ; create a box around the volcano
-
-
-
-  ; is there a delay in the compound events?
-  ;
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-310
-10
-1371
-385
+185
+125
+1235
+496
 -1
 -1
-2.0221
+2.0
 1
 10
 1
@@ -990,9 +865,9 @@ ticks
 30.0
 
 BUTTON
-60
+5
 10
-124
+69
 43
 Setup
 setup
@@ -1007,9 +882,9 @@ NIL
 1
 
 BUTTON
-190
+150
 10
-245
+215
 43
 go-once
 go\n
@@ -1024,9 +899,9 @@ NIL
 1
 
 BUTTON
-250
+220
 10
-310
+290
 43
 go-forever
 go
@@ -1042,54 +917,39 @@ NIL
 
 SLIDER
 5
-420
+50
 235
-453
+83
 threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-8.0
+4.0
 1
 1
 Season(s)
 HORIZONTAL
 
 CHOOSER
-145
-285
-290
-330
+7
+120
+152
+165
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
-1
+0
 
 SLIDER
-5
-250
-145
-283
+2
+170
+152
+203
 mean_cultural_capital
 mean_cultural_capital
 1
 100
-100.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-145
-250
-285
-283
-stdv_cultural_capital
-stdv_cultural_capital
-0
-50
-10.0
+47.0
 1
 1
 NIL
@@ -1097,29 +957,44 @@ HORIZONTAL
 
 SLIDER
 5
-455
-255
-488
+205
+150
+238
+stdv_cultural_capital
+stdv_cultural_capital
+0
+50
+21.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+85
+285
+118
 max_effectiveness
 max_effectiveness
 0
 10
-10.0
+3.0
 1
 1
 resource_units_per_HG_per_day
 HORIZONTAL
 
 SLIDER
-145
-180
-285
-213
+5
+380
+177
+413
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.05
+1.0
 0.05
 1
 NIL
@@ -1127,24 +1002,24 @@ HORIZONTAL
 
 SLIDER
 5
-285
-145
-318
+415
+177
+448
 resources_tool
 resources_tool
-1
+0
 100
-60.0
+50.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-140
-95
-310
-128
+5
+485
+175
+518
 optimal_temperature
 optimal_temperature
 0
@@ -1156,25 +1031,25 @@ Celcius
 HORIZONTAL
 
 SLIDER
-15
-95
-140
-128
+5
+240
+130
+273
 optimal_precipitation
 optimal_precipitation
 0
 20
-3.0
+6.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-130
-10
-185
-43
+74
+9
+146
+42
 Startup
 startup
 NIL
@@ -1188,45 +1063,30 @@ NIL
 1
 
 SLIDER
-140
-130
-310
-163
+5
+520
+175
+553
 max_deviation_temp
 max_deviation_temp
 0
 30
-7.0
+9.0
 1
 1
 Celcius
 HORIZONTAL
 
 SLIDER
-10
+5
+275
 130
-135
-163
+308
 max_deviation_prec
 max_deviation_prec
 0
 10
-10.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-145
-215
-285
-248
-stdev_group_size
-stdev_group_size
-0
-30
-10.0
+3.0
 1
 1
 NIL
@@ -1234,9 +1094,24 @@ HORIZONTAL
 
 SLIDER
 5
-215
-145
-248
+345
+177
+378
+stdev_group_size
+stdev_group_size
+0
+30
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+5
+310
+177
+343
 average_group_size
 average_group_size
 1
@@ -1249,24 +1124,24 @@ HORIZONTAL
 
 SLIDER
 5
-180
-145
-213
+450
+177
+483
 number_of_bands
 number_of_bands
-2
-2000
-1009.0
+1
+1000
+1000.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-210
-45
-305
-78
+5
+555
+153
+588
 show-graticules?
 show-graticules?
 1
@@ -1274,10 +1149,10 @@ show-graticules?
 -1000
 
 SWITCH
-115
-45
-210
-78
+240
+50
+352
+83
 show_links
 show_links
 0
@@ -1285,10 +1160,10 @@ show_links
 -1000
 
 PLOT
-315
-385
-515
-535
+1240
+125
+1440
+275
 Number of bands
 Time
 Number
@@ -1303,11 +1178,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count bands"
 
 PLOT
-515
-385
-715
-535
-Mean Group Size Bands
+1240
+280
+1440
+430
+Mean group size of bands
 NIL
 NIL
 0.0
@@ -1321,10 +1196,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ group_size ] of bands"
 
 PLOT
-1375
-25
-1575
-175
+1445
+125
+1645
+275
 Mean Temperature
 NIL
 NIL
@@ -1339,10 +1214,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_temp ] of land_patches"
 
 PLOT
-1575
-25
-1775
-175
+1445
+280
+1645
+430
 Mean Precipitation
 NIL
 NIL
@@ -1356,369 +1231,20 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
-SWITCH
-25
-45
-115
-78
-debug?
-debug?
-0
-1
--1000
-
 TEXTBOX
-10
-10
-160
-28
-Controls
+325
+520
+475
+538
+Controls\n
 11
 0.0
 1
-
-TEXTBOX
-5
-80
-85
-98
-External Factors
-11
-0.0
-1
-
-TEXTBOX
-5
-165
-155
-183
-Initialization Model
-11
-0.0
-1
-
-TEXTBOX
-10
-335
-85
-353
-Assumptions
-11
-0.0
-1
-
-SLIDER
-5
-490
-160
-523
-maximum_days_moving
-maximum_days_moving
-0
-100
-100.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-5
-350
-140
-383
-max_food_patch
-max_food_patch
-0
-18000
-9000.0
-100
-1
-NIL
-HORIZONTAL
-
-SLIDER
-140
-350
-295
-383
-max_resource_patch
-max_resource_patch
-0
-18000
-4000.0
-100
-1
-NIL
-HORIZONTAL
-
-SLIDER
-5
-385
-205
-418
-max_altitude_food_available
-max_altitude_food_available
-1000
-5000
-2500.0
-100
-1
-m
-HORIZONTAL
-
-TEXTBOX
-1380
-10
-1530
-28
-Environment
-11
-0.0
-1
-
-PLOT
-1375
-180
-1575
-330
-Mean Food Availability
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ food_available ] of land_patches"
-
-PLOT
-1575
-180
-1775
-330
-Mean Resource Available
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ resources_available ] of land_patches"
-
-PLOT
-715
-385
-915
-535
-Mean Cultural Capital
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ cultural_capital ] of bands"
-
-PLOT
-915
-385
-1115
-535
-Extinct Bands
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot extinct_bands"
-
-PLOT
-1115
-385
-1315
-535
-Number of Connections
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count links "
-
-PLOT
-1315
-385
-1515
-535
-Total Time Moving
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"clear-all-plots " ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot total_movement"
-
-PLOT
-1515
-385
-1715
-535
-Mean Knowledge on Locations
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
-
-SLIDER
-5
-525
-160
-558
-cultural_capital_mutation
-cultural_capital_mutation
-1
-10
-4.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-160
-490
-290
-523
-merge_max_size
-merge_max_size
-2
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-160
-525
-260
-558
-split_min_size
-split_min_size
-1
-100
-25.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-5
-560
-177
-593
-growback_rate
-growback_rate
-4
-100
-16.0
-4
-1
-NIL
-HORIZONTAL
-
-PLOT
-315
-535
-515
-685
-Mean strength of links
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
-
-SLIDER
-5
-600
-247
-633
-volcano_eruption_distance
-volcano_eruption_distance
-0
-100
-10.0
-5
-1
-patches
-HORIZONTAL
-
-SLIDER
-5
-635
-227
-668
-ash_eruption_distance
-ash_eruption_distance
-0
-100
-50.0
-1
-1
-patches
-HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
-Social Consequences of Past Compound Events
-The aftermath of compound events will be analyzed with the help of Agent Based Modeling to gain a better understanding of the social consequences.
 
-One example of such a phenomena is the Laacher See eruption approximately 13,000 years ago located in present-day Germany. Archaeologist Felix Riede believes that this event has caused technological regression. The new inhabitants after the eruption were not as advanced in their toolmaking, even with some losing bow and arrow technology.
-
-This project was made by Brennen Bouwmeester and Kevin Su with supervision from Felix Riede and Igor Nikolic.
+(a general understanding of what the model is trying to show or explain)
 
 ## HOW IT WORKS
 
@@ -2030,42 +1556,6 @@ Polygon -10899396 true false 105 90 75 75 55 75 40 89 31 108 39 124 60 105 75 10
 Polygon -10899396 true false 132 85 134 64 107 51 108 17 150 2 192 18 192 52 169 65 172 87
 Polygon -10899396 true false 85 204 60 233 54 254 72 266 85 252 107 210
 Polygon -7500403 true true 119 75 179 75 209 101 224 135 220 225 175 261 128 261 81 224 74 135 88 99
-
-volcano
-true
-0
-Rectangle -955883 false false 120 105 180 105
-Rectangle -955883 false false 105 90 195 105
-Rectangle -955883 true false 105 90 195 105
-Rectangle -955883 true false 90 105 225 105
-Rectangle -955883 true false 105 75 195 90
-Rectangle -955883 true false 105 75 150 90
-Rectangle -1184463 true false 105 75 150 105
-Rectangle -955883 true false 120 120 165 165
-Rectangle -955883 true false 135 165 165 180
-Rectangle -6459832 true false 0 225 360 300
-Rectangle -6459832 true false 15 195 285 225
-Rectangle -6459832 true false 45 180 270 195
-Rectangle -6459832 true false 75 165 135 165
-Rectangle -6459832 true false 60 165 135 165
-Rectangle -6459832 true false 60 165 135 180
-Rectangle -6459832 true false 165 165 240 180
-Rectangle -6459832 true false 165 150 225 165
-Rectangle -6459832 true false 75 150 120 165
-Rectangle -6459832 true false 75 135 120 150
-Rectangle -6459832 true false 75 120 120 135
-Rectangle -6459832 true false 165 120 225 135
-Rectangle -6459832 true false 165 135 225 150
-Rectangle -955883 true false 105 105 195 105
-Rectangle -955883 true false 90 105 210 120
-Rectangle -16777216 true false 210 180 225 210
-Rectangle -16777216 true false 75 195 90 225
-Rectangle -16777216 true false 150 225 165 255
-Circle -955883 true false 120 120 30
-Rectangle -955883 true false 195 60 210 45
-Rectangle -955883 true false 210 45 225 60
-Rectangle -955883 true false 75 45 90 60
-Rectangle -955883 true false 135 15 150 30
 
 wheel
 false
