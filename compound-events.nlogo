@@ -890,7 +890,7 @@ INPUTBOX
 387
 487
 start_event
-5000.0
+10.0
 1
 0
 Number
@@ -969,7 +969,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-1
+0
 
 SLIDER
 527
@@ -1035,8 +1035,8 @@ volcano_duration_effect
 volcano_duration_effect
 0
 1000
-280.0
-10
+24.0
+4
 1
 ticks
 HORIZONTAL
@@ -1114,39 +1114,39 @@ Climate Change
 1
 
 SLIDER
-313
+310
 585
-486
+445
 618
 max_temp_change
 max_temp_change
 -5
 5
-5.0
+0.0
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-315
-620
-487
-653
+445
+585
+575
+618
 max_prec_change
 max_prec_change
 0
 10
-3.05
+0.0
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-735
+580
 585
-922
+735
 618
 increase_temp_variation
 increase_temp_variation
@@ -1160,9 +1160,9 @@ HORIZONTAL
 
 SLIDER
 735
-620
-922
-653
+585
+890
+618
 increase_prec_variation
 increase_prec_variation
 0
@@ -1174,19 +1174,45 @@ NIL
 HORIZONTAL
 
 SLIDER
-315
-655
-497
-688
+360
+620
+515
+653
 environment_delay
 environment_delay
 1
 1000
-151.0
+300.0
 1
 1
 ticks
 HORIZONTAL
+
+SLIDER
+665
+620
+800
+653
+variation_delay
+variation_delay
+0
+1000
+500.0
+1
+1
+ticks
+HORIZONTAL
+
+MONITOR
+1790
+590
+1892
+635
+Impacted Bands
+count bands with [ event_impact? = true ]
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

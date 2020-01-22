@@ -1,23 +1,30 @@
 to update-weather
-  set temp_change min list max_temp_change (temp_change + max_temp_change / environment_delay)
-  set prec_change min list max_prec_change (prec_change + max_prec_change / environment_delay)
+  if ticks < environment_delay [ 
+    set temp_change min list max_temp_change (temp_change + max_temp_change / environment_delay)
+    set prec_change min list max_prec_change (prec_change + max_prec_change / environment_delay) 
+  ]
+  
+  if ticks < variation_delay [ 
+    set sd_temp_change min list increase_temp_variation (sd_temp_change + increase_temp_variation / variation_delay)
+    set sd_prec_change min list increase_temp_variation (sd_prec_change + increase_prec_variation / variation_delay)
+  ]
   
   ask patches [
     if current_season = 0 [
-      set temp_current random-normal temp_jja sd_temp_jja + temp_change
-      set prec_current max list 0 random-normal prec_jja sd_prec_jja + prec_change
+      set temp_current random-normal temp_jja (sd_temp_jja + sd_temp_change) + temp_change
+      set prec_current max (list 0 random-normal prec_jja (sd_prec_jja + sd_prec_change)) + prec_change
     ]
     if current_season = 1 [
-      set temp_current random-normal temp_son sd_temp_son + temp_change
-      set prec_current max list 0 random-normal prec_son sd_prec_son + prec_change
+      set temp_current random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change
+      set prec_current max (list 0 random-normal prec_son (sd_prec_son + sd_prec_change)) + prec_change
     ]
     if current_season = 2 [
-      set temp_current random-normal temp_djf sd_temp_djf + temp_change
-      set prec_current max list 0 random-normal prec_djf sd_prec_djf + prec_change
+      set temp_current random-normal temp_djf (sd_temp_djf + sd_temp_change) + temp_change
+      set prec_current max (list 0 random-normal prec_djf (sd_prec_djf + sd_prec_change)) + prec_change
     ]
     if current_season = 3 [
-      set temp_current random-normal temp_mam sd_temp_mam + temp_change
-      set prec_current max list 0 random-normal prec_mam sd_prec_mam + prec_change
+      set temp_current random-normal temp_mam (sd_temp_mam + sd_temp_change) + temp_change
+      set prec_current max (list 0 random-normal prec_mam (sd_prec_mam + sd_prec_change)) + prec_change
     ]
   ]
 end

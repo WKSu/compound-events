@@ -49,6 +49,8 @@ globals [
   ; climate change
   temp_change
   prec_change
+  sd_temp_change
+  sd_prec_change
 
 
   ; global variables keeping track of statistics in the model
@@ -91,6 +93,8 @@ bands-own [
   time_spent_exploring
   time_spent_moving
   time_spent_gathering
+  
+  event_impact?
 ]
 
 links-own [
