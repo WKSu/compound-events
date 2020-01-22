@@ -382,10 +382,10 @@ show_links
 -1000
 
 PLOT
-315
-385
-515
-535
+1789
+25
+1989
+175
 Number of bands
 Time
 Number
@@ -400,10 +400,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count bands"
 
 PLOT
-515
-385
-715
-535
+1989
+25
+2189
+175
 Mean Group Size Bands
 NIL
 NIL
@@ -611,10 +611,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ resources_available ] of land_patches"
 
 PLOT
-715
-385
-915
-535
+1790
+337
+1990
+487
 Mean Cultural Capital
 NIL
 NIL
@@ -629,10 +629,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ cultural_capital ] of bands"
 
 PLOT
-915
-385
-1115
-535
+1789
+172
+1989
+322
 Extinct Bands
 NIL
 NIL
@@ -647,10 +647,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot extinct_bands"
 
 PLOT
-1115
-385
-1315
-535
+1375
+339
+1575
+489
 Number of Connections
 NIL
 NIL
@@ -665,10 +665,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count links "
 
 PLOT
-1315
-385
-1515
-535
+1375
+485
+1575
+635
 Total Time Moving
 NIL
 NIL
@@ -683,10 +683,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot total_movement"
 
 PLOT
-1515
-385
-1715
-535
+1989
+174
+2189
+324
 Mean Knowledge on Locations
 NIL
 NIL
@@ -761,10 +761,10 @@ NIL
 HORIZONTAL
 
 PLOT
-315
-535
-515
-685
+1575
+339
+1775
+489
 Mean strength of links
 NIL
 NIL
@@ -779,25 +779,25 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
 
 SLIDER
-520
-675
-730
-708
+312
+527
+522
+560
 volcano_eruption_distance
 volcano_eruption_distance
 0
 100
-5.0
+20.0
 5
 1
 patches
 HORIZONTAL
 
 SLIDER
-735
-590
-935
-623
+527
+442
+727
+475
 ash_eruption_distance_1
 ash_eruption_distance_1
 0
@@ -809,10 +809,10 @@ patches
 HORIZONTAL
 
 SLIDER
-735
-625
-935
-658
+527
+477
+727
+510
 ash_eruption_angle_1
 ash_eruption_angle_1
 0
@@ -824,10 +824,10 @@ degree
 HORIZONTAL
 
 SLIDER
-735
-555
-935
-588
+527
+407
+727
+440
 ash_wind_direction_1
 ash_wind_direction_1
 0
@@ -839,10 +839,10 @@ heading
 HORIZONTAL
 
 SLIDER
-935
-555
-1135
-588
+727
+407
+927
+440
 ash_wind_direction_2
 ash_wind_direction_2
 0
@@ -854,10 +854,10 @@ heading
 HORIZONTAL
 
 SLIDER
-935
-590
-1135
-623
+727
+442
+927
+475
 ash_eruption_distance_2
 ash_eruption_distance_2
 0
@@ -869,10 +869,10 @@ patches
 HORIZONTAL
 
 SLIDER
-935
-625
-1135
-658
+727
+477
+927
+510
 ash_eruption_angle_2
 ash_eruption_angle_2
 0
@@ -884,10 +884,10 @@ degree
 HORIZONTAL
 
 INPUTBOX
-520
-555
-595
-635
+312
+407
+387
+487
 start_event
 20.0
 1
@@ -895,10 +895,10 @@ start_event
 Number
 
 SLIDER
-520
-640
-730
-673
+312
+492
+522
+525
 random_ash_fall
 random_ash_fall
 0
@@ -910,10 +910,10 @@ random_ash_fall
 HORIZONTAL
 
 SWITCH
-600
-555
-730
-588
+392
+407
+522
+440
 show_impact
 show_impact
 0
@@ -921,20 +921,20 @@ show_impact
 -1000
 
 CHOOSER
-1140
-555
-1302
-600
+932
+407
+1094
+452
 ash_eruption_distribution
 ash_eruption_distribution
 "normal" "skewed far" "skewed near"
 1
 
 SLIDER
-1140
-605
-1312
-638
+932
+457
+1104
+490
 mean_ash_intensity
 mean_ash_intensity
 0
@@ -946,10 +946,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1140
-640
-1312
-673
+932
+492
+1104
+525
 stdv_ash_intensity
 stdv_ash_intensity
 0
@@ -961,20 +961,20 @@ NIL
 HORIZONTAL
 
 CHOOSER
-600
-590
-730
-635
+392
+442
+522
+487
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-1
+0
 
 SLIDER
-735
-670
-935
-703
+527
+522
+727
+555
 ash_eruption_radius
 ash_eruption_radius
 0
@@ -986,50 +986,50 @@ patches
 HORIZONTAL
 
 TEXTBOX
-520
-535
-670
-553
+312
+387
+462
+405
 Volcano Eruption\n
 11
 0.0
 1
 
 TEXTBOX
-737
-657
-797
-675
+530
+510
+590
+528
 If in-radius:
 11
 0.0
 1
 
 TEXTBOX
-735
-540
-885
-558
+527
+392
+677
+410
 If wind-cones
 11
 0.0
 1
 
 TEXTBOX
-1145
-540
-1340
-566
+937
+392
+1132
+418
 Changes to ash eruption distribution
 11
 0.0
 1
 
 SLIDER
-1390
-565
-1602
-598
+1099
+415
+1311
+448
 volcano_duration_effect
 volcano_duration_effect
 0
@@ -1039,6 +1039,68 @@ volcano_duration_effect
 1
 ticks
 HORIZONTAL
+
+PLOT
+1992
+338
+2192
+488
+Mean Technology Level
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
+
+MONITOR
+1997
+488
+2087
+533
+NIL
+lost_resources
+0
+1
+11
+
+MONITOR
+1882
+488
+1997
+533
+NIL
+death_by_volcano
+17
+1
+11
+
+MONITOR
+1792
+488
+1882
+533
+NIL
+death_by_ash
+0
+1
+11
+
+MONITOR
+1792
+532
+1951
+577
+NIL
+event_cultural_capital_loss
+2
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
