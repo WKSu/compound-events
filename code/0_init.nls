@@ -45,6 +45,10 @@ globals [
   current_season
   time_available
   max_move_time
+  
+  ; climate change
+  temp_change
+  prec_change
 
 
   ; global variables keeping track of statistics in the model

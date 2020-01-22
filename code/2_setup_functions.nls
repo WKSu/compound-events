@@ -6,6 +6,8 @@ to setup-globals
   set death_by_volcano 0
   set death_by_ash 0
   set event_cultural_capital_loss 0
+  set temp_change 0
+  set prec_change 0
 
   ; setting the threshold (how long they have to be in close proximity to each other) to create a link
   ; linear growth, the longer they are in close proximity, the more they will share

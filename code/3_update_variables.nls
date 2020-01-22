@@ -1,9 +1,8 @@
 to update-weather
+  set temp_change min list max_temp_change (temp_change + max_temp_change / environment_delay)
+  set prec_change min list max_prec_change (prec_change + max_prec_change / environment_delay)
+  
   ask patches [
-    
-    let temp_change yearly_temp_change / 4
-    let prec_change yearly_prec_change / 4
-
     if current_season = 0 [
       set temp_current random-normal temp_jja sd_temp_jja + temp_change
       set prec_current max list 0 random-normal prec_jja sd_prec_jja + prec_change

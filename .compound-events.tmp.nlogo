@@ -788,7 +788,7 @@ volcano_eruption_distance
 volcano_eruption_distance
 0
 100
-0.0
+5.0
 5
 1
 patches
@@ -890,7 +890,7 @@ INPUTBOX
 387
 487
 start_event
-5.0
+5000.0
 1
 0
 Number
@@ -969,7 +969,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-0
+1
 
 SLIDER
 527
@@ -1118,8 +1118,8 @@ SLIDER
 585
 486
 618
-yearly_temp_change
-yearly_temp_change
+max_temp_change
+max_temp_change
 -5
 5
 5.0
@@ -1131,22 +1131,22 @@ HORIZONTAL
 SLIDER
 315
 620
-485
+487
 653
-yearly_prec_change
-yearly_prec_change
+max_prec_change
+max_prec_change
 0
 10
-0.0
+3.05
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-495
+735
 585
-682
+922
 618
 increase_temp_variation
 increase_temp_variation
@@ -1159,9 +1159,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-495
+735
 620
-682
+922
 653
 increase_prec_variation
 increase_prec_variation
@@ -1174,18 +1174,18 @@ NIL
 HORIZONTAL
 
 SLIDER
-690
-585
-862
-618
-variation_delay
-variation_delay
-0
-100
-50.0
+315
+655
+497
+688
+environment_delay
+environment_delay
+1
+1000
+151.0
 1
 1
-NIL
+ticks
 HORIZONTAL
 
 @#$#@#$#@
