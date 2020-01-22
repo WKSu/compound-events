@@ -1,0 +1,106 @@
+to setup-patches
+  gis:load-coordinate-system ("data/gis/EPHA/europe.prj") ; set the coordinate system to WGS84 (CR84)
+
+  ; load in GIS data split
+  setup-altitude
+  setup-terrain-ruggedness-index
+  setup-precipitation
+  setup-temperature
+  update-weather ; added so that tick 0 also has current weather and precipitation
+
+  if show-graticules? = True [
+    setup-graticules
+  ]
+end
+
+to setup-altitude
+  ; loading GIS datasets
+  set europe-altitude gis:load-dataset "data/gis/GEBCO/gebco_elevation_resampled.asc" ; https://download.gebco.net/ - altitude data also used for the Allerod map
+  set europe-landmass gis:load-dataset "data/gis/EPHA/europe.asc" ; Allerod compiled by ZBSA after Andrén et al. 2011; Björck 1995; Brooks et al. 2011; Hughes et al. 2016; Lericolais 2017; Lunkka et al. 2012; Moscon et al. 2015; Patton et al. 2017; Seguinot et al. 2018; Stroeven et al. 2016; Subetto et al. 2017; Vassiljev/Saarse 2013; Weaver et al. 2003 - full bibliography in report"
+
+  gis:set-world-envelope-ds (gis:envelope-of europe-landmass) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+
+  ; assign the values to the patch attributes
+  gis:apply-raster europe-altitude altitude
+  gis:apply-raster europe-landmass landmass
+
+  ; start: coloring patches to represent european landmass 13900 - 12700BP
+  let min-landmass gis:minimum-of europe-landmass
+  let max-landmass gis:maximum-of europe-landmass
+
+  ask patches [
+    if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
+    [ set pcolor scale-color black landmass min-landmass max-landmass ]
+
+    if (landmass = 781.4310302734375) or (landmass = 1133.7154541015625) or (landmass = 0) ;; easy way to idenfity water bodies
+    [ set pcolor blue ]
+  ]
+  ; end: coloring landmass
+end
+
+to setup-terrain-ruggedness-index
+  set europe-tri gis:load-dataset "data/gis/EPHA/europe_TRI.asc" ; Allerod Map raster analysis in QGIS using GDAL to create the TRI
+  gis:apply-raster europe-tri ruggedness_index
+
+
+  ; Make water areas inaccessible for hunter-gatherer bands
+  ; They will never move into the water
+  ask patches with [ pcolor = blue ] [
+    set ruggedness_index 1000 ]
+  set land_patches patches with [ pcolor != blue ]
+end
+
+to setup-precipitation
+  ; loading GIS datasets
+  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_prec_jja gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_JJA.asc"
+  set europe_prec_son gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_SON.asc"
+
+  gis:set-world-envelope-ds (gis:envelope-of europe_prec_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+
+  ; assign the values to the patch attributes
+  gis:apply-raster europe_prec_djf prec_djf
+  gis:apply-raster europe_prec_mam prec_mam
+  gis:apply-raster europe_prec_jja prec_jja
+  gis:apply-raster europe_prec_son prec_son
+end
+
+to setup-temperature
+  ; loading GIS datasets
+  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
+  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
+  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  set europe_temp_djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
+  set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
+  set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
+  set europe_temp_son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+  set europe_temp_range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
+
+  gis:set-world-envelope-ds (gis:envelope-of europe_temp_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
+
+  ; assign the values to the patch attributes
+  gis:apply-raster europe_temp_djf temp_djf
+  gis:apply-raster europe_temp_mam temp_mam
+  gis:apply-raster europe_temp_jja temp_jja
+  gis:apply-raster europe_temp_son temp_son
+  gis:apply-raster europe_temp_range temp_range
+
+  ; based on the QGIS Raster Analysis of each map
+  set sd_temp_djf 8.483842584
+  set sd_temp_mam 3.492836109
+  set sd_temp_jja 3.487510518
+  set sd_temp_son 5.298136605
+
+  set sd_prec_djf 1.223634201
+  set sd_prec_mam 0.785912515
+  set sd_prec_jja 0.76655715
+  set sd_prec_son 1.126944302
+end
+
+to setup-graticules
+  gis:load-coordinate-system ("data/gis/Natural Earth 2/ne_10m_graticules_5.prj") ;
+  set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
+  gis:draw europe-grid 1
+end

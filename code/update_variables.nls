@@ -1,0 +1,117 @@
+to update-weather
+  ask patches [
+
+    if current_season = 0 [
+      set temp_current random-normal temp_jja sd_temp_jja
+      set prec_current max list 0 random-normal prec_jja sd_prec_jja
+    ]
+    if current_season = 1 [
+      set temp_current random-normal temp_son sd_temp_son
+      set prec_current max list 0 random-normal prec_son sd_prec_son
+    ]
+    if current_season = 2 [
+      set temp_current random-normal temp_djf sd_temp_djf
+      set prec_current max list 0 random-normal prec_djf sd_prec_djf
+    ]
+    if current_season = 3 [
+      set temp_current random-normal temp_mam sd_temp_mam
+      set prec_current max list 0 random-normal prec_mam sd_prec_mam
+    ]
+  ]
+end
+
+to update-food-and-resources
+  ask land_patches[
+
+    ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
+    if current_season = 0 [
+      set temp_year replace-item 0 temp_year temp_current
+      set prec_year replace-item 0 prec_year prec_current
+    ]
+    if current_season = 1[
+      set temp_year replace-item 1 temp_year temp_current
+      set prec_year replace-item 1 prec_year prec_current
+    ]
+    if current_season = 2[
+      set temp_year replace-item 2 temp_year temp_current
+      set prec_year replace-item 2 prec_year prec_current
+    ]
+    if current_season = 3[
+      set temp_year replace-item 3 temp_year temp_current
+      set prec_year replace-item 3 prec_year prec_current
+    ]
+
+    set average_temp mean temp_year
+    set average_prec mean prec_year
+
+    ;min-max feature scaling
+    let temp_deviation 0
+    if average_temp <= optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
+    ]
+    if average_temp > optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
+    ]
+
+    ;min-max feature scaling
+    let prec_deviation 0
+    if average_prec <= optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+    ]
+    if average_prec > optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+    ]
+
+    set food_available min list (((temp_deviation + prec_deviation) / 2) * max_food_patch) (food_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_food_patch) / growback_rate)
+    set resources_available min list (((temp_deviation + prec_deviation) / 2) * max_resource_patch) (resources_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_resource_patch) / growback_rate)
+
+    if abs (average_temp - optimal_temperature) > max_deviation_temp or volcano_impact? = true  [
+      set food_available 0
+      set resources_available 0
+    ]
+    if abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true  [
+      set food_available 0
+      set resources_available 0]
+  ]
+end
+
+to update_bands_variables
+  ;new season means the bands have all available time to move, gather and explore
+  if show_links = False[
+    ask links[
+      set hidden? True
+    ]
+  ]
+  ask bands[
+    set time_spent 0
+    set time_spent_exploring 0
+    set time_spent_moving 0
+    set time_spent_gathering 0
+    ;mobility is dependent on group_size
+    set mobility max list 1 (initial_mobility - (round (group_size / 10)))
+
+    set food_needed group_size * 90
+    set resources_needed (group_size * 30) - resources_owned
+    if resources_needed < 0[
+      set resources_needed 0
+    ]
+
+    ;Mutation of the cultural capital - normal distribution
+    set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
+
+    ;as the season has changed, the bands change their knowledge about the patches to the current season
+    if current_season = 0[
+      set known_locations_current known_locations_summer
+    ]
+    if current_season = 1[
+      set known_locations_current known_locations_fall
+    ]
+    if current_season = 2[
+      set known_locations_current known_locations_winter
+    ]
+    if current_season = 3[
+      set known_locations_current known_locations_spring
+    ]
+  ]
+
+end

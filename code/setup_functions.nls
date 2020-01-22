@@ -1,0 +1,156 @@
+to setup-globals
+  ; resetting statistics
+  set total_movement 0
+  set extinct_bands 0
+
+  ; setting the threshold (how long they have to be in close proximity to each other) to create a link
+  ; linear growth, the longer they are in close proximity, the more they will share
+  set first_threshold_connection threshold_location_knowledge
+  set second_threshold_connection 2 * threshold_location_knowledge
+  set third_threshold_connection 3 * threshold_location_knowledge
+  set fourth_threshold_connection 4 * threshold_location_knowledge
+
+  set max_move_time maximum_days_moving
+  set time_available 90
+  set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
+end
+
+to setup-food-and-resources
+  ask land_patches[
+    ; reset the values for the compound events
+    set volcano_impact? false
+    set ash_impact? false
+    set ash_fall 0
+
+    ; average for temperature and precipitation based on initial setup data
+    set temp_year (list temp_jja temp_son temp_djf temp_mam)
+    set average_temp mean temp_year
+
+    set prec_year (list prec_jja prec_son prec_djf prec_mam)
+    set average_prec mean prec_year
+
+    set min_temperature optimal_temperature - max_deviation_temp
+    set max_temperature optimal_temperature + max_deviation_temp
+
+    set min_precipitation optimal_precipitation - max_deviation_prec
+    set max_precipitation optimal_precipitation + max_deviation_prec
+
+    ;min-max feature scaling (linear)
+    let temp_deviation 0
+
+    if average_temp <= optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
+    ]
+    if average_temp > optimal_temperature[
+      set temp_deviation (1 - (average_temp - optimal_temperature) / (max_temperature - optimal_temperature))
+    ]
+
+    ;min-max feature scaling (linear)
+    let prec_deviation 0
+    if average_prec <= optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
+    ]
+    if average_prec > optimal_precipitation[
+      set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
+    ]
+
+    set food_available ((temp_deviation + prec_deviation) / 2) * max_food_patch
+    set resources_available ((temp_deviation + prec_deviation) / 2) * max_resource_patch
+
+    ; set the food availability and resources on 0 when they are not able meet the right conditions
+    if abs (average_temp - optimal_temperature) > max_deviation_temp [
+      set food_available 0
+      set resources_available 0
+    ]
+    if abs (average_prec - optimal_precipitation) > max_deviation_prec [
+      set food_available 0
+      set resources_available 0]
+
+    ; economic factors such as resources (mining) might still be possible in high altitudes
+    ; West, J. B. (2002). Highest permanent human habitation. High altitude medicine & biology, 3(4), 401-407.
+    ; Highest contemporary altitude where people are living is 2480m https://www.wikiwand.com/en/List_of_highest_towns_by_country
+    if altitude > max_altitude_food_available [
+      set food_available 0 ]
+  ]
+end
+
+to spread-population
+  ; this function looks at the initial food availability and tries to spawn bands in locations where there is food available
+  ; ensures that no band is spawned on uninhabitable patches!
+  let median_food median [food_available] of land_patches
+  let fertile_patches land_patches with [food_available >= median_food]
+  set fertile_patches fertile_patches with [pycor > 135 or pycor < 86 or pxcor > 70 ]
+  let ireland_patches land_patches with [pycor < 135 and pycor > 86 and pxcor < 70]
+
+  ask n-of (number_of_bands - 1) fertile_patches [
+    setup-agents
+  ]
+  ask one-of ireland_patches with [food_available >= median_food][
+    setup-agents
+  ]
+end
+
+to setup-volcano
+  ; set up the map size in coordinates
+  let topleftx -12
+  let toplefty 60
+  let bottomrightx 42
+  let bottomrighty 40
+
+  let laachersee_lat 7.266867
+  let laachersee_lon 50.412276
+
+  ; calculate the location in the netlogo world, code based on the setup project from Igor Nikolic for SEN1211
+  let lengthx bottomrightx - topleftx ; length of the map in coordinate units
+  let deltax laachersee_lat - topleftx  ; xdistance from edge on the x, in cordinate units
+  let xcoordinates max-pxcor * (deltax / lengthx)
+
+  let lengthy toplefty - bottomrighty
+  let deltay laachersee_lon - bottomrighty
+  let ycoordinates max-pycor * (deltay / lengthy)
+
+  ; color the Laacher See area in red
+  ask patch xcoordinates ycoordinates [
+    sprout-volcanoes 1 [
+      set shape "volcano"
+      set size 10
+      set heading 0
+    ]
+    ; increase visibility of the area of the volcano, it is not up to scale!
+  ]
+end
+
+to setup-agents
+
+  sprout-bands 1 [
+    set shape "person"
+    set size 2
+    set color black
+    set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
+    set resources_owned 0
+    if cultural_capital_distribution = "normal"[
+      set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
+    ]
+    if cultural_capital_distribution = "uniform"[
+      set cultural_capital random mean_cultural_capital + 1
+    ]
+    if cultural_capital_distribution = "poisson"[
+      set cultural_capital min list 100 (round max list 1 random-poisson mean_cultural_capital)
+    ]
+    set group_size round group_size
+    set food_needed group_size * 90 ;one unit per day
+    set resources_needed group_size * 30 ;one unit per 3 days
+
+    set technology_level cultural_capital
+    set effectiveness max_effectiveness * (technology_level / 100)
+
+    set initial_mobility random 10 + 1
+    set health 100
+    set current_home_location patch-here
+    set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
+    set known_locations_fall []
+    set known_locations_winter []
+    set known_locations_spring []
+  ]
+
+end
