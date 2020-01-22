@@ -1191,7 +1191,7 @@ HORIZONTAL
 SLIDER
 665
 620
-800
+810
 653
 variation_delay
 variation_delay
@@ -1259,9 +1259,9 @@ HORIZONTAL
 
 SLIDER
 940
-610
+595
 1112
-643
+628
 increased_knowledge
 increased_knowledge
 0
