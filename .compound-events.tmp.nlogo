@@ -968,7 +968,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-0
+1
 
 SLIDER
 735
