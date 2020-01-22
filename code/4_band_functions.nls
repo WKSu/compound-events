@@ -340,6 +340,9 @@ to use_gathered_products
     ]
     if group_size < 1[
       set extinct_bands extinct_bands + 1
+      if [ ash_impact? ] of patch-here [ 
+        set death_by_ash death_by_ash + 1
+        set event_cultural_capital_loss event_cultural_capital_loss + cultural_capital ]
       die
     ]
     set group_size ceiling (group_size * standard_birth_rate)

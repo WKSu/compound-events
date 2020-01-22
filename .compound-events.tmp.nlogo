@@ -12,17 +12,18 @@
 ; Bugs:
 ;- Volcano somehow disappears after it erupts.. no intentional code.. but also not that much of a problem because it formed a crater in real life anyways
 
-__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls" ]
+__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
+             "code/6_climate_change_functions.nls" ]
 
 to startup
   ; startup command only applies these functions during the initial start of the model
   ; it saves time by not loading in all the GIS data everytime a new run is started!
   clear-all
-  profiler:start
+;  profiler:start
   ; all these functions are in the "load_gis.nls"
   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
-  profiler:stop
-  print profiler:report
+;  profiler:stop
+;  print profiler:report
 end
 
 to setup
@@ -293,7 +294,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-11.0
+7.0
 1
 1
 Celcius
@@ -308,7 +309,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-10.0
+4.0
 1
 1
 NIL
@@ -395,7 +396,7 @@ Number
 10.0
 true
 false
-"" ""
+"" "if tick = start_event [\nplot 1000 ]"
 PENS
 "default" 1.0 0 -16777216 true "" "plot count bands"
 
@@ -669,7 +670,7 @@ PLOT
 485
 1575
 635
-Total Time Moving
+Average Total Time Moving
 NIL
 NIL
 0.0
@@ -680,7 +681,7 @@ true
 false
 "clear-all-plots " ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot total_movement"
+"default" 1.0 0 -16777216 true "" "plot total_movement / count bands"
 
 PLOT
 1989
@@ -754,7 +755,7 @@ growback_rate
 growback_rate
 4
 100
-28.0
+20.0
 4
 1
 NIL
@@ -787,7 +788,7 @@ volcano_eruption_distance
 volcano_eruption_distance
 0
 100
-20.0
+0.0
 5
 1
 patches
@@ -889,7 +890,7 @@ INPUTBOX
 387
 487
 start_event
-20.0
+5.0
 1
 0
 Number
@@ -954,7 +955,7 @@ stdv_ash_intensity
 stdv_ash_intensity
 0
 50
-10.0
+20.0
 1
 1
 NIL
@@ -1034,7 +1035,7 @@ volcano_duration_effect
 volcano_duration_effect
 0
 1000
-10.0
+280.0
 10
 1
 ticks
@@ -1059,10 +1060,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
 
 MONITOR
-1997
-488
-2087
-533
+1949
+532
+2039
+577
 NIL
 lost_resources
 0
@@ -1070,9 +1071,9 @@ lost_resources
 11
 
 MONITOR
-1882
+1792
 488
-1997
+1907
 533
 NIL
 death_by_volcano
@@ -1081,9 +1082,9 @@ death_by_volcano
 11
 
 MONITOR
-1792
+1907
 488
-1882
+1997
 533
 NIL
 death_by_ash
@@ -1101,6 +1102,91 @@ event_cultural_capital_loss
 2
 1
 11
+
+TEXTBOX
+315
+569
+503
+592
+Climate Change
+11
+0.0
+1
+
+SLIDER
+313
+585
+486
+618
+yearly_temp_change
+yearly_temp_change
+-5
+5
+5.0
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+315
+620
+485
+653
+yearly_prec_change
+yearly_prec_change
+0
+10
+0.0
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+495
+585
+682
+618
+increase_temp_variation
+increase_temp_variation
+0
+10
+0.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+495
+620
+682
+653
+increase_prec_variation
+increase_prec_variation
+0
+10
+0.0
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+690
+585
+862
+618
+variation_delay
+variation_delay
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -50,6 +50,10 @@ globals [
   ; global variables keeping track of statistics in the model
   extinct_bands
   total_movement
+  lost_resources
+  death_by_volcano ; count the band deads!
+  death_by_ash ; count the band deads!
+  event_cultural_capital_loss
 ]
 
 bands-own [
@@ -91,6 +95,8 @@ links-own [
 ]
 
 patches-own [
+  max_food
+  max_resources
   food_available
   resources_available
   altitude

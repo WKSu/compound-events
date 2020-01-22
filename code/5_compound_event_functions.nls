@@ -59,21 +59,30 @@ to compound_event_impact
     ; normalize ash impact between 0 and 100
     if ash_eruption_distribution = "normal" [
       ask patches with [ ash_impact? = true ] [
-        set ash_fall random-normal mean_ash_intensity stdv_ash_intensity ]
+        set ash_fall min list 100 random-normal mean_ash_intensity stdv_ash_intensity ]
     ]
 
     if ash_eruption_distribution = "skewed far" [
-      let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2
+      let max_distance 0 
+      if ash_fallout = "wind-cones" [ 
+        set max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 ]
+      if ash_fallout = "in-radius" [ 
+        set max_distance ash_eruption_radius ] 
 
       ask patches with [ ash_impact? = true ] [
-        set ash_fall random-poisson (distance patch 186 95) / (max_distance) * 100 ]
+        set ash_fall min list 100 random-poisson ((distance patch 186 95) / (max_distance) * 100) 
+      ]
     ]
 
     if ash_eruption_distribution = "skewed near" [
-      let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2
+      let max_distance 0 
+      if ash_fallout = "wind-cones" [ 
+        set max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 ]
+      if ash_fallout = "in-radius" [ 
+        set max_distance ash_eruption_radius ] 
 
       ask patches with [ ash_impact? = true ] [
-        set ash_fall random-poisson ((1 - (distance patch 186 95 / max_distance)) * 100)
+        set ash_fall min list 100 random-poisson ((1 - (distance patch 186 95 / max_distance)) * 100)
       ]
     ]
 
@@ -104,14 +113,12 @@ to visualize-impact-volcano
       [ set pcolor blue ]
     ]
   ]
-
-
   if show_impact = true [
-    ask patches with [ volcano_impact? = true ] [ set pcolor red ]
     ask patches with [ ash_impact? = true ] [
       set pcolor scale-color orange ash_fall 0 100
-
     ]
+    
+    ask patches with [ volcano_impact? = true ] [ set pcolor red ]
   ]
 end
 
@@ -120,15 +127,33 @@ to interaction_volcano
   ;
   if ticks = start_event [
     ask patches with [ volcano_impact? = true ] [
-      ask turtles-here [ die ]
+      ask bands-here [ 
+        set death_by_volcano death_by_volcano + 1
+        set event_cultural_capital_loss event_cultural_capital_loss + cultural_capital
+        die 
+      ]
       set food_available 0
       set resources_available 0
+    ]
+    
+    ask patches with [ ash_impact? = true ] [
+      ; lower the max food and resources of a patch based on the ash fall
+      set max_food min list 0 max_food_patch * ( 1 - ash_fall / 100)
+      set max_resources min list 0 max_resource_patch * (1 - ash_fall / 100)
+      
+      ask bands-here [ 
+        set lost_resources lost_resources + resources_owned
+        set resources_owned 0 ] ; assumption that the bands are not able to move any extra resources during a catastrophe
     ]
   ]
 
   if ticks = start_event + volcano_duration_effect [
-    ask patches with [ volcano_impact? = true ] [
+    ask patches with [ volcano_impact? = true or ash_impact? = true ] [
       set volcano_impact? false
+      set ash_impact? false
+      set ash_fall 0
     ]
+    
+    
   ]
 end
