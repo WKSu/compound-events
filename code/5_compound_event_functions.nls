@@ -143,8 +143,8 @@ to interaction_volcano
       set max_resources min list 0 max_resource_patch * (1 - ash_fall / 100)
       
       ask bands-here [ 
-        set lost_resources lost_resources + resources_owned
         set event_impact? true
+        set lost_resources lost_resources + resources_owned
         set resources_owned 0 ] ; assumption that the bands are not able to move any extra resources during a catastrophe
     ]
   ]
