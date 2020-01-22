@@ -1232,6 +1232,46 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot count links / count bands"
 
+TEXTBOX
+945
+540
+1095
+558
+Policy Levers
+11
+0.0
+1
+
+SLIDER
+940
+560
+1160
+593
+cooperation_radius
+cooperation_radius
+0
+10
+1.0
+1
+1
+patches
+HORIZONTAL
+
+SLIDER
+940
+610
+1112
+643
+increased_knowledge
+increased_knowledge
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 Social Consequences of Past Compound Events

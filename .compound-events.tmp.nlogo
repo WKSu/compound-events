@@ -87,6 +87,21 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
+SLIDER
+0
+0
+0
+0
+NIL
+NIL
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
 BUTTON
 60
 10
@@ -1232,19 +1247,29 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot count links / count bands"
 
+TEXTBOX
+945
+540
+1095
+558
+Policy Levers
+11
+0.0
+1
+
 SLIDER
 940
-565
-1112
-598
-NIL
-NIL
+560
+1160
+593
+cooperation_radius
+cooperation_radius
 0
-100
-50.0
+10
+1.0
 1
 1
-NIL
+patches
 HORIZONTAL
 
 @#$#@#$#@

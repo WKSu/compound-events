@@ -13,10 +13,12 @@ to interact-with-other-bands
   ask bands [
     ;define the current turtle who is asked to interact
     let current_band self
-
+    
     ;put all the turtles on the same or a neighbouring patch in a turtleset
-    let neighbor_bands (turtle-set bands-on neighbors bands-here)
-    ask neighbor_bands[
+;    let neighbor_bands (turtle-set bands-on neighbors bands-here)
+    let neighbor_bands (turtle-set bands in-radius cooperation_radius)
+    
+    ask neighbor_bands [
 
       ;if there is no link between the neighbouring bands yet...
       if not member? current_band in-link-neighbors and current_band != self[
