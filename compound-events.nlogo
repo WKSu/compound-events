@@ -247,7 +247,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-6.0
+5.0
 1
 1
 Celcius
@@ -294,7 +294,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-5.0
+6.0
 1
 1
 Celcius
@@ -890,7 +890,7 @@ INPUTBOX
 387
 487
 start_event
-10.0
+20.0
 1
 0
 Number
