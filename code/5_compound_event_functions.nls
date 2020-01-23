@@ -40,7 +40,7 @@ to compound_event_impact
 
         ; take the average of the distances for 'random' ash fall
         let average_distance (ash_eruption_distance_1 + ash_eruption_distance_2) / 2
-        let available_patches average_distance ^ 2 * 3.14
+        let available_patches average_distance ^ 2 * 3.14 ; calculate surface area of possible patches with patches
         let random_patches round (available_patches * ( random_ash_fall / 100 ))
 
         ask n-of random_patches patches in-radius average_distance [
@@ -92,6 +92,8 @@ to compound_event_impact
 end
 
 to visualize-impact-volcano
+
+  
   if ticks = 0 or ticks = start_event + volcano_duration_effect [
     ; start: coloring patches to represent european landmass 13900 - 12700BP
     let min-landmass gis:minimum-of europe-landmass
@@ -106,9 +108,8 @@ to visualize-impact-volcano
     ]
   ]
   
-  
-  if ticks = start_event [ 
-    if show_impact = true [
+  if show_impact = true [
+    if ticks = start_event [ 
       ask patches with [ ash_impact? = true ] [
         set pcolor scale-color orange ash_fall 0 100
       ]
@@ -119,6 +120,10 @@ to visualize-impact-volcano
       ask bands with [ event_impact? = true ] [ 
         set color red 
       ]
+    ]
+    
+    ask patches with [ ash_impact? = true ] [
+        set pcolor scale-color orange ash_fall 0 100
     ]
   ]
 end
@@ -147,6 +152,12 @@ to interaction_volcano
         set lost_resources lost_resources + resources_owned
         set resources_owned 0 ] ; assumption that the bands are not able to move any extra resources during a catastrophe
     ]
+  ]
+  
+  ; decrease ash fall gradually based on the volcano duration effect
+  ask patches with [ ash_impact? = true ] [
+    let ash_fall_decrease ash_fall / volcano_duration_effect
+    set ash_fall ash_fall - ash_fall_decrease
   ]
 
   if ticks = start_event + volcano_duration_effect [
