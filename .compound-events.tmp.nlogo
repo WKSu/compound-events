@@ -55,10 +55,12 @@ to go
 
   ; functions in "compound_event_functions.nls"
   compound_event_impact
+  find-all-components
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
 end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 310
@@ -890,7 +892,7 @@ INPUTBOX
 387
 487
 start_event
-20.0
+50000.0
 1
 0
 Number
@@ -1251,7 +1253,7 @@ cooperation_radius
 cooperation_radius
 0
 10
-1.0
+4.0
 1
 1
 patches

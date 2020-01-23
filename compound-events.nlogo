@@ -890,7 +890,7 @@ INPUTBOX
 387
 487
 start_event
-20.0
+50000.0
 1
 0
 Number
@@ -1251,7 +1251,7 @@ cooperation_radius
 cooperation_radius
 0
 10
-1.0
+4.0
 1
 1
 patches
