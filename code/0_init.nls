@@ -1,4 +1,4 @@
-extensions [ gis profiler ]
+extensions [ gis profiler nw ]
 
 breed [ bands band ]
 breed [ volcanoes volcano ]
@@ -60,6 +60,8 @@ globals [
   death_by_volcano ; count the band deads!
   death_by_ash ; count the band deads!
   event_cultural_capital_loss
+  unique_communities
+  agentset_unique_communities
 ]
 
 bands-own [
@@ -97,6 +99,10 @@ bands-own [
   time_spent_gathering
   
   event_impact?
+  
+  community
+  community_name
+  community_size
 ]
 
 links-own [

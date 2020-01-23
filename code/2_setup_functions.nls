@@ -10,6 +10,8 @@ to setup-globals
   set prec_change 0
   set sd_temp_change 0
   set sd_prec_change 0
+  set unique_communities [ ]
+  
 
   ; setting the threshold (how long they have to be in close proximity to each other) to create a link
   ; linear growth, the longer they are in close proximity, the more they will share
@@ -21,6 +23,7 @@ to setup-globals
   set max_move_time maximum_days_moving
   set time_available 90
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
+  
 end
 
 to setup-food-and-resources

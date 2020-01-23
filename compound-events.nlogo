@@ -11,8 +11,10 @@
 
 ; Bugs:
 ;- Volcano somehow disappears after it erupts.. no intentional code.. but also not that much of a problem because it formed a crater in real life anyways
+; Fix Hatch Links
 
-__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls" ]
+__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
+             "code/6_community.nls" ]
 
 to startup
   ; startup command only applies these functions during the initial start of the model
@@ -55,6 +57,8 @@ to go
 
   ; functions in "compound_event_functions.nls"
   compound_event_impact
+
+  community-detection
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
@@ -372,9 +376,9 @@ show-graticules?
 -1000
 
 SWITCH
-95
+5
 45
-195
+105
 78
 show_links
 show_links
@@ -455,10 +459,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
 SWITCH
-5
-45
-95
-78
+1185
+530
+1275
+563
 debug?
 debug?
 0
@@ -890,7 +894,7 @@ INPUTBOX
 387
 487
 start_event
-50000.0
+50.0
 1
 0
 Number
@@ -917,7 +921,7 @@ SWITCH
 440
 show_impact
 show_impact
-0
+1
 1
 -1000
 
@@ -1035,7 +1039,7 @@ volcano_duration_effect
 volcano_duration_effect
 0
 1000
-1000.0
+24.0
 4
 1
 ticks
@@ -1251,7 +1255,7 @@ cooperation_radius
 cooperation_radius
 0
 10
-4.0
+2.0
 1
 1
 patches
@@ -1330,6 +1334,53 @@ mobility_size_factor
 1
 NIL
 HORIZONTAL
+
+PLOT
+1375
+645
+1575
+795
+Count Unique Communities
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot length unique_communities"
+
+PLOT
+1580
+645
+1780
+795
+plot 1
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ community_size ] of agentset_unique_communities"
+
+SWITCH
+105
+45
+225
+78
+color_clusters?
+color_clusters?
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

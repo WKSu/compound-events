@@ -29,8 +29,8 @@ to interact-with-other-bands
           set updated? False
           set color red
           if show_links = False[
-            set hidden? True
-          ]
+            set hidden? true
+          ] 
         ]
       ]
       ;make sure turtles don't see themselves as neighbours
@@ -41,7 +41,7 @@ to interact-with-other-bands
           ask current_link[
             ;increase the strength of the current link as the groups have been close to each other for another tick
             set strength_of_connection strength_of_connection + 1
-            set updated? True
+            set updated? true
           ]
           
           
@@ -377,13 +377,21 @@ to split_bands
           let current_link self
           ifelse end1 = [mother] of baby_band[
             ask end2 [ create-link-with baby_band 
-              [set strength_of_connection [strength_of_connection] of current_link]
+              [set strength_of_connection [strength_of_connection] of current_link
+                set color red 
+                if show_links = False[
+                  set hidden? true
+              ]]
             ]
           ]
           [
             ask end1 [create-link-with baby_band
-              [set strength_of_connection [strength_of_connection] of current_link]
-            
+              [set strength_of_connection [strength_of_connection] of current_link
+                set color red
+                if show_links = False[
+                  set hidden? true
+              ]]
+              
             ]
           ]
         ]
