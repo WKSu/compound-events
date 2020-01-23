@@ -12,8 +12,7 @@
 ; Bugs:
 ;- Volcano somehow disappears after it erupts.. no intentional code.. but also not that much of a problem because it formed a crater in real life anyways
 
-__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
-             "code/6_climate_change_functions.nls" ]
+__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls" ]
 
 to startup
   ; startup command only applies these functions during the initial start of the model
@@ -756,7 +755,7 @@ growback_rate
 growback_rate
 4
 100
-20.0
+12.0
 4
 1
 NIL
@@ -1028,10 +1027,10 @@ Changes to ash eruption distribution
 1
 
 SLIDER
-1099
-415
-1311
-448
+1110
+445
+1322
+478
 volcano_duration_effect
 volcano_duration_effect
 0
@@ -1272,6 +1271,17 @@ increased_knowledge
 1
 NIL
 HORIZONTAL
+
+SWITCH
+1110
+410
+1312
+443
+ash_fall_gradual_decrease
+ash_fall_gradual_decrease
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?

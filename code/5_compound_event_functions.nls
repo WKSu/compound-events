@@ -154,10 +154,12 @@ to interaction_volcano
     ]
   ]
   
-  ; decrease ash fall gradually based on the volcano duration effect
-  ask patches with [ ash_impact? = true ] [
-    let ash_fall_decrease ash_fall / volcano_duration_effect
-    set ash_fall ash_fall - ash_fall_decrease
+  if ash_fall_gradual_decrease [
+    ; decrease ash fall gradually based on the volcano duration effect
+    ask patches with [ ash_impact? = true ] [
+      let ash_fall_decrease ash_fall / volcano_duration_effect
+      set ash_fall ash_fall - ash_fall_decrease
+    ]
   ]
 
   if ticks = start_event + volcano_duration_effect [
