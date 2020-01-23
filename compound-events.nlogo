@@ -354,7 +354,7 @@ number_of_bands
 number_of_bands
 2
 2000
-1000.0
+100.0
 1
 1
 NIL
@@ -755,7 +755,7 @@ growback_rate
 growback_rate
 4
 100
-12.0
+4.0
 4
 1
 NIL
@@ -863,7 +863,7 @@ ash_eruption_distance_2
 ash_eruption_distance_2
 0
 100
-45.0
+60.0
 5
 1
 patches
