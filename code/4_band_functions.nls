@@ -2,7 +2,7 @@ to interact-with-other-bands
   ;Make sure that links do not get updated by both of the ends (turtles)
   ask links [
     set updated? False
-    if ticks mod 4 = 0[
+    if ticks mod decrease_connection = 0 [
       set strength_of_connection strength_of_connection - 1
     ]
     if strength_of_connection < 1[
@@ -15,14 +15,14 @@ to interact-with-other-bands
     let current_band self
     
     ;put all the turtles on the same or a neighbouring patch in a turtleset
-;    let neighbor_bands (turtle-set bands-on neighbors bands-here)
+    ;    let neighbor_bands (turtle-set bands-on neighbors bands-here)
     let neighbor_bands (turtle-set bands in-radius cooperation_radius)
     
     ask neighbor_bands [
-
+      
       ;if there is no link between the neighbouring bands yet...
       if not member? current_band in-link-neighbors and current_band != self[
-
+        
         ;create a link between the bands
         create-link-with current_band[
           set strength_of_connection 0
@@ -43,8 +43,8 @@ to interact-with-other-bands
             set strength_of_connection strength_of_connection + 1
             set updated? True
           ]
-
-
+          
+          
           if [strength_of_connection] of current_link > second_threshold_connection[
             update_location_knowledge known_locations_summer current_band
             update_location_knowledge known_locations_fall current_band
@@ -52,7 +52,7 @@ to interact-with-other-bands
           if [strength_of_connection] of current_link > first_threshold_connection[
             update_location_knowledge known_locations_winter current_band
             update_location_knowledge known_locations_spring current_band
-            set technology_level technology_level + 1  ;also share knowledge about technologies from the first threshold on
+            set cultural_capital cultural_capital + 1  ;also share knowledge about technologies from the first threshold on
           ]
           ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
           if [strength_of_connection] of current_link > fourth_threshold_connection[
@@ -61,7 +61,7 @@ to interact-with-other-bands
         ]
       ]
     ]
-
+    
   ]
 end
 
@@ -77,9 +77,9 @@ end
 
 to update_location_knowledge [known_locations_given_season current_band]
   ;Function that shares knowledge between bands (will happen twice per link as both agents have to update their knowledge)
-
+  
   let temporary_list_of_known_locations [known_locations_given_season] of current_band
-
+  
   let x 0
   ;First delete all the other bands knowledge which the band has already (own information > foreign information)
   while [x < length known_locations_given_season][
@@ -113,13 +113,14 @@ to gather_move_explore
         let new_home min-one-of potential_new_locations [distance self]
         if new_home != current_home_location [
           move new_home ]
-
+        
       ]
       ;If there is no location available that has enough food AND resources, explore to find a patch that has enough
       if not any? potential_new_locations[
         explore
+        
       ]
-
+      
     ]
     [
       ;delete current knowledge on this patch in the current season
@@ -127,7 +128,7 @@ to gather_move_explore
       ;add the new knowledge on this patch in the current season
       set known_locations_current lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_current
     ]
-
+    
     gather
     ;At the end of a season, the knowledge should be updated about the season that has just passed
     if current_season = 0[
@@ -151,12 +152,12 @@ to gather
   let time_left (time_available - time_spent)
   ;print sentence "time_available: " time_available
   ;print sentence "time_spent: " time_spent
-
+  
   set time_spent_gathering time_left
   ;Decide how much time is needed to gather food and resources
   let time_needed_for_food 90 / effectiveness
   let time_needed_for_resources 30 / effectiveness
-
+  
   let part_spent_food time_left * (time_needed_for_food / (time_needed_for_food + time_needed_for_resources))
   ;print sentence "part spent food: "part_spent_food
   ;print sentence "time_left:" time_left
@@ -164,29 +165,29 @@ to gather
   ;print sentence "food_needed" food_needed
   ;print sentence "time_needed_food:" time_needed_for_food
   ;print sentence "time_needed-resources:" time_needed_for_resources
-
+  
   let part_spent_resources time_left - part_spent_food
-
+  
   if part_spent_food > time_needed_for_food[
     set part_spent_food time_needed_for_food
   ]
-
+  
   if part_spent_resources > time_needed_for_resources[
     set part_spent_resources time_needed_for_resources
   ]
-
-
+  
+  
   ;Find out how much food and resources the band could gather if available
   let potential_food part_spent_food * group_size * effectiveness
   ;print sentence "potential_food: " potential_food
-
+  
   let potential_resources part_spent_resources * group_size * effectiveness
-
-
+  
+  
   ;Gather food
   ifelse potential_food > [food_available] of current_home_location [
     set food_owned round food_available
-
+    
     ask current_home_location[
       set food_available 0
     ]
@@ -195,12 +196,12 @@ to gather
     set food_owned round potential_food
     ;print sentence "food_owned: " food_owned
     ;print ""
-
+    
     ask current_home_location[
       set food_available round (food_available - potential_food)
     ]
   ]
-
+  
   ;Gather resources
   ifelse potential_resources > [resources_available] of current_home_location[
     set resources_owned resources_owned + resources_available
@@ -216,7 +217,7 @@ to gather
     ;Spending the spare time if there is any on gathering additional resources
     let spare_time time_left - time_needed_for_food - time_needed_for_resources
     let potential_extra_resources min list (group_size * 30)(group_size * effectiveness * spare_time)
-
+    
     ifelse potential_extra_resources > [resources_available] of current_home_location[
       let resources_gathered min list (group_size * 30) ([resources_available] of current_home_location)
       set resources_owned resources_owned + resources_gathered
@@ -229,7 +230,7 @@ to gather
       ask current_home_location[
         set resources_available resources_available - potential_extra_resources
       ]
-
+      
     ]
   ]
 end
@@ -238,46 +239,46 @@ to move [new_home]
   ;Calculate time needed to move based on the roughness of the new home, the distance to this new home and the differene in altitude between the current home and the new home. Also lower the time based on mobility.
   let time_needed_to_move max list 1 (((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility)
   ;print sentence "time_needed_to_move: " time_needed_to_move
-
+  
   if time_needed_to_move < max_move_time [
-
+    
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
     set total_movement total_movement + time_spent_moving ; count the total time which is spent on moving
                                                           ;print sentence "time_spent_moving: " time_spent_moving
-
+    
     set previous_home_location current_home_location
-
+    
     let resources_moved min list group_size resources_owned
     let resources_dropped resources_owned - resources_moved
     set resources_owned resources_moved
     ask previous_home_location [
       set resources_available resources_available + resources_dropped
     ]
-
+    
     move-to new_home
     set current_home_location new_home
     ;delete current knowledge on this patch in the current season
     set known_locations_current filter [x -> item 0 x != patch-here] known_locations_current
     ;add the new knowledge on this patch in the current season
     set known_locations_current lput (list new_home [food_available] of new_home [resources_available] of new_home) known_locations_current ]
-
+  
 end
 
 to explore
   ;Exploring takes time depending on mobility
-  let time_spent_explore 11 - mobility
+  let time_spent_explore 21 - mobility
   set time_spent time_spent + time_spent_explore
   set time_spent_exploring time_spent_explore
   ;print sentence "time_spent_exploring: " time_spent_exploring
-
+  
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
-  ask patches in-radius round (mobility / 2 + 1) [
+  ask patches in-radius ceiling (mobility + 1) [
     set list_of_explored_patches lput (list self [food_available] of self [resources_available] of self) list_of_explored_patches
   ]
   let x 0
-
+  
   while [x < length list_of_explored_patches][
     let current_location item x list_of_explored_patches
     set known_locations_current filter [y -> item 0 y != item 0 current_location] known_locations_current
@@ -305,10 +306,10 @@ to explore
     set current_max item 1 y
     ]
   ]
-
+  
   ;print sentence "Best KNown Locations: " best_known_locations
   ;print sentence "Current Max Patch: " current_max_patch
-
+  
   if current_max_patch != current_home_location [
     move current_max_patch ]
 end
@@ -326,7 +327,7 @@ to use_gathered_products
     ]
     let shortage_total (shortage_food + shortage_resources) / 2
     ;print sentence "shortage_total: " shortage_total
-
+    
     set health max list 0 (health - (100 * shortage_total))
     if shortage_total <= 0 [
       set health 100
@@ -335,7 +336,7 @@ to use_gathered_products
     set food_owned 0
     set resources_owned max list 0 (resources_owned - resources_needed)
     ;people die before new ones are born
-
+    
     if health < 100 [
       set death_rate (health / 100)
       set group_size group_size * death_rate
@@ -344,17 +345,18 @@ to use_gathered_products
       set extinct_bands extinct_bands + 1
       if [ ash_impact? ] of patch-here [ 
         set death_by_ash death_by_ash + 1
-        set event_cultural_capital_loss event_cultural_capital_loss + cultural_capital ]
+        set event_cultural_capital_loss event_cultural_capital_loss + cultural_capital 
+      ]
       die
     ]
     set group_size ceiling (group_size * standard_birth_rate)
-
+    
     ifelse cultural_capital > technology_level [
       let potential_increase_technology_level_resources floor (resources_owned / (resources_tool * group_size))
       let potential_increase_technology_level_cutural_capital floor (cultural_capital - technology_level)
-
+      
       let increase_technology_level min list potential_increase_technology_level_resources potential_increase_technology_level_cutural_capital
-
+      
       set technology_level technology_level + increase_technology_level
       set resources_owned resources_owned - (increase_technology_level * resources_tool * group_size) ]
     [
@@ -365,11 +367,27 @@ to use_gathered_products
 end
 
 to split_bands
-    ask bands [
-
+  ask bands [
     if group_size > merge_max_size and (group_size / 2) > split_min_size[
       set group_size round (group_size / 2)
-      hatch 1
-    ]
-    set count_known_locations_current length known_locations_current ]
+      set mother self
+      hatch 1 [
+        let baby_band self
+        ask [ my-links ] of mother [
+          let current_link self
+          ifelse end1 = [mother] of baby_band[
+            ask end2 [ create-link-with baby_band 
+              [set strength_of_connection [strength_of_connection] of current_link]
+            ]
+          ]
+          [
+            ask end1 [create-link-with baby_band
+              [set strength_of_connection [strength_of_connection] of current_link]
+            
+            ]
+          ]
+        ]
+      ]
+      set count_known_locations_current length known_locations_current ]
+  ]
 end

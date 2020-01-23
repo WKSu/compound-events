@@ -294,7 +294,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-6.0
+11.0
 1
 1
 Celcius
@@ -513,8 +513,8 @@ SLIDER
 maximum_days_moving
 maximum_days_moving
 0
-100
-100.0
+89
+89.0
 1
 1
 NIL
@@ -1035,7 +1035,7 @@ volcano_duration_effect
 volcano_duration_effect
 0
 1000
-24.0
+1000.0
 4
 1
 ticks
@@ -1282,6 +1282,54 @@ ash_fall_gradual_decrease
 1
 1
 -1000
+
+PLOT
+1795
+585
+1995
+735
+Mean Technology Level Impacted Bands
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands with [ event_impact? = true ]"
+
+SLIDER
+5
+650
+197
+683
+decrease_connection
+decrease_connection
+1
+100
+4.0
+4
+1
+ticks
+HORIZONTAL
+
+SLIDER
+5
+685
+177
+718
+mobility_size_factor
+mobility_size_factor
+1
+2
+2.0
+0.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

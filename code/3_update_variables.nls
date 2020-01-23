@@ -96,8 +96,10 @@ to update_bands_variables
     set time_spent_exploring 0
     set time_spent_moving 0
     set time_spent_gathering 0
+    
+    let group_size_influence mobility_size_factor * (1 - (group_size / merge_max_size))
     ;mobility is dependent on group_size
-    set mobility max list 1 (initial_mobility - (round (group_size / 10)))
+    set mobility max list 1 (initial_mobility * group_size_influence)
 
     set food_needed group_size * 90
     set resources_needed (group_size * 30) - resources_owned
@@ -107,6 +109,9 @@ to update_bands_variables
 
     ;Mutation of the cultural capital - normal distribution
     set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
+    
+;    if not any? my-links [
+;      set cultural_capital max list 1 min list 100 (cultural_capital - 1) ] 
 
     ;as the season has changed, the bands change their knowledge about the patches to the current season
     if current_season = 0[
