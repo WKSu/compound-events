@@ -151,7 +151,7 @@ threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-8.0
+7.0
 1
 1
 Season(s)
@@ -729,7 +729,7 @@ merge_max_size
 merge_max_size
 2
 100
-50.0
+45.0
 1
 1
 NIL
@@ -933,7 +933,7 @@ CHOOSER
 ash_eruption_distribution
 ash_eruption_distribution
 "normal" "skewed far" "skewed near"
-1
+0
 
 SLIDER
 932
@@ -1314,7 +1314,7 @@ decrease_connection
 decrease_connection
 1
 100
-4.0
+1.0
 4
 1
 ticks
