@@ -31,7 +31,7 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ;random-seed -176624766
+  random-seed -176624766
 
   ; all these functions are in the "setup_functions.nls"
   setup-globals

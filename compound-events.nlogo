@@ -31,7 +31,7 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ;random-seed -176624766
+  random-seed -176624766
 
   ; all these functions are in the "setup_functions.nls"
   setup-globals
@@ -176,7 +176,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-50.0
+51.0
 1
 1
 NIL
@@ -853,7 +853,7 @@ INPUTBOX
 960
 80
 start_event
-250.0
+200.0
 1
 0
 Number
