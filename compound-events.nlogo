@@ -65,13 +65,13 @@ to go
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-310
-10
-1371
-385
+5
+88
+1498
+613
 -1
 -1
-2.0221
+2.851
 1
 10
 1
@@ -92,9 +92,9 @@ ticks
 30.0
 
 BUTTON
-60
+210
 10
-124
+265
 43
 Setup
 setup
@@ -109,9 +109,9 @@ NIL
 1
 
 BUTTON
-190
+740
 10
-245
+805
 43
 go-once
 go\n
@@ -126,9 +126,9 @@ NIL
 1
 
 BUTTON
-250
+810
 10
-310
+885
 43
 go-forever
 go
@@ -143,80 +143,80 @@ NIL
 1
 
 SLIDER
-5
-475
-235
-508
+205
+45
+430
+78
 threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-7.0
+3.0
 1
 1
 Season(s)
 HORIZONTAL
 
 CHOOSER
-75
-295
-220
-340
+615
+1095
+760
+1140
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
 0
 
 SLIDER
-5
-260
-145
-293
+745
+45
+885
+78
 mean_cultural_capital
 mean_cultural_capital
 1
 100
-50.0
+56.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-145
-260
-285
-293
+760
+1095
+900
+1128
 stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-10.0
+11.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-510
-255
-543
+80
+45
+205
+78
 max_effectiveness
 max_effectiveness
 0
 10
-8.0
+9.0
 1
 1
-resource_units_per_HG_per_day
+NIL
 HORIZONTAL
 
 SLIDER
-145
-190
-285
-223
+1035
+935
+1175
+968
 standard_birth_rate
 standard_birth_rate
 1
@@ -228,10 +228,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-345
-145
-378
+910
+970
+1015
+1003
 resources_tool
 resources_tool
 1
@@ -243,10 +243,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-130
-95
-300
-128
+740
+935
+910
+968
 optimal_temperature
 optimal_temperature
 0
@@ -258,10 +258,10 @@ Celcius
 HORIZONTAL
 
 SLIDER
-5
-95
-130
-128
+615
+935
+740
+968
 optimal_precipitation
 optimal_precipitation
 0
@@ -273,9 +273,9 @@ NIL
 HORIZONTAL
 
 BUTTON
-130
+5
 10
-185
+60
 43
 Startup
 startup
@@ -290,40 +290,40 @@ NIL
 1
 
 SLIDER
-130
-130
-300
-163
+740
+970
+910
+1003
 max_deviation_temp
 max_deviation_temp
 0
 30
-11.0
+4.0
 1
 1
 Celcius
 HORIZONTAL
 
 SLIDER
-5
-130
-130
-163
+615
+970
+740
+1003
 max_deviation_prec
 max_deviation_prec
 0
 10
-4.0
+3.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-145
-225
-285
-258
+745
+1060
+865
+1093
 stdev_group_size
 stdev_group_size
 0
@@ -335,10 +335,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-225
-145
-258
+615
+1060
+745
+1093
 average_group_size
 average_group_size
 1
@@ -350,10 +350,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-190
-145
-223
+910
+935
+1035
+968
 number_of_bands
 number_of_bands
 2
@@ -365,10 +365,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-145
-345
-285
-378
+60
+10
+200
+43
 show-graticules?
 show-graticules?
 1
@@ -376,10 +376,10 @@ show-graticules?
 -1000
 
 SWITCH
-5
-45
-105
-78
+420
+10
+520
+43
 show_links
 show_links
 0
@@ -387,10 +387,10 @@ show_links
 -1000
 
 PLOT
-1789
-25
-1989
-175
+405
+615
+605
+765
 Number of bands
 Time
 Number
@@ -400,15 +400,15 @@ Number
 10.0
 true
 false
-"" "if tick = start_event [\nplot 1000 ]"
+"" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot count bands"
 
 PLOT
-1989
-25
-2189
-175
+605
+615
+805
+765
 Mean Group Size Bands
 NIL
 NIL
@@ -423,10 +423,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ group_size ] of bands"
 
 PLOT
-1375
-25
-1575
-175
+6
+615
+206
+765
 Mean Temperature
 NIL
 NIL
@@ -441,10 +441,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_temp ] of land_patches"
 
 PLOT
-1575
-25
-1775
-175
+206
+615
+406
+765
 Mean Precipitation
 NIL
 NIL
@@ -458,62 +458,31 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
-SWITCH
-1185
-530
-1275
-563
-debug?
-debug?
-0
-1
--1000
-
 TEXTBOX
-10
-10
-55
-28
-Controls
+620
+920
+710
+938
+External factors
 11
 0.0
 1
 
 TEXTBOX
-5
-80
-85
-98
-External Factors
-11
-0.0
-1
-
-TEXTBOX
-5
-175
-155
-193
-Initialization Model
-11
-0.0
-1
-
-TEXTBOX
-10
-390
-85
-408
+620
+1010
+695
+1028
 Assumptions
 11
 0.0
 1
 
 SLIDER
-5
-545
-160
-578
+1015
+970
+1170
+1003
 maximum_days_moving
 maximum_days_moving
 0
@@ -525,40 +494,40 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-405
-140
-438
+1025
+1025
+1150
+1058
 max_food_patch
 max_food_patch
 0
 18000
-9000.0
+5200.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-140
-405
-295
-438
+1150
+1025
+1295
+1058
 max_resource_patch
 max_resource_patch
 0
 18000
-4600.0
+5200.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-440
-205
-473
+615
+1025
+810
+1058
 max_altitude_food_available
 max_altitude_food_available
 1000
@@ -569,21 +538,11 @@ max_altitude_food_available
 m
 HORIZONTAL
 
-TEXTBOX
-1380
-10
-1530
-28
-Environment
-11
-0.0
-1
-
 PLOT
-1375
-180
-1575
-330
+805
+615
+1005
+765
 Mean Food Availability
 NIL
 NIL
@@ -598,10 +557,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ food_available ] of land_patches"
 
 PLOT
-1575
-180
-1775
-330
+1005
+615
+1205
+765
 Mean Resource Available
 NIL
 NIL
@@ -616,10 +575,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ resources_available ] of land_patches"
 
 PLOT
-1790
-337
-1990
-487
+605
+765
+805
+915
 Mean Cultural Capital
 NIL
 NIL
@@ -634,10 +593,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ cultural_capital ] of bands"
 
 PLOT
-1789
-172
-1989
-322
+1205
+615
+1385
+765
 Extinct Bands
 NIL
 NIL
@@ -652,10 +611,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot extinct_bands"
 
 PLOT
-1375
-339
-1575
-489
+205
+765
+405
+915
 Number of Connections
 NIL
 NIL
@@ -670,10 +629,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot count links "
 
 PLOT
-1575
-490
-1775
-640
+805
+765
+1005
+915
 Average Time Moving
 NIL
 NIL
@@ -688,10 +647,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot total_movement / count bands"
 
 PLOT
-1989
-174
-2189
-324
+5
+765
+205
+915
 Mean Knowledge on Locations
 NIL
 NIL
@@ -706,70 +665,70 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-5
-580
-160
-613
+1175
+935
+1330
+968
 cultural_capital_mutation
 cultural_capital_mutation
 1
 10
-4.0
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-160
-545
-290
-578
+910
+1025
+1025
+1058
 merge_max_size
 merge_max_size
 2
 100
-45.0
+51.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-160
-580
-260
-613
+810
+1025
+910
+1058
 split_min_size
 split_min_size
 1
 100
-25.0
+26.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-5
-615
-177
-648
+865
+1060
+970
+1093
 growback_rate
 growback_rate
 4
 100
-4.0
+8.0
 4
 1
 NIL
 HORIZONTAL
 
 PLOT
-1575
-339
-1775
-489
+405
+765
+605
+915
 Mean strength of links
 NIL
 NIL
@@ -781,13 +740,13 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
+"mean" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
 
 SLIDER
-312
-527
-522
-560
+1185
+10
+1390
+43
 volcano_eruption_distance
 volcano_eruption_distance
 0
@@ -799,10 +758,10 @@ patches
 HORIZONTAL
 
 SLIDER
-527
-442
-727
-475
+200
+1030
+395
+1063
 ash_eruption_distance_1
 ash_eruption_distance_1
 0
@@ -814,10 +773,10 @@ patches
 HORIZONTAL
 
 SLIDER
-527
-477
-727
-510
+395
+1030
+580
+1063
 ash_eruption_angle_1
 ash_eruption_angle_1
 0
@@ -829,10 +788,10 @@ degree
 HORIZONTAL
 
 SLIDER
-527
-407
-727
-440
+5
+1030
+200
+1063
 ash_wind_direction_1
 ash_wind_direction_1
 0
@@ -844,40 +803,40 @@ heading
 HORIZONTAL
 
 SLIDER
-727
-407
-927
-440
+5
+1065
+200
+1098
 ash_wind_direction_2
 ash_wind_direction_2
 0
 360
-205.0
+230.0
 5
 1
 heading
 HORIZONTAL
 
 SLIDER
-727
-442
-927
-475
+200
+1065
+395
+1098
 ash_eruption_distance_2
 ash_eruption_distance_2
 0
 100
-60.0
+50.0
 5
 1
 patches
 HORIZONTAL
 
 SLIDER
-727
-477
-927
-510
+395
+1065
+580
+1098
 ash_eruption_angle_2
 ash_eruption_angle_2
 0
@@ -889,21 +848,21 @@ degree
 HORIZONTAL
 
 INPUTBOX
-312
-407
-387
-487
+895
+10
+960
+80
 start_event
-50.0
+10.0
 1
 0
 Number
 
 SLIDER
-312
-492
-522
-525
+1360
+45
+1500
+78
 random_ash_fall
 random_ash_fall
 0
@@ -915,31 +874,31 @@ random_ash_fall
 HORIZONTAL
 
 SWITCH
-392
-407
-522
-440
-show_impact
-show_impact
-1
+265
+10
+420
+43
+show_volcano_impact
+show_volcano_impact
+0
 1
 -1000
 
 CHOOSER
-932
-407
-1094
-452
+1050
+10
+1185
+55
 ash_eruption_distribution
 ash_eruption_distribution
 "normal" "skewed far" "skewed near"
 0
 
 SLIDER
-932
-457
-1104
-490
+190
+1120
+320
+1153
 mean_ash_intensity
 mean_ash_intensity
 0
@@ -951,90 +910,90 @@ NIL
 HORIZONTAL
 
 SLIDER
-932
-492
-1104
-525
+320
+1120
+445
+1153
 stdv_ash_intensity
 stdv_ash_intensity
 0
 50
-20.0
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 CHOOSER
-392
-442
-522
-487
+960
+10
+1052
+55
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
 1
 
 SLIDER
-527
-522
-727
-555
+5
+1120
+180
+1153
 ash_eruption_radius
 ash_eruption_radius
 0
 100
-50.0
+10.0
 1
 1
 patches
 HORIZONTAL
 
 TEXTBOX
-312
-387
-462
-405
+1030
+60
+1120
+78
 Volcano Eruption\n
 11
 0.0
 1
 
 TEXTBOX
-530
-510
-590
-528
+10
+1105
+70
+1123
 If in-radius:
 11
 0.0
 1
 
 TEXTBOX
-527
-392
-677
-410
+10
+1015
+80
+1033
 If wind-cones
 11
 0.0
 1
 
 TEXTBOX
-937
-392
-1132
-418
+190
+1105
+370
+1123
 Changes to ash eruption distribution
 11
 0.0
 1
 
 SLIDER
-1110
-445
-1322
-478
+1185
+45
+1360
+78
 volcano_duration_effect
 volcano_duration_effect
 0
@@ -1045,29 +1004,11 @@ volcano_duration_effect
 ticks
 HORIZONTAL
 
-PLOT
-1992
-338
-2192
-488
-Mean Technology Level
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
-
 MONITOR
-1950
-535
-2040
-580
+1385
+795
+1475
+840
 NIL
 lost_resources
 0
@@ -1075,10 +1016,10 @@ lost_resources
 11
 
 MONITOR
-1793
-491
-1908
-536
+1385
+615
+1490
+660
 NIL
 death_by_volcano
 17
@@ -1086,10 +1027,10 @@ death_by_volcano
 11
 
 MONITOR
-1908
-491
-1998
-536
+1385
+660
+1475
+705
 NIL
 death_by_ash
 0
@@ -1097,46 +1038,46 @@ death_by_ash
 11
 
 MONITOR
-1793
-535
-1952
-580
-NIL
+1385
+750
+1490
+795
+Cultural capital loss
 event_cultural_capital_loss
 2
 1
 11
 
 TEXTBOX
-315
-569
-503
-592
+10
+920
+90
+943
 Climate Change
 11
 0.0
 1
 
 SLIDER
-310
-585
-445
-618
+5
+935
+140
+968
 max_temp_change
 max_temp_change
 -5
 5
-0.0
+1.2
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-445
-585
-575
-618
+140
+935
+270
+968
 max_prec_change
 max_prec_change
 0
@@ -1148,40 +1089,40 @@ NIL
 HORIZONTAL
 
 SLIDER
+270
+935
+425
+968
+increase_temp_variation
+increase_temp_variation
+0
+10
+3.5
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+425
+935
 580
-585
-735
-618
-increase_temp_variation
-increase_temp_variation
+968
+increase_prec_variation
+increase_prec_variation
 0
 10
-0.0
+0.1
 0.1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-735
-585
-890
-618
-increase_prec_variation
-increase_prec_variation
-0
-10
-0.0
-0.1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-360
-620
-515
-653
+5
+970
+160
+1003
 environment_delay
 environment_delay
 1
@@ -1193,123 +1134,61 @@ ticks
 HORIZONTAL
 
 SLIDER
-665
-620
-810
-653
+270
+970
+415
+1003
 variation_delay
 variation_delay
 0
 1000
-500.0
+506.0
 1
 1
 ticks
 HORIZONTAL
 
 MONITOR
-2000
-490
-2102
-535
+1385
+705
+1487
+750
 Impacted Bands
 count bands with [ event_impact? = true ]
 17
 1
 11
 
-PLOT
-1375
-490
-1575
-640
-Average Connections
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count links / count bands"
-
 TEXTBOX
-945
-540
-1095
-558
+10
+55
+75
+73
 Policy Levers
 11
 0.0
 1
 
 SLIDER
-940
-560
-1160
-593
+585
+45
+745
+78
 cooperation_radius
 cooperation_radius
 0
 10
-2.0
+3.0
 1
 1
 patches
 HORIZONTAL
 
 SLIDER
-940
-595
-1112
-628
-increased_knowledge
-increased_knowledge
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SWITCH
-1110
-410
-1312
-443
-ash_fall_gradual_decrease
-ash_fall_gradual_decrease
-1
-1
--1000
-
-PLOT
-1795
+430
+45
 585
-1995
-735
-Mean Technology Level Impacted Bands
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands with [ event_impact? = true ]"
-
-SLIDER
-5
-650
-197
-683
+78
 decrease_connection
 decrease_connection
 1
@@ -1321,10 +1200,10 @@ ticks
 HORIZONTAL
 
 SLIDER
-5
-685
-177
-718
+970
+1060
+1105
+1093
 mobility_size_factor
 mobility_size_factor
 1
@@ -1336,10 +1215,10 @@ NIL
 HORIZONTAL
 
 PLOT
-1375
-645
-1575
-795
+1005
+765
+1205
+915
 Count Unique Communities
 NIL
 NIL
@@ -1354,11 +1233,11 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot length unique_communities"
 
 PLOT
-1580
-645
-1780
-795
-plot 1
+1205
+765
+1385
+915
+Mean community size
 NIL
 NIL
 0.0
@@ -1372,13 +1251,24 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ community_size ] of agentset_unique_communities"
 
 SWITCH
-105
-45
-225
-78
+520
+10
+645
+43
 color_clusters?
 color_clusters?
-0
+1
+1
+-1000
+
+SWITCH
+645
+10
+735
+43
+debug?
+debug?
+1
 1
 -1000
 
