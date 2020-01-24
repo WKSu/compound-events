@@ -137,7 +137,7 @@ to setup-agents
 
   sprout-bands 1 [
     set shape "band"
-    set size 3
+    set size 2
     set color black
     set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
