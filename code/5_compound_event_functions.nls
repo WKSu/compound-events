@@ -108,7 +108,7 @@ to visualize-impact-volcano
     ]
   ]
   
-  if show_impact = true [
+  if show_volcano_impact = true [
     if ticks = start_event [ 
       ask patches with [ ash_impact? = true ] [
         set pcolor scale-color orange ash_fall 0 100
@@ -155,13 +155,11 @@ to interaction_volcano
     ]
   ]
   
-  if ash_fall_gradual_decrease [
     ; decrease ash fall gradually based on the volcano duration effect
     ask patches with [ ash_impact? = true ] [
       let ash_fall_decrease ash_fall / volcano_duration_effect
       set ash_fall ash_fall - ash_fall_decrease
     ]
-  ]
 
   if ticks = start_event + volcano_duration_effect [
     ask patches with [ volcano_impact? = true or ash_impact? = true ] [
