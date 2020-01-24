@@ -13,7 +13,8 @@
 ;- Volcano somehow disappears after it erupts.. no intentional code.. but also not that much of a problem because it formed a crater in real life anyways
 ; Fix Hatch Links
 
-__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls" ]
+__includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
+             "code/6_community.nls" ]
 
 to startup
   ; startup command only applies these functions during the initial start of the model
@@ -62,7 +63,6 @@ to go
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 310
@@ -151,7 +151,7 @@ threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-8.0
+7.0
 1
 1
 Season(s)
@@ -729,7 +729,7 @@ merge_max_size
 merge_max_size
 2
 100
-50.0
+45.0
 1
 1
 NIL
@@ -1314,7 +1314,7 @@ decrease_connection
 decrease_connection
 1
 100
-4.0
+1.0
 4
 1
 ticks
