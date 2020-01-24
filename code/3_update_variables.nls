@@ -9,24 +9,38 @@ to update-weather
     set sd_prec_change min list increase_temp_variation (sd_prec_change + increase_prec_variation / variation_delay)
   ]
   
-  ask patches [
-    if current_season = 0 [
-      set temp_current random-normal temp_jja (sd_temp_jja + sd_temp_change) + temp_change
-      set prec_current max (list 0 random-normal prec_jja (sd_prec_jja + sd_prec_change)) + prec_change
+  ask patches [ 
+    set temp_current (ifelse-value
+      current_season = 0 [ random-normal temp_jja (sd_temp_jja + sd_temp_change) + temp_change ] 
+      current_season = 1 [ random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change ]
+      current_season = 2 [ random-normal temp_djf (sd_temp_djf + sd_temp_change) + temp_change ]
+      current_season = 3 [ random-normal temp_mam (sd_temp_mam + sd_temp_change) + temp_change ])
+    
+    set prec_current (ifelse-value
+      current_season = 0 [ max (list 0 random-normal prec_jja (sd_prec_jja + sd_prec_change)) + prec_change ]
+      current_season = 1 [ max (list 0 random-normal prec_son (sd_prec_son + sd_prec_change)) + prec_change ]
+      current_season = 2 [ max (list 0 random-normal prec_djf (sd_prec_djf + sd_prec_change)) + prec_change ]
+      current_season = 3 [ max (list 0 random-normal prec_mam (sd_prec_mam + sd_prec_change)) + prec_change ]) 
     ]
-    if current_season = 1 [
-      set temp_current random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change
-      set prec_current max (list 0 random-normal prec_son (sd_prec_son + sd_prec_change)) + prec_change
-    ]
-    if current_season = 2 [
-      set temp_current random-normal temp_djf (sd_temp_djf + sd_temp_change) + temp_change
-      set prec_current max (list 0 random-normal prec_djf (sd_prec_djf + sd_prec_change)) + prec_change
-    ]
-    if current_season = 3 [
-      set temp_current random-normal temp_mam (sd_temp_mam + sd_temp_change) + temp_change
-      set prec_current max (list 0 random-normal prec_mam (sd_prec_mam + sd_prec_change)) + prec_change
-    ]
-  ]
+  
+;  ask patches [
+;    if current_season = 0 [
+;      set temp_current random-normal temp_jja (sd_temp_jja + sd_temp_change) + temp_change
+;      set prec_current max (list 0 random-normal prec_jja (sd_prec_jja + sd_prec_change)) + prec_change
+;    ]
+;    if current_season = 1 [
+;      set temp_current random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change
+;      set prec_current max (list 0 random-normal prec_son (sd_prec_son + sd_prec_change)) + prec_change
+;    ]
+;    if current_season = 2 [
+;      set temp_current random-normal temp_djf (sd_temp_djf + sd_temp_change) + temp_change
+;      set prec_current max (list 0 random-normal prec_djf (sd_prec_djf + sd_prec_change)) + prec_change
+;    ]
+;    if current_season = 3 [
+;      set temp_current random-normal temp_mam (sd_temp_mam + sd_temp_change) + temp_change
+;      set prec_current max (list 0 random-normal prec_mam (sd_prec_mam + sd_prec_change)) + prec_change
+;    ]
+;  ]
 end
 
 to update-food-and-resources
@@ -53,10 +67,12 @@ to update-food-and-resources
     set average_temp mean temp_year
     set average_prec mean prec_year
     
-    ifelse abs (average_temp - optimal_temperature) > max_deviation_temp or abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true [
+    ifelse abs (average_temp - optimal_temperature) > max_deviation_temp or abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true 
+    [
       set food_available 0
       set resources_available 0
-    ] [
+    ] 
+    [
       ;min-max feature scaling
       let temp_deviation 0
       ifelse average_temp <= optimal_temperature [
