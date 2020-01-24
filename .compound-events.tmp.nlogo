@@ -176,7 +176,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-50.0
+51.0
 1
 1
 NIL
@@ -191,7 +191,7 @@ stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-11.0
+20.0
 1
 1
 NIL
@@ -358,7 +358,7 @@ number_of_bands
 number_of_bands
 2
 2000
-100.0
+1000.0
 1
 1
 NIL
@@ -502,7 +502,7 @@ max_food_patch
 max_food_patch
 0
 18000
-5200.0
+9000.0
 100
 1
 NIL
@@ -517,7 +517,7 @@ max_resource_patch
 max_resource_patch
 0
 18000
-5200.0
+4500.0
 100
 1
 NIL
@@ -688,7 +688,7 @@ merge_max_size
 merge_max_size
 2
 100
-51.0
+50.0
 1
 1
 NIL
@@ -703,7 +703,7 @@ split_min_size
 split_min_size
 1
 100
-26.0
+25.0
 1
 1
 NIL
@@ -853,7 +853,7 @@ INPUTBOX
 960
 80
 start_event
-1000.0
+200.0
 1
 0
 Number
