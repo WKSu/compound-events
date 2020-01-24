@@ -9,7 +9,7 @@ to update-weather
     set sd_prec_change min list increase_temp_variation (sd_prec_change + increase_prec_variation / variation_delay)
   ]
   
-  ask patches [ 
+  ask land_patches [ 
     set temp_current (ifelse-value
       current_season = 0 [ random-normal temp_jja (sd_temp_jja + sd_temp_change) + temp_change ] 
       current_season = 1 [ random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change ]
@@ -47,22 +47,35 @@ to update-food-and-resources
   ask land_patches [
     ; food return is based on the moving average of temperature and precipitation! It does not take into account the harvesting of the hunter-gatherers on the patch // TO DO
     ; take the temperature of the last season and add it to the list to calculate the new average
-    if current_season = 0 [
-      set temp_year replace-item 0 temp_year temp_current
-      set prec_year replace-item 0 prec_year prec_current
-    ]
-    if current_season = 1[
-      set temp_year replace-item 1 temp_year temp_current
-      set prec_year replace-item 1 prec_year prec_current
-    ]
-    if current_season = 2[
-      set temp_year replace-item 2 temp_year temp_current
-      set prec_year replace-item 2 prec_year prec_current
-    ]
-    if current_season = 3[
-      set temp_year replace-item 3 temp_year temp_current
-      set prec_year replace-item 3 prec_year prec_current
-    ]
+    
+    set temp_year (ifelse-value
+      current_season = 0 [ replace-item 0 temp_year temp_current ]
+      current_season = 1 [ replace-item 1 temp_year temp_current ]
+      current_season = 2 [ replace-item 2 temp_year temp_current ]
+      current_season = 3 [ replace-item 3 temp_year temp_current ])
+  
+      set prec_year (ifelse-value
+      current_season = 0 [ replace-item 0 prec_year prec_current ]
+      current_season = 1 [ replace-item 1 prec_year prec_current ]
+      current_season = 2 [ replace-item 2 prec_year prec_current ]
+      current_season = 3 [ replace-item 3 prec_year prec_current ])
+  
+;    if current_season = 0 [
+;      set temp_year replace-item 0 temp_year temp_current
+;      set prec_year replace-item 0 prec_year prec_current
+;    ]
+;    if current_season = 1[
+;      set temp_year replace-item 1 temp_year temp_current
+;      set prec_year replace-item 1 prec_year prec_current
+;    ]
+;    if current_season = 2[
+;      set temp_year replace-item 2 temp_year temp_current
+;      set prec_year replace-item 2 prec_year prec_current
+;    ]
+;    if current_season = 3[
+;      set temp_year replace-item 3 temp_year temp_current
+;      set prec_year replace-item 3 prec_year prec_current
+;    ]
     
     set average_temp mean temp_year
     set average_prec mean prec_year

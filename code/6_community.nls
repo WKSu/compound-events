@@ -1,7 +1,7 @@
 to community-detection
   nw:set-context bands links
   if color_clusters? = true [ 
-  color-clusters nw:louvain-communities
+    color-clusters nw:louvain-communities
   ]
   
   foreach nw:louvain-communities [ [comm] ->
@@ -12,16 +12,12 @@ to community-detection
   
   set unique_communities [ ]
   
-  ask bands [
-    if community_size > 1 [ 
-      set unique_communities lput community_name unique_communities
-    ]
+  ask bands with [ community_size > 1 ] [
+    set unique_communities lput community_name unique_communities
   ]
   
   set unique_communities remove-duplicates unique_communities
   set agentset_unique_communities turtle-set unique_communities
-
- 
 end
 
 to color-clusters [ clusters ]
@@ -31,7 +27,7 @@ to color-clusters [ clusters ]
   let n length clusters
   ; Generate a unique hue for each cluster
   let hues n-values n [ i -> (360 * i / n) ]
-
+  
   ; loop through the clusters and colors zipped together
   (foreach clusters hues [ [cluster hue] ->
     ask cluster [ ; for each node in the cluster

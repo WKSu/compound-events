@@ -118,9 +118,7 @@ to gather_move_explore
       ;If there is no location available that has enough food AND resources, explore to find a patch that has enough
       if not any? potential_new_locations[
         explore
-        
       ]
-      
     ]
     [
       ;delete current knowledge on this patch in the current season
