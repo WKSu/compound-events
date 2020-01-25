@@ -139,6 +139,9 @@ patches-own [
   temp_current
   min_precipitation
   max_precipitation
+  
+  temp_deviation
+  prec_deviation
 
   ; compound event impact
   volcano_impact?
