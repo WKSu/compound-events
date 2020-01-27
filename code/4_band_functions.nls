@@ -44,13 +44,12 @@ to interact-with-other-bands
             set updated? true
           ]
           
-          
           if [strength_of_connection] of current_link > second_threshold_connection[
-            update_location_knowledge known_locations_summer current_band
+            update_location_knowledge known_locations_winter current_band
             update_location_knowledge known_locations_fall current_band
           ]
           if [strength_of_connection] of current_link > first_threshold_connection[
-            update_location_knowledge known_locations_winter current_band
+            update_location_knowledge known_locations_summer current_band
             update_location_knowledge known_locations_spring current_band
             set cultural_capital cultural_capital + 1  ;also share knowledge about technologies from the first threshold on
           ]

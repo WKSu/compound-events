@@ -14,18 +14,18 @@
 ; Fix Hatch Links
 
 __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
-             "code/6_community.nls" ]
+  "code/6_community.nls" ]
 
 to startup
   ; startup command only applies these functions during the initial start of the model
   ; it saves time by not loading in all the GIS data everytime a new run is started!
   clear-all
   reset-ticks
-;  profiler:start
+  ;  profiler:start
   ; all these functions are in the "load_gis.nls"
   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
-;  profiler:stop
-;  print profiler:report
+                ;  profiler:stop
+                ;  print profiler:report
 end
 
 to setup
@@ -165,7 +165,7 @@ CHOOSER
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
-0
+2
 
 SLIDER
 745
@@ -343,7 +343,7 @@ average_group_size
 average_group_size
 1
 40
-25.0
+23.0
 1
 1
 NIL
@@ -751,7 +751,7 @@ volcano_eruption_distance
 volcano_eruption_distance
 0
 100
-5.0
+0.0
 1
 1
 patches
@@ -853,16 +853,16 @@ INPUTBOX
 960
 80
 start_event
-10.0
+2.0
 1
 0
 Number
 
 SLIDER
-1360
-45
-1500
-78
+1390
+10
+1530
+43
 random_ash_fall
 random_ash_fall
 0
@@ -932,7 +932,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-1
+0
 
 SLIDER
 5
@@ -990,10 +990,10 @@ Changes to ash eruption distribution
 1
 
 SLIDER
-1185
-45
-1360
-78
+325
+1155
+500
+1188
 volcano_duration_effect
 volcano_duration_effect
 0
@@ -1273,25 +1273,25 @@ debug?
 -1000
 
 SLIDER
-590
+580
 1030
-762
+752
 1063
 cone_impact_1
 cone_impact_1
 0
 2
-2.0
+1.0
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-615
-1070
-787
-1103
+580
+1065
+752
+1098
 cone_impact_2
 cone_impact_2
 0
@@ -1301,6 +1301,51 @@ cone_impact_2
 1
 NIL
 HORIZONTAL
+
+SLIDER
+325
+1185
+495
+1218
+decay_exponent
+decay_exponent
+0
+0.5
+0.17
+0.01
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+190
+1155
+328
+1200
+decay_type
+decay_type
+"gradual" "exponential"
+1
+
+TEXTBOX
+505
+1155
+655
+1173
+if gradual
+11
+0.0
+1
+
+TEXTBOX
+500
+1190
+650
+1208
+if exponential\n
+11
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?

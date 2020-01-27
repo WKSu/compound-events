@@ -98,43 +98,6 @@ to compound_event_impact
   visualize-impact-volcano
 end
 
-to distribution-ash
-  if ash_eruption_distribution = "normal" [
-    ask patches with [ ash_impact? = true ] [
-      set ash_fall min list 100 random-normal mean_ash_intensity stdv_ash_intensity ]
-  ]
-  
-  if ash_eruption_distribution = "skewed far" [
-    let max_distance 0 
-    if ash_fallout = "wind-cones" [ 
-      set max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 ]
-    if ash_fallout = "in-radius" [ 
-      set max_distance ash_eruption_radius ] 
-    
-    ask patches with [ ash_impact? = true ] [
-      set ash_fall min list 100 random-poisson ((distance patch 186 95) / (max_distance) * 100) 
-    ]
-  ]
-  
-  if ash_eruption_distribution = "skewed near" [
-    let max_distance 0 
-    if ash_fallout = "wind-cones" [ 
-      set max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 ]
-    if ash_fallout = "in-radius" [ 
-      set max_distance ash_eruption_radius ] 
-    
-    ask patches with [ ash_impact? = true ] [
-      set ash_fall min list 100 random-poisson ((1 - (distance patch 186 95 / max_distance)) * 100)
-    ]
-  ]
-  
-  ;  if ash_eruption_distribution = "skewed far" [
-  ;    if ash_fallout = "wind-cones" [ 
-  ;      let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 
-  ;      set ash_fall min list 100 random-poisson ((distance patch 186 95) / (max_distance) * 100) ]
-end
-
-
 to visualize-impact-volcano
   let min-landmass gis:minimum-of europe-landmass
   let max-landmass gis:maximum-of europe-landmass
@@ -166,20 +129,16 @@ to visualize-impact-volcano
     ]
     
     ask patches with [ ash_impact? = true ] [
-      
-      ifelse ash_fall > 0 [ 
+      ifelse ash_fall > 1 [ 
         set pcolor scale-color orange ash_fall 0 100 ] [
         if (landmass <= 0) or (landmass >= 0) ; note the use of the "<= 0 or >= 0" technique to filter out "not a number" values
-        [ set pcolor scale-color black landmass min-landmass max-landmass ]
-      ]
-      
+        [ set pcolor scale-color black landmass min-landmass max-landmass ] ]
     ]
   ]
 end
 
-to interaction_volcano
+to interaction_volcano  
   ; kill all hunter-gatherer bands from the eruption of the volcano
-  ;
   if ticks = start_event [
     ask patches with [ volcano_impact? = true ] [
       ask bands-here [ 
@@ -202,23 +161,37 @@ to interaction_volcano
         ask my-links [ die ] 
         set resources_owned 0 ] ; assumption that the bands are not able to move any extra resources during a catastrophe
     ]
-  ]
+  ] 
   
-  ; decrease ash fall gradually based on the volcano duration effect
-  ask patches with [ ash_impact? = true ] [
+  if ticks > start_event [ 
+    ; decrease ash fall gradually based on the volcano duration effect
     if decay_type = "gradual" [
       let ash_fall_decrease 100 / volcano_duration_effect
-      set ash_fall max list 0 (ash_fall - ash_fall_decrease) ]
-  ]
-  
-  
-  if ticks = start_event + volcano_duration_effect [
-    ask patches with [ volcano_impact? = true or ash_impact? = true ] [
-      set volcano_impact? false
-      set ash_impact? false
-      set ash_fall 0
-      set max_food max_food_patch
-      set max_resources max_resource_patch
+      
+      ask patches with [ ash_impact? = true ] [
+        set ash_fall max list 0 (ash_fall - ash_fall_decrease) 
+        
+        if ticks = start_event + volcano_duration_effect [
+          set volcano_impact? false
+          set ash_impact? false
+          set ash_fall 0
+          set max_food max_food_patch
+          set max_resources max_resource_patch
+        ]
+      ]
     ]
+    
+    if decay_type = "exponential" [ 
+      ask patches with [ ash_impact? = true ] [
+        let ash_fall_decrease (- decay_exponent * ash_fall)
+        set ash_fall max list 0 floor (ash_fall + ash_fall_decrease) 
+        
+        if ash_fall = 0 [ 
+          set volcano_impact? false
+          set ash_impact? false
+          set max_food max_food_patch
+          set max_resources max_resource_patch ]
+        ]
+      ]
   ]
 end
