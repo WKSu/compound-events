@@ -49,8 +49,6 @@ to setup-food-and-resources
     set max_precipitation optimal_precipitation + max_deviation_prec
 
     ;min-max feature scaling (linear)
-    let temp_deviation 0
-
     if average_temp <= optimal_temperature[
       set temp_deviation (1 - (average_temp - optimal_temperature) / (min_temperature - optimal_temperature))
     ]
@@ -59,7 +57,6 @@ to setup-food-and-resources
     ]
 
     ;min-max feature scaling (linear)
-    let prec_deviation 0
     if average_prec <= optimal_precipitation[
       set prec_deviation (1 - (average_prec - optimal_precipitation) / (min_precipitation - optimal_precipitation))
     ]
@@ -134,10 +131,9 @@ to setup-volcano
 end
 
 to setup-agents
-
   sprout-bands 1 [
     set shape "band"
-    set size 3
+    set size 2
     set color black
     set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0

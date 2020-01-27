@@ -31,7 +31,7 @@ end
 to setup
   clear-turtles
   reset-ticks
-  ;random-seed -176624766
+  random-seed -176624766
 
   ; all these functions are in the "setup_functions.nls"
   setup-globals
@@ -151,7 +151,7 @@ threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-3.0
+7.0
 1
 1
 Season(s)
@@ -176,7 +176,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-56.0
+51.0
 1
 1
 NIL
@@ -191,7 +191,7 @@ stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-11.0
+20.0
 1
 1
 NIL
@@ -298,7 +298,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-4.0
+10.0
 1
 1
 Celcius
@@ -358,7 +358,7 @@ number_of_bands
 number_of_bands
 2
 2000
-100.0
+1000.0
 1
 1
 NIL
@@ -502,7 +502,7 @@ max_food_patch
 max_food_patch
 0
 18000
-5200.0
+9000.0
 100
 1
 NIL
@@ -517,7 +517,7 @@ max_resource_patch
 max_resource_patch
 0
 18000
-5200.0
+4500.0
 100
 1
 NIL
@@ -688,7 +688,7 @@ merge_max_size
 merge_max_size
 2
 100
-51.0
+50.0
 1
 1
 NIL
@@ -703,7 +703,7 @@ split_min_size
 split_min_size
 1
 100
-26.0
+25.0
 1
 1
 NIL
@@ -853,7 +853,7 @@ INPUTBOX
 960
 80
 start_event
-10.0
+200.0
 1
 0
 Number
@@ -932,7 +932,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-1
+0
 
 SLIDER
 5
@@ -943,7 +943,7 @@ ash_eruption_radius
 ash_eruption_radius
 0
 100
-10.0
+40.0
 1
 1
 patches
@@ -1067,7 +1067,7 @@ max_temp_change
 max_temp_change
 -5
 5
-1.2
+0.0
 0.05
 1
 NIL
@@ -1097,7 +1097,7 @@ increase_temp_variation
 increase_temp_variation
 0
 10
-3.5
+0.0
 0.1
 1
 NIL
@@ -1112,7 +1112,7 @@ increase_prec_variation
 increase_prec_variation
 0
 10
-0.1
+0.0
 0.1
 1
 NIL
@@ -1193,7 +1193,7 @@ decrease_connection
 decrease_connection
 1
 100
-4.0
+1.0
 4
 1
 ticks
@@ -1257,7 +1257,7 @@ SWITCH
 43
 color_clusters?
 color_clusters?
-1
+0
 1
 -1000
 
