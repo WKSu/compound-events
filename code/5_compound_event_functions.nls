@@ -166,6 +166,8 @@ to interaction_volcano
       set volcano_impact? false
       set ash_impact? false
       set ash_fall 0
+      set max_food max_food_patch
+      set max_resources max_resource_patch
     ]
   ]
 end
