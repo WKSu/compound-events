@@ -21,7 +21,7 @@ to compound_event_impact
       ; initial parameters are set so ash fall is similar to figure 1 in Reinig, F., Cherubini, P., Engels, S., Esper, J., Guidobaldi, G., Jöris, O., ... & Pfanz, H. (2020). Towards a dendrochronologically refined date of the Laacher See eruption around 13,000 years ago. Quaternary Science Reviews, 229, 106128.
       
       if ash_fallout = "in-radius" [
-        ask patches in-radius ash_eruption_radius [
+        ask n-of (percentage_ash * count patches in-radius ash_eruption_radius) patches in-radius ash_eruption_radius [
           set ash_impact? true
           
           if ash_eruption_distribution = "normal" [
@@ -42,7 +42,7 @@ to compound_event_impact
       if ash_fallout = "wind-cones" [
         ; set the ash to a specific wind direction, eruption distance, and spread of this cone
         set heading ash_wind_direction_1
-        ask patches in-cone ash_eruption_distance_1 ash_eruption_angle_1 [
+        ask n-of (percentage_ash * count patches in-cone ash_eruption_distance_1 ash_eruption_angle_1) patches in-cone ash_eruption_distance_1 ash_eruption_angle_1 [
           set ash_impact? true
           
           if ash_eruption_distribution = "normal" [
@@ -59,7 +59,7 @@ to compound_event_impact
         ]
         
         set heading ash_wind_direction_2
-        ask patches in-cone ash_eruption_distance_2 ash_eruption_angle_2 [
+        ask n-of (percentage_ash * count patches in-cone ash_eruption_distance_2 ash_eruption_angle_2) patches in-cone ash_eruption_distance_2 ash_eruption_angle_2 [
           set ash_impact? true
           
           if ash_eruption_distribution = "normal" [
