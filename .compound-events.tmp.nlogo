@@ -165,7 +165,7 @@ CHOOSER
 cultural_capital_distribution
 cultural_capital_distribution
 "normal" "uniform" "poisson"
-0
+2
 
 SLIDER
 745
@@ -859,10 +859,10 @@ start_event
 Number
 
 SLIDER
-1360
-45
-1500
-78
+1390
+10
+1530
+43
 random_ash_fall
 random_ash_fall
 0
@@ -1273,25 +1273,25 @@ debug?
 -1000
 
 SLIDER
-590
+580
 1030
-762
+752
 1063
 cone_impact_1
 cone_impact_1
 0
 2
-1.3
+1.0
 0.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-615
-1070
-787
-1103
+580
+1065
+752
+1098
 cone_impact_2
 cone_impact_2
 0
@@ -1301,6 +1301,31 @@ cone_impact_2
 1
 NIL
 HORIZONTAL
+
+SLIDER
+1360
+45
+1530
+78
+decay_exponent
+decay_exponent
+0
+1
+0.17
+0.01
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+445
+1120
+583
+1165
+decay_type
+decay_type
+"gradual" "exponential"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
