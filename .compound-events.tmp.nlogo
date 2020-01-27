@@ -158,9 +158,9 @@ Season(s)
 HORIZONTAL
 
 CHOOSER
-615
+810
 1095
-760
+955
 1140
 cultural_capital_distribution
 cultural_capital_distribution
@@ -176,16 +176,16 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-50.0
+51.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-760
+955
 1095
-900
+1095
 1128
 stdv_cultural_capital
 stdv_cultural_capital
@@ -213,9 +213,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1035
+1230
 935
-1175
+1370
 968
 standard_birth_rate
 standard_birth_rate
@@ -228,9 +228,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-910
+1105
 970
-1015
+1210
 1003
 resources_tool
 resources_tool
@@ -243,9 +243,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-740
 935
-910
+935
+1105
 968
 optimal_temperature
 optimal_temperature
@@ -258,9 +258,9 @@ Celcius
 HORIZONTAL
 
 SLIDER
-615
+810
 935
-740
+935
 968
 optimal_precipitation
 optimal_precipitation
@@ -290,9 +290,9 @@ NIL
 1
 
 SLIDER
-740
+935
 970
-910
+1105
 1003
 max_deviation_temp
 max_deviation_temp
@@ -305,9 +305,9 @@ Celcius
 HORIZONTAL
 
 SLIDER
-615
+810
 970
-740
+935
 1003
 max_deviation_prec
 max_deviation_prec
@@ -320,9 +320,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-745
+940
 1060
-865
+1060
 1093
 stdev_group_size
 stdev_group_size
@@ -335,9 +335,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-615
+810
 1060
-745
+940
 1093
 average_group_size
 average_group_size
@@ -350,9 +350,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-910
+1105
 935
-1035
+1230
 968
 number_of_bands
 number_of_bands
@@ -459,9 +459,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
 TEXTBOX
-620
+815
 920
-710
+905
 938
 External factors
 11
@@ -469,9 +469,9 @@ External factors
 1
 
 TEXTBOX
-620
+815
 1010
-695
+890
 1028
 Assumptions
 11
@@ -479,9 +479,9 @@ Assumptions
 1
 
 SLIDER
-1015
+1210
 970
-1170
+1365
 1003
 maximum_days_moving
 maximum_days_moving
@@ -494,9 +494,9 @@ NIL
 HORIZONTAL
 
 SLIDER
+1220
 1025
-1025
-1150
+1345
 1058
 max_food_patch
 max_food_patch
@@ -509,9 +509,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1150
+1345
 1025
-1295
+1490
 1058
 max_resource_patch
 max_resource_patch
@@ -524,9 +524,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-615
-1025
 810
+1025
+1005
 1058
 max_altitude_food_available
 max_altitude_food_available
@@ -665,9 +665,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-1175
+1370
 935
-1330
+1525
 968
 cultural_capital_mutation
 cultural_capital_mutation
@@ -680,9 +680,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-910
+1105
 1025
-1025
+1220
 1058
 merge_max_size
 merge_max_size
@@ -695,9 +695,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-810
+1005
 1025
-910
+1105
 1058
 split_min_size
 split_min_size
@@ -710,9 +710,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-865
 1060
-970
+1060
+1165
 1093
 growback_rate
 growback_rate
@@ -751,7 +751,7 @@ volcano_eruption_distance
 volcano_eruption_distance
 0
 100
-2.0
+5.0
 1
 1
 patches
@@ -853,7 +853,7 @@ INPUTBOX
 960
 80
 start_event
-200.0
+10.0
 1
 0
 Number
@@ -892,7 +892,7 @@ CHOOSER
 ash_eruption_distribution
 ash_eruption_distribution
 "normal" "skewed far" "skewed near"
-1
+2
 
 SLIDER
 190
@@ -932,7 +932,7 @@ CHOOSER
 ash_fallout
 ash_fallout
 "in-radius" "wind-cones"
-0
+1
 
 SLIDER
 5
@@ -1163,7 +1163,7 @@ TEXTBOX
 10
 55
 75
-85
+73
 Policy Levers
 11
 0.0
@@ -1200,9 +1200,9 @@ ticks
 HORIZONTAL
 
 SLIDER
-970
+1165
 1060
-1105
+1300
 1093
 mobility_size_factor
 mobility_size_factor
@@ -1271,6 +1271,36 @@ debug?
 1
 1
 -1000
+
+SLIDER
+590
+1030
+762
+1063
+cone_impact_1
+cone_impact_1
+0
+2
+1.3
+0.05
+1
+NIL
+HORIZONTAL
+
+SLIDER
+615
+1070
+787
+1103
+cone_impact_2
+cone_impact_2
+0
+2
+1.0
+0.05
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
