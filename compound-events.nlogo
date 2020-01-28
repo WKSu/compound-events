@@ -44,6 +44,9 @@ __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls
   "code/6_community.nls" ]
 
 to startup
+
+  file-open "random-seed.txt"
+
   ; startup command only applies these functions during the initial start of the model
   ; it saves time by not loading in all the GIS data everytime a new run is started!
   clear-all
@@ -55,9 +58,22 @@ to startup
                 ;  print profiler:report
 end
 
+to remember_seed
+  ; pull range from the random-seed
+  ; save the random numbers in a file
+  let remember_random_seed random (2147483647 * 2) - 2147483647
+  random-seed remember_random_seed
+  file-open "random-seed.txt"
+  file-write remember_random_seed
+  file-close
+end
+
 to setup
   clear-turtles
   reset-ticks
+  ;  random-seed 1999387669
+
+
 
   ; functions are in the "setup_functions.nls"
   setup-globals
@@ -1221,9 +1237,9 @@ SLIDER
 decrease_connection
 decrease_connection
 1
-100
+12
 1.0
-4
+1
 1
 ticks
 HORIZONTAL
@@ -1428,10 +1444,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands"
 
 SLIDER
-660
-950
-832
-983
+805
+1320
+977
+1353
 max_shared_locations
 max_shared_locations
 1
@@ -1500,27 +1516,27 @@ Polygon -7500403 true true 150 0 0 150 105 150 105 293 195 293 195 150 300 150
 
 band
 false
-0
-Polygon -16777216 true false 15 90 30 150 15 225 15 225 30 225 45 180 60 225 75 225 75 225 60 150 75 90
-Polygon -16777216 true false 15 90 0 165 15 165 30 90
-Polygon -16777216 true false 75 165 90 165 75 90 60 90
-Circle -16777216 true false 15 30 60
-Circle -16777216 true false 120 45 60
-Circle -16777216 true false 225 30 60
-Polygon -16777216 true false 120 105 135 165 120 240 120 240 135 240 150 195 165 240 180 240 180 240 165 165 180 105
-Polygon -16777216 true false 225 90 240 150 225 225 225 225 240 225 255 180 270 225 285 225 285 225 270 150 285 90
-Polygon -16777216 true false 120 105 105 180 120 180 135 105
-Polygon -16777216 true false 225 90 210 165 225 165 240 90
-Polygon -16777216 true false 180 180 195 180 180 105 165 105
-Polygon -16777216 true false 285 165 300 165 285 90 270 90
-Rectangle -7500403 true true 45 90 60 90
-Rectangle -16777216 true false 30 75 60 90
-Rectangle -16777216 true false 135 90 165 105
-Rectangle -16777216 true false 240 75 270 90
+14
+Polygon -16777216 true true 15 90 30 150 15 225 15 225 30 225 45 180 60 225 75 225 75 225 60 150 75 90
+Polygon -16777216 true true 15 90 0 165 15 165 30 90
+Polygon -16777216 true true 75 165 90 165 75 90 60 90
+Circle -16777216 true true 15 30 60
+Circle -16777216 true true 120 45 60
+Circle -16777216 true true 225 30 60
+Polygon -16777216 true true 120 105 135 165 120 240 120 240 135 240 150 195 165 240 180 240 180 240 165 165 180 105
+Polygon -16777216 true true 225 90 240 150 225 225 225 225 240 225 255 180 270 225 285 225 285 225 270 150 285 90
+Polygon -16777216 true true 120 105 105 180 120 180 135 105
+Polygon -16777216 true true 225 90 210 165 225 165 240 90
+Polygon -16777216 true true 180 180 195 180 180 105 165 105
+Polygon -16777216 true true 285 165 300 165 285 90 270 90
+Rectangle -7500403 true false 45 90 60 90
+Rectangle -16777216 true true 30 75 60 90
+Rectangle -16777216 true true 135 90 165 105
+Rectangle -16777216 true true 240 75 270 90
 Line -6459832 false 90 225 90 60
 Line -6459832 false 300 225 300 75
-Circle -7500403 true true 75 270 0
-Polygon -7500403 true true 90 45 75 75 105 75
+Circle -7500403 true false 75 270 0
+Polygon -7500403 true false 90 45 75 75 105 75
 Polygon -6459832 false false 225 135 300 135 285 165 240 165 225 135
 Circle -2674135 true false 240 120 30
 Circle -10899396 true false 255 120 30
@@ -1864,13 +1880,12 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="10" runMetricsEveryStep="true">
-    <setup>setup</setup>
+  <experiment name="Test" repetitions="1" runMetricsEveryStep="true">
+    <setup>startup
+setup</setup>
     <go>go</go>
-    <timeLimit steps="10"/>
-    <exitCondition>count bands = 0</exitCondition>
-    <metric>ifelse length agentset_unique_communities &gt; 0 [</metric>
-    <metric>mean [ community_size ] of agentset_unique_communities ] [ 0 ]</metric>
+    <timeLimit steps="250"/>
+    <metric>count turtles</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>
@@ -1928,10 +1943,10 @@ NetLogo 6.1.1
     <enumeratedValueSet variable="show_links">
       <value value="true"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="mobility_size_factor">
+    <enumeratedValueSet variable="volcano_eruption_distance">
       <value value="2"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="volcano_eruption_distance">
+    <enumeratedValueSet variable="mobility_size_factor">
       <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_food_patch">
@@ -1993,9 +2008,6 @@ NetLogo 6.1.1
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_effectiveness">
       <value value="6"/>
-      <value value="7"/>
-      <value value="8"/>
-      <value value="9"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="maximum_days_moving">
       <value value="89"/>
@@ -2018,11 +2030,11 @@ NetLogo 6.1.1
     <enumeratedValueSet variable="color_clusters?">
       <value value="true"/>
     </enumeratedValueSet>
-    <enumeratedValueSet variable="environment_delay">
-      <value value="300"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="start_event">
       <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="environment_delay">
+      <value value="300"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="ash_eruption_angle_1">
       <value value="30"/>
