@@ -44,13 +44,13 @@ to interact-with-other-bands
             set updated? true
           ]
           
-          if [strength_of_connection] of current_link > second_threshold_connection[
-            update_location_knowledge known_locations_winter current_band
-            update_location_knowledge known_locations_fall current_band
+          if [strength_of_connection] of current_link > second_threshold_connection [
+            update_location_knowledge up-to-n-of max_shared_locations known_locations_winter current_band
+            update_location_knowledge up-to-n-of max_shared_locations known_locations_fall current_band
           ]
-          if [strength_of_connection] of current_link > first_threshold_connection[
-            update_location_knowledge known_locations_summer current_band
-            update_location_knowledge known_locations_spring current_band
+          if [strength_of_connection] of current_link > first_threshold_connection [
+            update_location_knowledge up-to-n-of max_shared_locations known_locations_summer current_band
+            update_location_knowledge up-to-n-of max_shared_locations known_locations_spring current_band
             set cultural_capital cultural_capital + 1  ;also share knowledge about technologies from the first threshold on
           ]
           ;Share knowledge based on the strength of the connection: Spring, Winter, Fall, Summer
@@ -126,6 +126,8 @@ to gather_move_explore
       set known_locations_current lput (list patch-here [food_available] of patch-here [resources_available] of patch-here) known_locations_current
     ]
     
+    set known_locations_current up-to-n-of cultural_capital known_locations_current ; how much location knowledge they can remember is based on cultural capital
+    
     gather
     ;At the end of a season, the knowledge should be updated about the season that has just passed
     if current_season = 0[
@@ -140,7 +142,8 @@ to gather_move_explore
     if current_season = 3[
       set known_locations_spring known_locations_current
     ]
-  ] ]
+    ] 
+  ]
 end
 
 to gather
@@ -271,7 +274,7 @@ to explore
   
   let list_of_explored_patches []
   ;Add the explored patches to the known patches
-  ask patches in-radius ceiling (mobility + 1) [
+  ask patches in-radius ceiling ((mobility + 1) / 2) [
     set list_of_explored_patches lput (list self [food_available] of self [resources_available] of self) list_of_explored_patches
   ]
   let x 0

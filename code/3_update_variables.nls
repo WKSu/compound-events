@@ -71,7 +71,7 @@ end
 to update_bands_variables
   ;new season means the bands have all available time to move, gather and explore
   
-  ask bands[
+  ask bands [
     set time_spent 0
     set time_spent_exploring 0
     set time_spent_moving 0

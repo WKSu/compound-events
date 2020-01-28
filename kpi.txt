@@ -1,0 +1,53 @@
+; Compound Events KPI's
+; - environment
+; mean [ average_temp ] of land_patches
+; mean [ average_prec ] of land_patches
+
+; - volcano impact
+death_by_volcano
+death_by_ash
+event_cultural_capital_loss
+count bands with [ event_impact? = true ] ; impacted bands
+lost_resources
+
+; - patch availability 
+mean [ food_available ] of land_patches
+mean [ resources_available ] of land_patches
+; do we want the mean?
+
+; Connectedness 
+length unique_communities
+mean [ community_size ] of agentset_unique_communities
+count links 
+
+; Band characteristics
+mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands
+mean [ cultural_capital ] of bands
+mean [ technology_level ] of bands
+total_movement / count bands
+
+; Population
+mean [ group_size ] of bands
+count bands
+sum [ group_size ] of bands
+
+
+mean [ average_temp ] of land_patches
+mean [ average_prec ] of land_patches
+death_by_volcano
+death_by_ash
+event_cultural_capital_loss
+count bands with [ event_impact? = true ]
+lost_resources
+mean [ food_available ] of land_patches
+mean [ resources_available ] of land_patches
+length unique_communities
+mean [ community_size ] of agentset_unique_communities
+count links
+mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands
+mean [ cultural_capital ] of bands
+mean [ technology_level ] of bands
+total_movement / count bands
+mean [ group_size ] of bands
+count bands
+sum [ group_size ] of bands
