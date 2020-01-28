@@ -74,7 +74,8 @@ globals [
 ;  mean_food_available_patches
 ;  mean_resources_available_patches
   
-  
+ 
+ remember_random_seed 
 ]
 
 bands-own [
