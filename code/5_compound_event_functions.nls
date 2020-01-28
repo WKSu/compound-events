@@ -99,8 +99,8 @@ to compound_event_impact
 end
 
 to visualize-impact-volcano
-  let min-landmass gis:minimum-of europe-landmass
-  let max-landmass gis:maximum-of europe-landmass
+  let min-landmass 0
+  let max-landmass 1537.2413330078125 ; actual values from raster dataset
   
   if ticks = 0 or ticks = start_event + volcano_duration_effect [
     ; start: coloring patches to represent european landmass 13900 - 12700BP

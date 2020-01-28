@@ -36,6 +36,10 @@
 ;count bands
 ;sum [ group_size ] of bands
 
+; FIX mean [ community_size ] of agentset_unique_communities
+; startup does not run in parallel or headless FFS
+
+
 __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
   "code/6_community.nls" ]
 
@@ -54,12 +58,13 @@ end
 to setup
   clear-turtles
   reset-ticks
-  random-seed -176624766
 
-  ; all these functions are in the "setup_functions.nls"
+  ; functions are in the "setup_functions.nls"
   setup-globals
   setup-food-and-resources
   spread-population
+
+  ; functions in "compound_event_functions.nls"
   visualize-impact-volcano
   setup-volcano
 
@@ -81,46 +86,11 @@ to go
   ; functions in "compound_event_functions.nls"
   compound_event_impact
 
+  ; functions in "community.nls"
   community-detection
-  print_kpi
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
-end
-
-to print_kpi
-  ; Compound Events KPI's
-  ; - environment
-  debug mean [ average_temp ] of land_patches
-  debug mean [ average_prec ] of land_patches
-
-  ; - volcano impact
-  debug death_by_volcano
-  debug death_by_ash
-  debug event_cultural_capital_loss
-  debug count bands with [ event_impact? = true ] ; impacted bands
-  debug lost_resources
-
-  ; - patch availability
-  debug mean [ food_available ] of land_patches
-  debug mean [ resources_available ] of land_patches
-  ; do we want the mean?
-
-  ; Connectedness
-  debug length unique_communities
-  debug mean [ community_size ] of agentset_unique_communities
-  debug count links
-
-  ; Band characteristics
-  debug mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands
-  debug mean [ cultural_capital ] of bands
-  debug mean [ technology_level ] of bands
-  debug (total_movement / count bands)
-
-  ; Population
-  debug mean [ group_size ] of bands
-  debug count bands
-  debug sum [ group_size ] of bands
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1898,25 +1868,9 @@ NetLogo 6.1.1
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="10"/>
-    <metric>mean [ average_temp ] of land_patches</metric>
-    <metric>mean [ average_prec ] of land_patches</metric>
-    <metric>death_by_volcano</metric>
-    <metric>death_by_ash</metric>
-    <metric>event_cultural_capital_loss</metric>
-    <metric>count bands with [ event_impact? = true ]</metric>
-    <metric>lost_resources</metric>
-    <metric>mean [ food_available ] of land_patches</metric>
-    <metric>mean [ resources_available ] of land_patches</metric>
-    <metric>length unique_communities</metric>
-    <metric>mean [ community_size ] of agentset_unique_communities</metric>
-    <metric>count links</metric>
-    <metric>mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands</metric>
-    <metric>mean [ cultural_capital ] of bands</metric>
-    <metric>mean [ technology_level ] of bands</metric>
-    <metric>total_movement / count bands</metric>
-    <metric>mean [ group_size ] of bands</metric>
-    <metric>count bands</metric>
-    <metric>sum [ group_size ] of bands</metric>
+    <exitCondition>count bands = 0</exitCondition>
+    <metric>ifelse length agentset_unique_communities &gt; 0 [</metric>
+    <metric>mean [ community_size ] of agentset_unique_communities ] [ 0 ]</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>

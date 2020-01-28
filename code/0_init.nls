@@ -53,15 +53,28 @@ globals [
   sd_prec_change
 
 
-  ; global variables keeping track of statistics in the model
+  ; global variables keeping track of statistics in the model (KPI's)
   extinct_bands
   total_movement
   lost_resources
   death_by_volcano ; count the band deads!
   death_by_ash ; count the band deads!
   event_cultural_capital_loss
+;  impacted_bands
+  
+  ; connectedness
   unique_communities
   agentset_unique_communities
+;  number_links
+;  
+;  
+;  ; environment and patches
+;  mean_temp_patches
+;  mean_prec_patches
+;  mean_food_available_patches
+;  mean_resources_available_patches
+  
+  
 ]
 
 bands-own [

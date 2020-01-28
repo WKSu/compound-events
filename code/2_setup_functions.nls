@@ -27,6 +27,8 @@ to setup-globals
 end
 
 to setup-food-and-resources
+  set land_patches patches with [ pcolor != blue ]
+  
   ask land_patches[
     ; reset the values for the compound events
     set volcano_impact? false
