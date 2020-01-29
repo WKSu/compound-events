@@ -114,7 +114,7 @@ to update_bands_variables
     ]
     
     ;Mutation of the cultural capital - normal distribution
-    set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
+      set cultural_capital max list 1 min list 100 random-normal cultural_capital cultural_capital_mutation
     
     ;    if not any? my-links [
     ;      set cultural_capital max list 1 min list 100 (cultural_capital - 1) ] 

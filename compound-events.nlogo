@@ -208,7 +208,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-60.0
+50.0
 1
 1
 NIL
@@ -223,7 +223,7 @@ stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-20.0
+25.0
 1
 1
 NIL
@@ -247,14 +247,14 @@ HORIZONTAL
 SLIDER
 1225
 1085
-1365
+1370
 1118
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.05
-0.01
+1.025
+0.005
 1
 NIL
 HORIZONTAL
@@ -268,7 +268,7 @@ resources_tool
 resources_tool
 1
 100
-60.0
+45.0
 1
 1
 NIL
@@ -375,7 +375,7 @@ average_group_size
 average_group_size
 1
 40
-23.0
+25.0
 1
 1
 NIL
@@ -390,7 +390,7 @@ number_of_bands
 number_of_bands
 2
 3200
-1200.0
+2900.0
 1
 1
 NIL
@@ -519,7 +519,7 @@ maximum_days_moving
 maximum_days_moving
 0
 89
-89.0
+30.0
 1
 1
 NIL
@@ -534,7 +534,7 @@ max_food_patch
 max_food_patch
 0
 18000
-8500.0
+9000.0
 100
 1
 NIL
@@ -697,9 +697,9 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-1365
+1370
 1085
-1520
+1525
 1118
 cultural_capital_mutation
 cultural_capital_mutation
@@ -885,7 +885,7 @@ INPUTBOX
 960
 80
 start_event
-20.0
+120.0
 1
 0
 Number
@@ -1313,7 +1313,7 @@ cone_impact_1
 cone_impact_1
 0
 2
-1.0
+1.5
 0.05
 1
 NIL
@@ -1455,6 +1455,24 @@ GISP2_trend
 0
 1
 -1000
+
+PLOT
+605
+915
+805
+1065
+Mean Technology Level
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ technology_level ] of bands"
 
 @#$#@#$#@
 ## WHAT IS IT?
