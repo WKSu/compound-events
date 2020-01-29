@@ -69,7 +69,7 @@ to update-food-and-resources
     set average_temp mean temp_year
     set average_prec mean prec_year
     
-    ifelse abs (average_temp - optimal_temperature) > max_deviation_temp or abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true [
+    ifelse abs (average_temp - optimal_temperature) > max_deviation_temp or abs (average_prec - optimal_precipitation) > max_deviation_prec or volcano_impact? = true  [
       set food_available 0
       set resources_available 0
     ] [
@@ -88,7 +88,11 @@ to update-food-and-resources
         set prec_deviation (1 - (average_prec - optimal_precipitation) / (max_precipitation - optimal_precipitation))
       ]
 
-      set food_available min list (((temp_deviation + prec_deviation) / 2) * max_food) (food_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_food) / growback_rate)
+      
+      ifelse altitude > max_altitude_food_available [
+        set food_available 0 ] [
+        set food_available min list (((temp_deviation + prec_deviation) / 2) * max_food) (food_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_food) / growback_rate) ]
+      
       set resources_available min list (((temp_deviation + prec_deviation) / 2) * max_resources) (resources_available + max list 0 (((temp_deviation + prec_deviation) / 2) * max_resources) / growback_rate)
     ]
   ]
