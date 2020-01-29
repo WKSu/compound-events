@@ -64,8 +64,6 @@ to setup
   clear-turtles
   reset-ticks
 
-  startup
-
   ; functions are in the "setup_functions.nls"
   setup-globals
   setup-food-and-resources
@@ -891,7 +889,7 @@ INPUTBOX
 960
 80
 start_event
-5.0
+20.0
 1
 0
 Number
@@ -905,7 +903,7 @@ random_ash_fall
 random_ash_fall
 0
 3
-3.0
+0.3
 0.05
 1
 %
@@ -1306,7 +1304,7 @@ SWITCH
 43
 debug?
 debug?
-0
+1
 1
 -1000
 
@@ -1394,7 +1392,7 @@ percentage_ash
 percentage_ash
 0
 1
-0.81
+1.0
 0.01
 1
 NIL
@@ -1884,11 +1882,11 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="Test" repetitions="1" runMetricsEveryStep="true">
+  <experiment name="Test" repetitions="40" runMetricsEveryStep="true">
     <setup>startup
 setup</setup>
     <go>go</go>
-    <timeLimit steps="250"/>
+    <timeLimit steps="10"/>
     <metric>count turtles</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
