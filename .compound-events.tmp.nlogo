@@ -253,7 +253,7 @@ standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.001
+1.025
 0.005
 1
 NIL
@@ -330,7 +330,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-10.0
+8.0
 1
 1
 Celcius
@@ -750,7 +750,7 @@ growback_rate
 growback_rate
 1
 100
-4.0
+2.0
 1
 1
 NIL
@@ -1452,7 +1452,7 @@ SWITCH
 1118
 GISP2_trend
 GISP2_trend
-0
+1
 1
 -1000
 

@@ -330,7 +330,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-8.0
+11.0
 1
 1
 Celcius
@@ -414,7 +414,7 @@ SWITCH
 43
 show_links
 show_links
-0
+1
 1
 -1000
 
@@ -519,7 +519,7 @@ maximum_days_moving
 maximum_days_moving
 0
 89
-30.0
+60.0
 1
 1
 NIL
@@ -750,7 +750,7 @@ growback_rate
 growback_rate
 1
 100
-2.0
+8.0
 1
 1
 NIL
@@ -912,7 +912,7 @@ SWITCH
 43
 show_volcano_impact
 show_volcano_impact
-0
+1
 1
 -1000
 
@@ -1289,7 +1289,7 @@ SWITCH
 43
 color_clusters?
 color_clusters?
-0
+1
 1
 -1000
 

@@ -349,7 +349,8 @@ to use_gathered_products
       ]
       die
     ]
-    set group_size round (group_size * standard_birth_rate)
+    
+    set group_size ceiling (group_size * standard_birth_rate)
     
     ifelse cultural_capital > technology_level [
       let potential_increase_technology_level_resources floor (resources_owned / (resources_tool * group_size))
