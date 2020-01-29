@@ -1,8 +1,3 @@
-;ending condition?
-;Decide about KPI's
-; idea - size of turtles depends on group size
-
-
 ;; Compound Events KPI's
 ;; - environment
 ;; mean [ average_temp ] of land_patches
@@ -36,12 +31,11 @@
 ;count bands
 ;sum [ group_size ] of bands
 
-; FIX mean [ community_size ] of agentset_unique_communities
 ; startup does not run in parallel or headless FFS
 
 
 __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
-  "code/6_community.nls" ]
+  "code/6_community.nls" "code/7_reporters.nls" ]
 
 to startup
   ifelse [ pcolor ] of patch 0 180 = 105 [
@@ -93,6 +87,8 @@ to go
 
   ; functions in "community.nls"
   community-detection
+
+  calculate_reporters
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
@@ -212,7 +208,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-30.0
+60.0
 1
 1
 NIL
@@ -538,7 +534,7 @@ max_food_patch
 max_food_patch
 0
 18000
-9000.0
+8500.0
 100
 1
 NIL
@@ -680,7 +676,7 @@ true
 false
 "clear-all-plots " ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot total_movement / count bands"
+"default" 1.0 0 -16777216 true "" "plot total_movement / count bands / ticks"
 
 PLOT
 5
@@ -902,8 +898,8 @@ SLIDER
 random_ash_fall
 random_ash_fall
 0
-3
-0.3
+99
+4.75
 0.05
 1
 %
@@ -1347,7 +1343,7 @@ decay_exponent
 decay_exponent
 0
 0.5
-0.17
+0.13
 0.01
 1
 NIL
@@ -1421,7 +1417,7 @@ PLOT
 915
 405
 1065
-plot 1
+Mean known locations
 NIL
 NIL
 0.0

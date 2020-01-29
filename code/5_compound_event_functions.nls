@@ -78,11 +78,24 @@ to compound_event_impact
         let average_distance (ash_eruption_distance_1 + ash_eruption_distance_2) / 2
         let available_patches average_distance ^ 2 * 3.14 ; calculate surface area of possible patches with patches
         let random_patches round (available_patches * ( random_ash_fall / 100 ))
+
+        
         
         ask n-of random_patches patches in-radius average_distance [
           ; random impact of ash fall on the world to create ash outside the cones
           set ash_impact? true
-          ask one-of neighbors [ set ash_impact? true ]
+          
+          if ash_eruption_distribution = "normal" [
+            set ash_fall min list 100 random-normal mean_ash_intensity stdv_ash_intensity ]
+          
+          if ash_eruption_distribution = "skewed far" [
+            let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 
+            set ash_fall min list 100 random-poisson ((distance patch 186 95) / (max_distance) * 100) * cone_impact_2]
+          
+          if ash_eruption_distribution = "skewed near" [
+            let max_distance max list ash_eruption_distance_1 ash_eruption_distance_2 
+            set ash_fall min list 100 random-poisson ((1 - (distance patch 186 95 / max_distance)) * 100) * cone_impact_2]
+          
         ]
         
         set heading 0 ; set the volcano back to its original location
@@ -152,8 +165,8 @@ to interaction_volcano
     
     ask patches with [ ash_impact? = true ] [
       ; lower the max food and resources of a patch based on the ash fall
-      set max_food max list 0 max_food_patch * ( 1 - ash_fall / 100)
-      set max_resources max list 0 max_resource_patch * (1 - ash_fall / 100)
+      set max_food max list 0 max_food_patch * 0.25 * ( 1 - ash_fall / 100)
+      set max_resources max list 0 max_resource_patch * 0.25 * (1 - ash_fall / 100)
       
       ask bands-here [ 
         set event_impact? true

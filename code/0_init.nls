@@ -11,13 +11,13 @@ globals [
   europe-altitude ; altitude
   europe-grid ; overlay a grid with graticules of 10
   europe-tri ; terrain roughness index
-
+  
   ; mean precipitation GIS
   europe_prec_djf ; DJF: December, January, February
   europe_prec_mam ; MAM: March, April, May
   europe_prec_jja ; JJA: June, July, August
   europe_prec_son ; September, October, November
-
+  
   ; mean temperature GIS
   europe_temp_djf
   europe_temp_mam
@@ -25,22 +25,22 @@ globals [
   europe_temp_son
   europe_temp_range ; Annual Temeprature Range
                     ; end: GIS globals
-
+  
   ; standard deviation of temperature
   sd_temp_djf
   sd_temp_mam
   sd_temp_jja
   sd_temp_son
-
+  
   sd_prec_djf
   sd_prec_mam
   sd_prec_jja
   sd_prec_son
   
   GISP2_climate_trend
-
+  
   land_patches
-
+  
   technology_sharing_threshold
   first_threshold_connection
   second_threshold_connection
@@ -55,62 +55,77 @@ globals [
   prec_change
   sd_temp_change
   sd_prec_change
-
-
+  
+  
   ; global variables keeping track of statistics in the model (KPI's)
   extinct_bands
   total_movement
-  lost_resources
-  death_by_volcano ; count the band deads!
-  death_by_ash ; count the band deads!
-  event_cultural_capital_loss
-;  impacted_bands
+  
+  ;  impacted_bands
   
   ; connectedness
   unique_communities
   agentset_unique_communities
-;  number_links
-;  
-;  
-;  ; environment and patches
-;  mean_temp_patches
-;  mean_prec_patches
-;  mean_food_available_patches
-;  mean_resources_available_patches
+  ;  number_links
   
- 
- remember_random_seed 
+  
+  ;; Compound Events KPI's
+  ;; - environment
+  average_temperature_of_patches
+  average_precipitation_of_patches
+  ;; - volcano impact
+  impact_by_ash
+  death_by_volcano
+  death_by_ash
+  event_cultural_capital_loss
+  lost_resources
+  ;; - patch availability
+  average_food_available
+  average_resources_available
+  ;; Connectedness
+  number_of_communities
+  average_community_size
+  number_of_links
+  ;; Band characteristics
+  average_knowledge_locations
+  average_cultural_capital
+  average_technology_level
+  average_time_spent_moving
+  ;; Population
+  mean_group_size
+  total_number_of_bands
+  total_population   
 ]
 
 bands-own [
   group_size
-
+  
   food_needed
   resources_needed
   food_owned
   resources_owned
-
+  
   effectiveness
   cultural_capital
   technology_level
   initial_mobility
   mobility
-
+  
   death_rate
   health
   
   mother
-
+  
   known_locations_summer
   known_locations_fall
   known_locations_winter
   known_locations_spring
   known_locations_current
   count_known_locations_current
-
+  
   current_home_location
   previous_home_location
-
+  
   time_spent
   time_spent_exploring
   time_spent_moving
@@ -136,7 +151,7 @@ patches-own [
   altitude
   ruggedness_index
   landmass
-
+  
   prec_djf
   prec_mam
   prec_jja
@@ -146,7 +161,7 @@ patches-own [
   prec_current
   min_temperature
   max_temperature
-
+  
   temp_djf
   temp_mam
   temp_jja
@@ -160,7 +175,7 @@ patches-own [
   
   temp_deviation
   prec_deviation
-
+  
   ; compound event impact
   volcano_impact?
   ash_impact?
