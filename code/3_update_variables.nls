@@ -1,7 +1,7 @@
 to update-weather
   
   ifelse GISP2_trend = true [ 
-    set temp_change 10 * (item year GISP2_climate_trend) 
+;    set temp_change 10 * (item year GISP2_climate_trend) 
   ] [
     if ticks < environment_delay [ 
       set temp_change min list max_temp_change (temp_change + max_temp_change / environment_delay)

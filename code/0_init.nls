@@ -1,9 +1,11 @@
-extensions [ gis profiler nw ]
+extensions [ gis profiler nw csv ]
 
 breed [ bands band ]
 breed [ volcanoes volcano ]
 
 globals [
+  year
+  
   ; start: GIS globals used for loading in map data
   europe-landmass ; visualize the continent
   europe-altitude ; altitude
@@ -34,6 +36,8 @@ globals [
   sd_prec_mam
   sd_prec_jja
   sd_prec_son
+  
+  GISP2_climate_trend
 
   land_patches
 

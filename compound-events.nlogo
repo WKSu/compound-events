@@ -44,43 +44,27 @@ __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls
   "code/6_community.nls" ]
 
 to startup
-  print (word "lock_files/" remember_random_seed)
-  ifelse file-exists? (word "lock_files/" remember_random_seed) [
-
-   stop
+  ifelse [ pcolor ] of patch 0 180 = 105 [
+    stop
   ]
   [
     ; startup command only applies these functions during the initial start of the model
   ; it saves time by not loading in all the GIS data everytime a new run is started!
   clear-all
   reset-ticks
-  remember_seed
   ;  profiler:start
   ; all these functions are in the "load_gis.nls"
   setup-patches ; function that loads in all the data needed for the initial patch data: altitude, landmass, terrain ruggedness, precipitation, and temperature
                 ;  profiler:stop
                 ;  print profiler:report
-
   ]
-end
-
-to remember_seed
-  ; pull range from the random-seed
-  ; save the random numbers in a file
-  set remember_random_seed random (2147483647 * 2) - 2147483647
-  random-seed remember_random_seed
-  file-open (word "lock_files/" remember_random_seed)
-  file-write (word "lock_files/"  remember_random_seed)
-  file-close
-
 end
 
 to setup
   clear-turtles
   reset-ticks
-  ;  random-seed 1999387669
 
-
+  startup
 
   ; functions are in the "setup_functions.nls"
   setup-globals
