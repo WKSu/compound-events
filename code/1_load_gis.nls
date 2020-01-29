@@ -73,9 +73,9 @@ to setup-temperature
   set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
   set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
   set europe_temp_djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
-  set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_mam.asc"
-  set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_jja.asc"
-  set europe_temp_son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_son.asc"
+  set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_MAM.asc"
+  set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_JJA.asc"
+  set europe_temp_son gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_SON.asc"
   set europe_temp_range gis:load-dataset "data/gis/PaleoView/temperature/temp_range.asc"
 
   gis:set-world-envelope-ds (gis:envelope-of europe_temp_djf) ; mapping the envelope of the NetLogo world to the given envelope in GIS space
