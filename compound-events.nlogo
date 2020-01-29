@@ -214,7 +214,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-30.0
+60.0
 1
 1
 NIL
@@ -540,7 +540,7 @@ max_food_patch
 max_food_patch
 0
 18000
-9000.0
+8500.0
 100
 1
 NIL
@@ -891,7 +891,7 @@ INPUTBOX
 960
 80
 start_event
-5.0
+30.0
 1
 0
 Number
@@ -904,8 +904,8 @@ SLIDER
 random_ash_fall
 random_ash_fall
 0
-3
-3.0
+99
+4.75
 0.05
 1
 %
@@ -1349,7 +1349,7 @@ decay_exponent
 decay_exponent
 0
 0.5
-0.17
+0.13
 0.01
 1
 NIL

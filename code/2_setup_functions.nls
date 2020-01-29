@@ -13,6 +13,9 @@ to setup-globals
   set sd_prec_change 0
   set unique_communities [ ]
   
+  set min_ch4 400
+  set max_ch4 1000
+  
 
   ; setting the threshold (how long they have to be in close proximity to each other) to create a link
   ; linear growth, the longer they are in close proximity, the more they will share

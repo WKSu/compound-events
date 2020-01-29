@@ -6,6 +6,7 @@ to setup-patches
   setup-terrain-ruggedness-index
   setup-precipitation
   setup-temperature
+  setup-temperature-trend
   update-weather ; added so that tick 0 also has current weather and precipitation
 
   if show-graticules? = True [
@@ -105,7 +106,7 @@ to setup-graticules
   gis:draw europe-grid 1
 end
 
-to setup_temperature_trend
+to setup-temperature-trend
     file-close-all
     ;Error-catch if file cannot be found
   if not file-exists? "data/GISP2.csv" [
@@ -120,7 +121,7 @@ to setup_temperature_trend
   loop[
     if i = length file[stop]
     ;Put only the price at the end of a list, so a list is created of only the price over time
-    set GISP2_climate_trend insert-item length GISP2_climate_trend GISP2_climate_trend (item 3 (item i file))
+    set GISP2_climate_trend insert-item length GISP2_climate_trend GISP2_climate_trend (item 1 (item i file))
     set i i + 1
   ]
 end

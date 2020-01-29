@@ -1,8 +1,26 @@
 to update-weather
   
   ifelse GISP2_trend = true [ 
-;    set temp_change 10 * (item year GISP2_climate_trend) 
-  ] [
+    let ch4_value 400
+    ifelse ticks < 240 [
+      set ch4_value item year GISP2_climate_trend
+    ]
+    [
+      set ch4_value item (length GISP2_climate_trend - 1) GISP2_climate_trend
+    ]
+    let ch4_normalized_value (ch4_value - min_ch4) / (800 - 100)
+    let temperature_from_ch4 (ch4_normalized_value * 20) - 5
+    
+    ask land_patches [ 
+      set temp_current (ifelse-value
+        current_season = 0 [ (random-normal temp_jja (sd_temp_jja + sd_temp_change) + temperature_from_ch4) / 2] 
+        current_season = 1 [ (random-normal temp_son (sd_temp_son + sd_temp_change) + temperature_from_ch4) / 2 ]
+        current_season = 2 [ (random-normal temp_djf (sd_temp_djf + sd_temp_change) + temperature_from_ch4) / 2 ]
+        current_season = 3 [ (random-normal temp_mam (sd_temp_mam + sd_temp_change) + temperature_from_ch4) / 2 ])
+    ]
+  ] 
+  
+  [
     if ticks < environment_delay [ 
       set temp_change min list max_temp_change (temp_change + max_temp_change / environment_delay)
       set prec_change min list max_prec_change (prec_change + max_prec_change / environment_delay) 
@@ -12,7 +30,7 @@ to update-weather
       set sd_temp_change min list increase_temp_variation (sd_temp_change + increase_temp_variation / variation_delay)
       set sd_prec_change min list increase_temp_variation (sd_prec_change + increase_prec_variation / variation_delay)
     ]
-  ]
+    
     
     ask land_patches [ 
       set temp_current (ifelse-value
@@ -20,13 +38,16 @@ to update-weather
         current_season = 1 [ random-normal temp_son (sd_temp_son + sd_temp_change) + temp_change ]
         current_season = 2 [ random-normal temp_djf (sd_temp_djf + sd_temp_change) + temp_change ]
         current_season = 3 [ random-normal temp_mam (sd_temp_mam + sd_temp_change) + temp_change ])
-      
+    ]
+  ]
+    ask land_patches[
       set prec_current (ifelse-value
         current_season = 0 [ max (list 0 random-normal prec_jja (sd_prec_jja + sd_prec_change)) + prec_change ]
         current_season = 1 [ max (list 0 random-normal prec_son (sd_prec_son + sd_prec_change)) + prec_change ]
         current_season = 2 [ max (list 0 random-normal prec_djf (sd_prec_djf + sd_prec_change)) + prec_change ]
         current_season = 3 [ max (list 0 random-normal prec_mam (sd_prec_mam + sd_prec_change)) + prec_change ]) 
     ]
+
 end
 
 to update-food-and-resources
