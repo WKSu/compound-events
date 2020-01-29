@@ -165,8 +165,8 @@ to interaction_volcano
     
     ask patches with [ ash_impact? = true ] [
       ; lower the max food and resources of a patch based on the ash fall
-      set max_food max list 0 max_food_patch * 0.25 * ( 1 - ash_fall / 100)
-      set max_resources max list 0 max_resource_patch * 0.25 * (1 - ash_fall / 100)
+      set max_food max list 0 max_food_patch * impact_ash_on_livability * ( 1 - ash_fall / 100)
+      set max_resources max list 0 max_resource_patch * impact_ash_on_livability * (1 - ash_fall / 100)
       
       ask bands-here [ 
         set event_impact? true
