@@ -94,8 +94,8 @@ to spread-population
   let median_food median [food_available] of land_patches
   let fertile_patches land_patches with [food_available >= median_food]
   ; take the top 25% of fertile patches
-  set median_food median [food_available] of fertile_patches
-  set fertile_patches land_patches with [food_available >= median_food]
+;  set median_food median [food_available] of fertile_patches
+;  set fertile_patches land_patches with [food_available >= median_food]
   
   set fertile_patches fertile_patches with [pycor > 135 or pycor < 86 or pxcor > 70 ]
   let ireland_patches land_patches with [pycor < 135 and pycor > 86 and pxcor < 70]

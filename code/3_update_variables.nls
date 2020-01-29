@@ -8,7 +8,7 @@ to update-weather
     [
       set ch4_value item (length GISP2_climate_trend - 1) GISP2_climate_trend
     ]
-    let ch4_normalized_value (ch4_value - 100) / (800 - 100)
+    let ch4_normalized_value (ch4_value - 400) / (800 - 100)
     let temperature_from_ch4 (ch4_normalized_value * 20) - 5
     
     ask land_patches [ 
