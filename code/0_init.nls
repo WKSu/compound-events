@@ -58,7 +58,6 @@ globals [
   
   
   ; global variables keeping track of statistics in the model (KPI's)
-  extinct_bands
   total_movement
   
   ;  impacted_bands
@@ -94,7 +93,9 @@ globals [
   ;; Population
   mean_group_size
   total_number_of_bands
-  total_population   
+  total_population
+  extinct_bands
+  
 ]
 
 bands-own [

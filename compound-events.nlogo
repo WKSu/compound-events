@@ -247,9 +247,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1225
+1235
 1085
-1365
+1375
 1118
 standard_birth_rate
 standard_birth_rate
@@ -262,15 +262,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-1100
-1120
-1205
-1153
+1190
+1210
+1295
+1243
 resources_tool
 resources_tool
 1
 100
-60.0
+79.0
 1
 1
 NIL
@@ -362,7 +362,7 @@ stdev_group_size
 stdev_group_size
 0
 30
-10.0
+5.0
 1
 1
 NIL
@@ -377,7 +377,7 @@ average_group_size
 average_group_size
 1
 40
-23.0
+25.0
 1
 1
 NIL
@@ -386,7 +386,7 @@ HORIZONTAL
 SLIDER
 1100
 1085
-1225
+1235
 1118
 number_of_bands
 number_of_bands
@@ -513,9 +513,9 @@ Assumptions
 1
 
 SLIDER
-1205
+1100
 1120
-1360
+1255
 1153
 maximum_days_moving
 maximum_days_moving
@@ -543,10 +543,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1340
-1175
-1485
-1208
+1260
+1245
+1405
+1278
 max_resource_patch
 max_resource_patch
 0
@@ -699,10 +699,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-1365
-1085
-1520
-1118
+1295
+1210
+1450
+1243
 cultural_capital_mutation
 cultural_capital_mutation
 1
@@ -744,10 +744,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1055
-1210
-1160
-1243
+1255
+1120
+1360
+1153
 growback_rate
 growback_rate
 4
@@ -901,7 +901,7 @@ random_ash_fall
 random_ash_fall
 0
 99
-4.75
+5.0
 0.05
 1
 %
@@ -1234,9 +1234,9 @@ ticks
 HORIZONTAL
 
 SLIDER
-1160
+1055
 1210
-1295
+1190
 1243
 mobility_size_factor
 mobility_size_factor
@@ -1315,7 +1315,7 @@ cone_impact_1
 cone_impact_1
 0
 2
-1.0
+1.35
 0.05
 1
 NIL
@@ -1433,10 +1433,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands"
 
 SLIDER
-805
-1320
-977
-1353
+1090
+1245
+1262
+1278
 max_shared_locations
 max_shared_locations
 1
@@ -1448,15 +1448,30 @@ NIL
 HORIZONTAL
 
 SWITCH
-590
+575
 1085
-712
+697
 1118
 GISP2_trend
 GISP2_trend
 0
 1
 -1000
+
+SLIDER
+610
+1270
+780
+1303
+impact_ash_on_livability
+impact_ash_on_livability
+0.1
+1.00
+0.25
+0.05
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
