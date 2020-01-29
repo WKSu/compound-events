@@ -1555,6 +1555,7 @@ NetLogo 6.1.1
 setup</setup>
     <go>go</go>
     <timeLimit steps="10"/>
+    <exitCondition>count bands = 0</exitCondition>
     <metric>average_temperature_of_patches</metric>
     <metric>average_precipitation_of_patches</metric>
     <metric>impact_by_ash</metric>
@@ -1574,6 +1575,7 @@ setup</setup>
     <metric>mean_group_size</metric>
     <metric>total_number_of_bands</metric>
     <metric>total_population</metric>
+    <metric>ticks</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>
@@ -1590,6 +1592,8 @@ setup</setup>
       <value value="40"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="growback_rate">
+      <value value="3"/>
+      <value value="5"/>
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="random_ash_fall">
@@ -1746,7 +1750,7 @@ setup</setup>
       <value value="1"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="base-experiment" repetitions="10" runMetricsEveryStep="true">
+  <experiment name="base-experiment-trendtrue" repetitions="10" runMetricsEveryStep="true">
     <setup>startup
 setup</setup>
     <go>go</go>
