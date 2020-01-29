@@ -1,5 +1,6 @@
 to setup-globals
   ; resetting statistics
+  set year 0
   set total_movement 0
   set extinct_bands 0
   set lost_resources 0

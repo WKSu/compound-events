@@ -104,3 +104,23 @@ to setup-graticules
   set europe-grid gis:load-dataset "data/gis/Natural Earth 2/ne_10m_graticules_5.shp"
   gis:draw europe-grid 1
 end
+
+to setup_temperature_trend
+    file-close-all
+    ;Error-catch if file cannot be found
+  if not file-exists? "data/GISP2.csv" [
+    user-message "The GISPS.csv file does not exist! Try adding it to your folder first."
+    stop
+  ]
+  
+  ;Read in the file
+  let file csv:from-file "data/GISP2.csv"
+  set GISP2_climate_trend []
+  let i 1
+  loop[
+    if i = length file[stop]
+    ;Put only the price at the end of a list, so a list is created of only the price over time
+    set GISP2_climate_trend insert-item length GISP2_climate_trend GISP2_climate_trend (item 3 (item i file))
+    set i i + 1
+  ]
+end

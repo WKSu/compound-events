@@ -114,6 +114,8 @@ to go
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
+  if current_season = 0 [
+    set year year + 1 ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -905,7 +907,7 @@ INPUTBOX
 960
 80
 start_event
-20.0
+5.0
 1
 0
 Number
@@ -919,7 +921,7 @@ random_ash_fall
 random_ash_fall
 0
 3
-0.3
+3.0
 0.05
 1
 %
@@ -1320,7 +1322,7 @@ SWITCH
 43
 debug?
 debug?
-1
+0
 1
 -1000
 
@@ -1408,7 +1410,7 @@ percentage_ash
 percentage_ash
 0
 1
-1.0
+0.81
 0.01
 1
 NIL
@@ -1464,6 +1466,17 @@ max_shared_locations
 1
 NIL
 HORIZONTAL
+
+SWITCH
+590
+1085
+712
+1118
+GISP2_trend
+GISP2_trend
+0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
