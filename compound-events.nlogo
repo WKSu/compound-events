@@ -1,8 +1,3 @@
-;ending condition?
-;Decide about KPI's
-; idea - size of turtles depends on group size
-
-
 ;; Compound Events KPI's
 ;; - environment
 ;; mean [ average_temp ] of land_patches
@@ -36,12 +31,11 @@
 ;count bands
 ;sum [ group_size ] of bands
 
-; FIX mean [ community_size ] of agentset_unique_communities
 ; startup does not run in parallel or headless FFS
 
 
 __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
-  "code/6_community.nls" ]
+  "code/6_community.nls" "code/7_reporters.nls" ]
 
 to startup
   ifelse [ pcolor ] of patch 0 180 = 105 [
@@ -95,6 +89,8 @@ to go
 
   ; functions in "community.nls"
   community-detection
+
+  calculate_reporters
 
   tick
   set current_season (ticks mod 4)   ;set season to next item in the list using a modulus based on ticks
@@ -682,7 +678,7 @@ true
 false
 "clear-all-plots " ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot total_movement / count bands"
+"default" 1.0 0 -16777216 true "" "plot total_movement / count bands / ticks"
 
 PLOT
 5
@@ -891,7 +887,7 @@ INPUTBOX
 960
 80
 start_event
-30.0
+4.0
 1
 0
 Number
@@ -1423,7 +1419,7 @@ PLOT
 915
 405
 1065
-plot 1
+Mean known locations
 NIL
 NIL
 0.0

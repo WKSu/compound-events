@@ -4,11 +4,11 @@ to update-weather
     let ch4_value 400
     ifelse ticks < 240 [
       set ch4_value item year GISP2_climate_trend
-    ]
+    ] 
     [
       set ch4_value item (length GISP2_climate_trend - 1) GISP2_climate_trend
     ]
-    let ch4_normalized_value (ch4_value - min_ch4) / (800 - 100)
+    let ch4_normalized_value (ch4_value - 100) / (800 - 100)
     let temperature_from_ch4 (ch4_normalized_value * 20) - 5
     
     ask land_patches [ 

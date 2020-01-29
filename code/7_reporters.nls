@@ -1,0 +1,34 @@
+to calculate_reporters
+  ;; Compound Events KPI's
+  
+  ;; - volcano impact
+  set impact_by_ash count bands with [ event_impact? = true ] ; impacted bands
+                                                              ;; - environment
+  set average_temperature_of_patches  mean [ average_temp ] of land_patches
+  set average_precipitation_of_patches mean [ average_prec ] of land_patches 
+  
+  ;; - patch availability
+  set average_food_available mean [ food_available ] of land_patches
+  set average_resources_available mean [ resources_available ] of land_patches
+  ;; Connectedness
+  set number_of_communities length unique_communities
+  set number_of_links count links
+  ifelse any? links[
+  set average_community_size mean [ community_size ] of agentset_unique_communities
+  ]
+  [
+  set average_community_size 1
+  ]
+  ;; Band characteristics
+  set average_knowledge_locations mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands
+  set average_cultural_capital mean [ cultural_capital ] of bands
+  set average_technology_level mean [ technology_level ] of bands
+  if ticks > 0[
+    set average_time_spent_moving total_movement / count bands / ticks
+  ]
+  ;; Population
+  set mean_group_size mean [ group_size ] of bands
+  set total_number_of_bands count bands
+  set total_population sum [ group_size ] of bands
+
+end
