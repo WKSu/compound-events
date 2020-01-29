@@ -91,7 +91,7 @@ end
 to spread-population
   ; this function looks at the initial food availability and tries to spawn bands in locations where there is food available
   ; ensures that no band is spawned on uninhabitable patches!
-  let median_food median [food_available] of land_patches + 600
+  let median_food median [food_available] of land_patches + 200
   let fertile_patches land_patches with [food_available >= median_food]
   ; take the top 25% of fertile patches
 ;  set median_food median [food_available] of fertile_patches
