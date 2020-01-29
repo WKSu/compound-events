@@ -50,7 +50,7 @@ to startup
 ;   stop
 ;  ]
 
-  ifelse [ pcolor ] of patch 0 180 != blue [
+  ifelse [ pcolor ] of patch 0 180 = 105 [
     stop
   ]
   [
