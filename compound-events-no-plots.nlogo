@@ -183,7 +183,7 @@ threshold_location_knowledge
 threshold_location_knowledge
 1
 8
-7.0
+1.0
 1
 1
 Season(s)
@@ -208,7 +208,7 @@ mean_cultural_capital
 mean_cultural_capital
 1
 100
-60.0
+50.0
 1
 1
 NIL
@@ -223,7 +223,7 @@ stdv_cultural_capital
 stdv_cultural_capital
 0
 50
-20.0
+25.0
 1
 1
 NIL
@@ -245,30 +245,30 @@ NIL
 HORIZONTAL
 
 SLIDER
-1225
+1235
 1085
-1365
+1370
 1118
 standard_birth_rate
 standard_birth_rate
 1
 1.25
-1.05
-0.01
+1.025
+0.005
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1100
-1120
-1205
-1153
+1190
+1210
+1295
+1243
 resources_tool
 resources_tool
 1
 100
-60.0
+45.0
 1
 1
 NIL
@@ -283,8 +283,8 @@ optimal_temperature
 optimal_temperature
 0
 30
-5.0
-1
+5.5
+0.25
 1
 Celcius
 HORIZONTAL
@@ -330,7 +330,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-10.0
+11.0
 1
 1
 Celcius
@@ -345,7 +345,7 @@ max_deviation_prec
 max_deviation_prec
 0
 10
-3.0
+4.0
 1
 1
 NIL
@@ -360,7 +360,7 @@ stdev_group_size
 stdev_group_size
 0
 30
-10.0
+5.0
 1
 1
 NIL
@@ -375,7 +375,7 @@ average_group_size
 average_group_size
 1
 40
-23.0
+25.0
 1
 1
 NIL
@@ -384,12 +384,12 @@ HORIZONTAL
 SLIDER
 1100
 1085
-1225
+1235
 1118
 number_of_bands
 number_of_bands
 2
-2000
+3200
 1000.0
 1
 1
@@ -439,15 +439,15 @@ Assumptions
 1
 
 SLIDER
-1205
+1100
 1120
-1360
+1255
 1153
 maximum_days_moving
 maximum_days_moving
 0
 89
-89.0
+60.0
 1
 1
 NIL
@@ -462,17 +462,17 @@ max_food_patch
 max_food_patch
 0
 18000
-8500.0
+9000.0
 100
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1340
-1175
-1485
-1208
+1260
+1245
+1405
+1278
 max_resource_patch
 max_resource_patch
 0
@@ -499,9 +499,9 @@ m
 HORIZONTAL
 
 SLIDER
-1365
+1370
 1085
-1520
+1525
 1118
 cultural_capital_mutation
 cultural_capital_mutation
@@ -544,16 +544,16 @@ NIL
 HORIZONTAL
 
 SLIDER
-1055
-1210
-1160
-1243
+1255
+1120
+1360
+1153
 growback_rate
 growback_rate
-4
+1
 100
 8.0
-4
+1
 1
 NIL
 HORIZONTAL
@@ -669,7 +669,7 @@ INPUTBOX
 960
 80
 start_event
-20.0
+120.0
 1
 0
 Number
@@ -683,7 +683,7 @@ random_ash_fall
 random_ash_fall
 0
 99
-4.75
+5.0
 0.05
 1
 %
@@ -961,9 +961,9 @@ ticks
 HORIZONTAL
 
 SLIDER
-1160
+1055
 1210
-1295
+1190
 1243
 mobility_size_factor
 mobility_size_factor
@@ -1006,7 +1006,7 @@ cone_impact_1
 cone_impact_1
 0
 2
-1.0
+1.5
 0.05
 1
 NIL
@@ -1036,7 +1036,7 @@ decay_exponent
 decay_exponent
 0
 0.5
-0.15
+0.13
 0.01
 1
 NIL
@@ -1088,10 +1088,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-805
-1320
-977
-1353
+1090
+1245
+1262
+1278
 max_shared_locations
 max_shared_locations
 1
@@ -1103,15 +1103,30 @@ NIL
 HORIZONTAL
 
 SWITCH
-590
+575
 1085
-712
+697
 1118
 GISP2_trend
 GISP2_trend
 0
 1
 -1000
+
+SLIDER
+610
+1270
+780
+1303
+impact_ash_on_livability
+impact_ash_on_livability
+0.1
+1.00
+0.25
+0.05
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1731,10 +1746,31 @@ setup</setup>
       <value value="1"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
+  <experiment name="base-experiment" repetitions="10" runMetricsEveryStep="true">
+    <setup>startup
+setup</setup>
     <go>go</go>
-    <metric>count turtles</metric>
+    <timeLimit steps="240"/>
+    <exitCondition>if count bands = 0</exitCondition>
+    <metric>average_temperature_of_patches</metric>
+    <metric>average_precipitation_of_patches</metric>
+    <metric>impact_by_ash</metric>
+    <metric>death_by_volcano</metric>
+    <metric>death_by_ash</metric>
+    <metric>event_cultural_capital_loss</metric>
+    <metric>lost_resources</metric>
+    <metric>average_food_available</metric>
+    <metric>average_resources_available</metric>
+    <metric>number_of_communities</metric>
+    <metric>average_community_size</metric>
+    <metric>number_of_links</metric>
+    <metric>average_knowledge_locations</metric>
+    <metric>average_cultural_capital</metric>
+    <metric>average_technology_level</metric>
+    <metric>average_time_spent_moving</metric>
+    <metric>mean_group_size</metric>
+    <metric>total_number_of_bands</metric>
+    <metric>total_population</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>
@@ -1754,16 +1790,19 @@ setup</setup>
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="random_ash_fall">
-      <value value="4.75"/>
+      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="decrease_connection">
       <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_deviation_prec">
-      <value value="3"/>
+      <value value="4"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cultural_capital_distribution">
       <value value="&quot;normal&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="impact_ash_on_livability">
+      <value value="0.25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="show-graticules?">
       <value value="false"/>
@@ -1778,19 +1817,19 @@ setup</setup>
       <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_deviation_temp">
-      <value value="10"/>
+      <value value="11"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="volcano_duration_effect">
       <value value="24"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="threshold_location_knowledge">
-      <value value="7"/>
+      <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="GISP2_trend">
       <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="average_group_size">
-      <value value="23"/>
+      <value value="25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="show_links">
       <value value="false"/>
@@ -1802,7 +1841,7 @@ setup</setup>
       <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_food_patch">
-      <value value="8500"/>
+      <value value="9000"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_shared_locations">
       <value value="50"/>
@@ -1817,13 +1856,15 @@ setup</setup>
       <value value="230"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="optimal_temperature">
+      <value value="5.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cooperation_radius">
+      <value value="1"/>
+      <value value="3"/>
       <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="stdev_group_size">
-      <value value="10"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="cooperation_radius">
-      <value value="3"/>
+      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cone_impact_2">
       <value value="1"/>
@@ -1859,10 +1900,14 @@ setup</setup>
       <value value="500"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_effectiveness">
+      <value value="2"/>
       <value value="6"/>
+      <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="maximum_days_moving">
-      <value value="89"/>
+      <value value="10"/>
+      <value value="30"/>
+      <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="decay_type">
       <value value="&quot;exponential&quot;"/>
@@ -1877,13 +1922,15 @@ setup</setup>
       <value value="&quot;skewed near&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="mean_cultural_capital">
-      <value value="60"/>
+      <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="color_clusters?">
       <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="start_event">
-      <value value="20"/>
+      <value value="60"/>
+      <value value="120"/>
+      <value value="240"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="environment_delay">
       <value value="300"/>
@@ -1892,22 +1939,22 @@ setup</setup>
       <value value="30"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="resources_tool">
-      <value value="60"/>
+      <value value="45"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="ash_wind_direction_1">
       <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="stdv_cultural_capital">
-      <value value="20"/>
+      <value value="25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_prec_change">
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="standard_birth_rate">
-      <value value="1.05"/>
+      <value value="1.025"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cone_impact_1">
-      <value value="1"/>
+      <value value="1.5"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

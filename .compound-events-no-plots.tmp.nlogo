@@ -330,7 +330,7 @@ max_deviation_temp
 max_deviation_temp
 0
 30
-8.0
+11.0
 1
 1
 Celcius
@@ -414,7 +414,7 @@ SWITCH
 43
 show_links
 show_links
-0
+1
 1
 -1000
 
@@ -519,7 +519,7 @@ maximum_days_moving
 maximum_days_moving
 0
 89
-30.0
+60.0
 1
 1
 NIL
@@ -750,7 +750,7 @@ growback_rate
 growback_rate
 1
 100
-2.0
+8.0
 1
 1
 NIL
@@ -912,7 +912,7 @@ SWITCH
 43
 show_volcano_impact
 show_volcano_impact
-0
+1
 1
 -1000
 
@@ -1289,7 +1289,7 @@ SWITCH
 43
 color_clusters?
 color_clusters?
-0
+1
 1
 -1000
 
@@ -1452,7 +1452,7 @@ SWITCH
 1118
 GISP2_trend
 GISP2_trend
-1
+0
 1
 -1000
 
@@ -2089,10 +2089,31 @@ setup</setup>
       <value value="1"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
+  <experiment name="base-experiment" repetitions="10" runMetricsEveryStep="true">
+    <setup>startup
+setup</setup>
     <go>go</go>
-    <metric>count turtles</metric>
+    <timeLimit steps="240"/>
+    <exitCondition>if count bands = 0</exitCondition>
+    <metric>average_temperature_of_patches</metric>
+    <metric>average_precipitation_of_patches</metric>
+    <metric>impact_by_ash</metric>
+    <metric>death_by_volcano</metric>
+    <metric>death_by_ash</metric>
+    <metric>event_cultural_capital_loss</metric>
+    <metric>lost_resources</metric>
+    <metric>average_food_available</metric>
+    <metric>average_resources_available</metric>
+    <metric>number_of_communities</metric>
+    <metric>average_community_size</metric>
+    <metric>number_of_links</metric>
+    <metric>average_knowledge_locations</metric>
+    <metric>average_cultural_capital</metric>
+    <metric>average_technology_level</metric>
+    <metric>average_time_spent_moving</metric>
+    <metric>mean_group_size</metric>
+    <metric>total_number_of_bands</metric>
+    <metric>total_population</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>
@@ -2136,10 +2157,10 @@ setup</setup>
       <value value="0"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="show_volcano_impact">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_deviation_temp">
-      <value value="7"/>
+      <value value="11"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="volcano_duration_effect">
       <value value="24"/>
@@ -2154,7 +2175,7 @@ setup</setup>
       <value value="25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="show_links">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="volcano_eruption_distance">
       <value value="2"/>
@@ -2181,7 +2202,9 @@ setup</setup>
       <value value="5.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="cooperation_radius">
+      <value value="1"/>
       <value value="3"/>
+      <value value="5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="stdev_group_size">
       <value value="5"/>
@@ -2220,10 +2243,14 @@ setup</setup>
       <value value="500"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_effectiveness">
+      <value value="2"/>
       <value value="6"/>
+      <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="maximum_days_moving">
+      <value value="10"/>
       <value value="30"/>
+      <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="decay_type">
       <value value="&quot;exponential&quot;"/>
@@ -2241,10 +2268,12 @@ setup</setup>
       <value value="50"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="color_clusters?">
-      <value value="true"/>
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="start_event">
+      <value value="60"/>
       <value value="120"/>
+      <value value="240"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="environment_delay">
       <value value="300"/>
