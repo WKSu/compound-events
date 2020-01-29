@@ -1,0 +1,1 @@
+D:\Programming\NetLogo\netlogo-headless.bat --model compound-events.nlogo --experiment Test --table experiments\test.csv --threads 16

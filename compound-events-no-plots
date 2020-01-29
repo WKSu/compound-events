@@ -283,8 +283,8 @@ optimal_temperature
 optimal_temperature
 0
 30
-5.5
-0.25
+5.0
+1
 1
 Celcius
 HORIZONTAL
@@ -389,8 +389,8 @@ SLIDER
 number_of_bands
 number_of_bands
 2
-3200
-1200.0
+2000
+1000.0
 1
 1
 NIL
@@ -414,81 +414,9 @@ SWITCH
 43
 show_links
 show_links
-0
+1
 1
 -1000
-
-PLOT
-405
-615
-605
-765
-Number of bands
-Time
-Number
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count bands"
-
-PLOT
-605
-615
-805
-765
-Mean Group Size Bands
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ group_size ] of bands"
-
-PLOT
-6
-615
-206
-765
-Mean Temperature
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ average_temp ] of land_patches"
-
-PLOT
-206
-615
-406
-765
-Mean Precipitation
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ average_prec ] of land_patches"
 
 TEXTBOX
 810
@@ -570,132 +498,6 @@ max_altitude_food_available
 m
 HORIZONTAL
 
-PLOT
-805
-615
-1005
-765
-Mean Food Availability
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ food_available ] of land_patches"
-
-PLOT
-1005
-615
-1205
-765
-Mean Resource Available
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ resources_available ] of land_patches"
-
-PLOT
-605
-765
-805
-915
-Mean Cultural Capital
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ cultural_capital ] of bands"
-
-PLOT
-1205
-615
-1385
-765
-Extinct Bands
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot extinct_bands"
-
-PLOT
-205
-765
-405
-915
-Number of Connections
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count links "
-
-PLOT
-805
-765
-1005
-915
-Average Time Moving
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"clear-all-plots " ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot total_movement / count bands / ticks"
-
-PLOT
-5
-765
-205
-915
-Mean Knowledge on Locations
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
-
 SLIDER
 1365
 1085
@@ -755,24 +557,6 @@ growback_rate
 1
 NIL
 HORIZONTAL
-
-PLOT
-5
-915
-205
-1065
-Mean strength of links
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"mean" 1.0 0 -16777216 true "" "plot mean [strength_of_connection] of links"
 
 SLIDER
 1185
@@ -912,7 +696,7 @@ SWITCH
 43
 show_volcano_impact
 show_volcano_impact
-0
+1
 1
 -1000
 
@@ -1036,50 +820,6 @@ volcano_duration_effect
 ticks
 HORIZONTAL
 
-MONITOR
-1385
-795
-1475
-840
-NIL
-lost_resources
-0
-1
-11
-
-MONITOR
-1385
-615
-1490
-660
-NIL
-death_by_volcano
-17
-1
-11
-
-MONITOR
-1385
-660
-1475
-705
-NIL
-death_by_ash
-0
-1
-11
-
-MONITOR
-1385
-750
-1490
-795
-Cultural capital loss
-event_cultural_capital_loss
-2
-1
-11
-
 TEXTBOX
 5
 1070
@@ -1180,17 +920,6 @@ variation_delay
 ticks
 HORIZONTAL
 
-MONITOR
-1385
-705
-1487
-750
-Impacted Bands
-count bands with [ event_impact? = true ]
-17
-1
-11
-
 TEXTBOX
 10
 55
@@ -1246,42 +975,6 @@ mobility_size_factor
 NIL
 HORIZONTAL
 
-PLOT
-1005
-765
-1205
-915
-Count Unique Communities
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot length unique_communities"
-
-PLOT
-1205
-765
-1385
-915
-Mean community size
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [ community_size ] of agentset_unique_communities"
-
 SWITCH
 520
 10
@@ -1289,7 +982,7 @@ SWITCH
 43
 color_clusters?
 color_clusters?
-0
+1
 1
 -1000
 
@@ -1300,7 +993,7 @@ SWITCH
 43
 debug?
 debug?
-0
+1
 1
 -1000
 
@@ -1343,7 +1036,7 @@ decay_exponent
 decay_exponent
 0
 0.5
-0.13
+0.15
 0.01
 1
 NIL
@@ -1393,42 +1086,6 @@ percentage_ash
 1
 NIL
 HORIZONTAL
-
-PLOT
-405
-765
-605
-915
-Population
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot sum [ group_size ] of bands"
-
-PLOT
-205
-915
-405
-1065
-Mean known locations
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands"
 
 SLIDER
 805
@@ -2045,6 +1702,185 @@ setup</setup>
     </enumeratedValueSet>
     <enumeratedValueSet variable="color_clusters?">
       <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="start_event">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="environment_delay">
+      <value value="300"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_angle_1">
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources_tool">
+      <value value="60"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_wind_direction_1">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdv_cultural_capital">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_prec_change">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="standard_birth_rate">
+      <value value="1.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cone_impact_1">
+      <value value="1"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="max_altitude_food_available">
+      <value value="2500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mean_ash_intensity">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distance_2">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="increase_temp_variation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_radius">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="growback_rate">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ash_fall">
+      <value value="4.75"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decrease_connection">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_deviation_prec">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cultural_capital_distribution">
+      <value value="&quot;normal&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-graticules?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_fallout">
+      <value value="&quot;wind-cones&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_temp_change">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show_volcano_impact">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_deviation_temp">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="volcano_duration_effect">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="threshold_location_knowledge">
+      <value value="7"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="GISP2_trend">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="average_group_size">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show_links">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="volcano_eruption_distance">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mobility_size_factor">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_food_patch">
+      <value value="8500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_shared_locations">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_angle_2">
+      <value value="110"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="debug?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_wind_direction_2">
+      <value value="230"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="optimal_temperature">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdev_group_size">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cooperation_radius">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cone_impact_2">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distance_1">
+      <value value="70"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="optimal_precipitation">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_resource_patch">
+      <value value="4500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="percentage_ash">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decay_exponent">
+      <value value="0.13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="split_min_size">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdv_ash_intensity">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="increase_prec_variation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_bands">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="variation_delay">
+      <value value="500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_effectiveness">
+      <value value="6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="maximum_days_moving">
+      <value value="89"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decay_type">
+      <value value="&quot;exponential&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="merge_max_size">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cultural_capital_mutation">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distribution">
+      <value value="&quot;skewed near&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mean_cultural_capital">
+      <value value="60"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_clusters?">
+      <value value="false"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="start_event">
       <value value="20"/>
