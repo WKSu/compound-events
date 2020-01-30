@@ -1960,6 +1960,217 @@ setup</setup>
       <value value="1.5"/>
     </enumeratedValueSet>
   </experiment>
+  <experiment name="base-experiment-trendfalse" repetitions="10" runMetricsEveryStep="true">
+    <setup>startup
+setup</setup>
+    <go>go</go>
+    <timeLimit steps="240"/>
+    <exitCondition>count bands = 0</exitCondition>
+    <metric>average_temperature_of_patches</metric>
+    <metric>average_precipitation_of_patches</metric>
+    <metric>impact_by_ash</metric>
+    <metric>death_by_volcano</metric>
+    <metric>death_by_ash</metric>
+    <metric>event_cultural_capital_loss</metric>
+    <metric>lost_resources</metric>
+    <metric>average_food_available</metric>
+    <metric>average_resources_available</metric>
+    <metric>number_of_communities</metric>
+    <metric>average_community_size</metric>
+    <metric>number_of_links</metric>
+    <metric>average_knowledge_locations</metric>
+    <metric>average_cultural_capital</metric>
+    <metric>average_technology_level</metric>
+    <metric>average_time_spent_moving</metric>
+    <metric>mean_group_size</metric>
+    <metric>total_number_of_bands</metric>
+    <metric>total_population</metric>
+    <enumeratedValueSet variable="max_altitude_food_available">
+      <value value="2500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mean_ash_intensity">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distance_2">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="increase_temp_variation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_radius">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="growback_rate">
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="random_ash_fall">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decrease_connection">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_deviation_prec">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cultural_capital_distribution">
+      <value value="&quot;normal&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="impact_ash_on_livability">
+      <value value="0.25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show-graticules?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_fallout">
+      <value value="&quot;wind-cones&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_temp_change">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show_volcano_impact">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_deviation_temp">
+      <value value="11"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="volcano_duration_effect">
+      <value value="24"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="threshold_location_knowledge">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="GISP2_trend">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="average_group_size">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="show_links">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="volcano_eruption_distance">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mobility_size_factor">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_food_patch">
+      <value value="9000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_shared_locations">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_angle_2">
+      <value value="110"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="debug?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_wind_direction_2">
+      <value value="230"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="optimal_temperature">
+      <value value="5.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cooperation_radius">
+      <value value="1"/>
+      <value value="3"/>
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdev_group_size">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cone_impact_2">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distance_1">
+      <value value="70"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="optimal_precipitation">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_resource_patch">
+      <value value="4500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="percentage_ash">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decay_exponent">
+      <value value="0.13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="split_min_size">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdv_ash_intensity">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="increase_prec_variation">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="number_of_bands">
+      <value value="1000"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="variation_delay">
+      <value value="500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_effectiveness">
+      <value value="2"/>
+      <value value="6"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="maximum_days_moving">
+      <value value="10"/>
+      <value value="30"/>
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="decay_type">
+      <value value="&quot;exponential&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="merge_max_size">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cultural_capital_mutation">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_distribution">
+      <value value="&quot;skewed near&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="mean_cultural_capital">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="color_clusters?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="start_event">
+      <value value="60"/>
+      <value value="120"/>
+      <value value="240"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="environment_delay">
+      <value value="300"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_eruption_angle_1">
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="resources_tool">
+      <value value="45"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ash_wind_direction_1">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="stdv_cultural_capital">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_prec_change">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="standard_birth_rate">
+      <value value="1.025"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="cone_impact_1">
+      <value value="1.5"/>
+    </enumeratedValueSet>
+  </experiment>
 </experiments>
 @#$#@#$#@
 @#$#@#$#@

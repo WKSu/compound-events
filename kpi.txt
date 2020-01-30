@@ -120,3 +120,6 @@ D:\Programming\NetLogo\netlogo-headless.bat --model compound-events-no-plots.nlo
 ["max_prec_change" 0]
 ["standard_birth_rate" 1.025]
 ["cone_impact_1" 1.5]
+
+# Fourth Experiment Run - Climate Change OFF
+D:\Programming\NetLogo\netlogo-headless.bat --model compound-events-no-plots.nlogo --experiment base-experiment-trendfalse --table experiments\Draft Experiments\base-experiment-trendfalse.csv --threads 16
