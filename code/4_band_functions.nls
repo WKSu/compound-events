@@ -62,6 +62,8 @@ to interact-with-other-bands
   ]
 end
 
+
+;only merge if the merged band is not too big and if the patch can actually support the needs of the new band
 to merge [current_band]
   if group_size + [group_size] of current_band <= merge_max_size and [food_available] of patch-here >= 90 * group_size + [group_size] of current_band[
     ask current_band[
@@ -71,6 +73,7 @@ to merge [current_band]
     die
   ]
 end
+
 
 to update_location_knowledge [known_locations_given_season current_band]
   ;Function that shares knowledge between bands (will happen twice per link as both agents have to update their knowledge)
@@ -101,7 +104,7 @@ to gather_move_explore
       ;Find patches with enough food and resources, but exlude patches that are too far away from the current position
       ;The cost to move to a new patch is built up from the distance to that patch, the ruggedness_index of the patch and the relative altitude of the patch
       ;The underlying relationship between resources_available on a patch and the ease with which the patch is crosses can be seen in the ruggedness_index. If a patch is rugged, there isn't much food and the other way around.
-      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) - mobility) < max_move_time)
+      foreach known_locations_current [x -> if (item 1 x >= food_needed and item 2 x >= resources_needed and ([distance self] of item 0 x + ([ruggedness_index] of item 0 x / 10) + abs (([altitude] of item 0 x - [altitude] of current_home_location) / 100) - mobility) < maximum_days_moving)
         [set potential_new_locations lput (item 0 x) potential_new_locations]
       ]
       set potential_new_locations patch-set potential_new_locations
@@ -238,7 +241,7 @@ to move [new_home]
   let time_needed_to_move max list 1 (((distance new_home + ([ruggedness_index] of new_home / 10) + abs (([altitude] of new_home - [altitude] of current_home_location) / 100))) - mobility)
   ;print sentence "time_needed_to_move: " time_needed_to_move
   
-  if time_needed_to_move < max_move_time [
+  if time_needed_to_move < maximum_days_moving [
     
     set time_spent time_spent + time_needed_to_move
     set time_spent_moving time_needed_to_move
@@ -247,6 +250,8 @@ to move [new_home]
     
     set previous_home_location current_home_location
     
+    
+    ;drop resources that the band cannot take with them.
     let resources_moved min list group_size resources_owned
     let resources_dropped resources_owned - resources_moved
     set resources_owned resources_moved
@@ -295,7 +300,7 @@ to explore
     ]
   ]
   ;Only travel to the new location if there is time to do so
-  set known_locations_current filter [y -> (([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility) < max_move_time] known_locations_current
+  set known_locations_current filter [y -> (([distance self] of item 0 y + ([ruggedness_index] of item 0 y / 10) + abs (([altitude] of item 0 y - [altitude] of current_home_location) / 100)) - mobility) < maximum_days_moving] known_locations_current
   ;Choose the best option based on where the biggest part of the food and resources can still be gathered
   let current_max_patch item 0 item 0 best_known_locations
   let current_max item 1 item 0 best_known_locations
@@ -350,6 +355,8 @@ to use_gathered_products
     
     set group_size ceiling (group_size * standard_birth_rate)
     
+    
+    ;increase the technology level if the bands is able to do so, depending on their cultural capital and resources owned.
     ifelse cultural_capital > technology_level [
       let potential_increase_technology_level_resources floor (resources_owned / (resources_tool * group_size))
       let potential_increase_technology_level_cutural_capital floor (cultural_capital - technology_level)
@@ -383,6 +390,8 @@ to split_bands
               ]]
             ]
           ]
+         ;make sure that both new splitted bands receive the same knowledge and connections.
+         
           [
             ask end1 [create-link-with baby_band
               [set strength_of_connection [strength_of_connection] of current_link

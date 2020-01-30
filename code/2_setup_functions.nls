@@ -21,7 +21,6 @@ to setup-globals
   set second_threshold_connection 2 * threshold_location_knowledge
   set fourth_threshold_connection 4 * threshold_location_knowledge
 
-  set max_move_time maximum_days_moving
   set time_available 90
   set current_season 0 ;0 = summer, 1 = fall, 2 = winter, 3 = spring
   
@@ -146,6 +145,8 @@ to setup-agents
     set color black
     set group_size max list 1 random-normal average_group_size stdev_group_size ;decide initial group size
     set resources_owned 0
+    
+    ;decide cultural capital level based on the distribution parameter
     if cultural_capital_distribution = "normal"[
       set cultural_capital min list 100 (round max list 1 random-normal mean_cultural_capital stdv_cultural_capital)
     ]
@@ -165,6 +166,8 @@ to setup-agents
     set initial_mobility random 10 + 1
     set health 100
     set current_home_location patch-here
+    
+    ;as the model begins in summer, the bands already gain summer knowledge on their current home location
     set known_locations_summer (list (list current_home_location ([food_available] of current_home_location) ([resources_available] of current_home_location)))
     set known_locations_fall []
     set known_locations_winter []

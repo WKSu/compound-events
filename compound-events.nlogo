@@ -1,39 +1,3 @@
-;; Compound Events KPI's
-;; - environment
-;; mean [ average_temp ] of land_patches
-;; mean [ average_prec ] of land_patches
-;
-;; - volcano impact
-;death_by_volcano
-;death_by_ash
-;event_cultural_capital_loss
-;count bands with [ event_impact? = true ] ; impacted bands
-;lost_resources
-;
-;; - patch availability
-;mean [ food_available ] of land_patches
-;mean [ resources_available ] of land_patches
-;; do we want the mean?
-;
-;; Connectedness
-;length unique_communities
-;mean [ community_size ] of agentset_unique_communities
-;count links
-;
-;; Band characteristics
-;mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands
-;mean [ cultural_capital ] of bands
-;mean [ technology_level ] of bands
-;total_movement / count bands
-;
-;; Population
-;mean [ group_size ] of bands
-;count bands
-;sum [ group_size ] of bands
-
-; startup does not run in parallel or headless FFS
-
-
 __includes [ "code/0_init.nls" "code/1_load_gis.nls" "code/2_setup_functions.nls" "code/3_update_variables.nls" "code/4_band_functions.nls" "code/5_compound_event_functions.nls"
   "code/6_community.nls" "code/7_reporters.nls" ]
 
@@ -87,7 +51,7 @@ to go
 
   ; functions in "community.nls"
   community-detection
-
+ ; functions in "reporters.nls"
   calculate_reporters
 
   tick
@@ -414,7 +378,7 @@ SWITCH
 43
 show_links
 show_links
-1
+0
 1
 -1000
 
@@ -885,7 +849,7 @@ INPUTBOX
 960
 80
 start_event
-120.0
+2.0
 1
 0
 Number
@@ -912,7 +876,7 @@ SWITCH
 43
 show_volcano_impact
 show_volcano_impact
-1
+0
 1
 -1000
 
@@ -1289,7 +1253,7 @@ SWITCH
 43
 color_clusters?
 color_clusters?
-1
+0
 1
 -1000
 

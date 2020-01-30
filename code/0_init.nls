@@ -31,23 +31,30 @@ globals [
   sd_temp_mam
   sd_temp_jja
   sd_temp_son
-  
+  ; standard deviation of precipitation
   sd_prec_djf
   sd_prec_mam
   sd_prec_jja
   sd_prec_son
   
+  ;the list of ch4 levels in Greenland and Antarctica
   GISP2_climate_trend
   
+  ;A set of patches that are not water
   land_patches
   
+  ;The thresholds from which bands start sharing knowledge
   technology_sharing_threshold
   first_threshold_connection
   second_threshold_connection
   fourth_threshold_connection
+  
+  ;Keeps track of the current season which is based on ticks and will make sure the right data is used
   current_season
+  
+  ;The number of days that bands can spend in total, always set to 90 (3 months)
   time_available
-  max_move_time
+
   
   ; climate change
   temp_change
@@ -114,8 +121,10 @@ bands-own [
   death_rate
   health
   
+  ;if bands decide to split, mother is used to copy the links of the old complete band
   mother
   
+  ;Keeps track of the knowledge on locations per season
   known_locations_summer
   known_locations_fall
   known_locations_winter
@@ -123,9 +132,13 @@ bands-own [
   known_locations_current
   count_known_locations_current
   
+  
+  ;Keeps track of the current and previous home location, to be able to calculate the time needed to move from the "previous home" to the potential new home
   current_home_location
   previous_home_location
   
+  
+  ;Keeps track of how much time is spent on what activity
   time_spent
   time_spent_exploring
   time_spent_moving
@@ -133,6 +146,7 @@ bands-own [
   
   event_impact?
   
+  ;Keeps track of the communities that the bands belongs to
   community
   community_name
   community_size
