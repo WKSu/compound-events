@@ -1575,7 +1575,6 @@ setup</setup>
     <metric>mean_group_size</metric>
     <metric>total_number_of_bands</metric>
     <metric>total_population</metric>
-    <metric>ticks</metric>
     <enumeratedValueSet variable="max_altitude_food_available">
       <value value="2500"/>
     </enumeratedValueSet>
@@ -1755,7 +1754,7 @@ setup</setup>
 setup</setup>
     <go>go</go>
     <timeLimit steps="240"/>
-    <exitCondition>if count bands = 0</exitCondition>
+    <exitCondition>count bands = 0</exitCondition>
     <metric>average_temperature_of_patches</metric>
     <metric>average_precipitation_of_patches</metric>
     <metric>impact_by_ash</metric>
