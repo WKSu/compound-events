@@ -2,10 +2,8 @@ to interact-with-other-bands
   ;Make sure that links do not get updated by both of the ends (turtles)
   ask links [
     set updated? False
-    if ticks mod decrease_connection = 0 [
-      set strength_of_connection strength_of_connection - 1
-    ]
-    if strength_of_connection < 1[
+    set strength_of_connection strength_of_connection - (1 / decrease_connection)
+    if strength_of_connection < 0.25[
       die
     ]
   ]

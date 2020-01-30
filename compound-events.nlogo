@@ -215,10 +215,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-950
-1245
-1090
-1278
+1370
+1210
+1510
+1243
 stdv_cultural_capital
 stdv_cultural_capital
 0
@@ -245,10 +245,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1235
-1085
-1370
-1118
+1405
+1175
+1540
+1208
 standard_birth_rate
 standard_birth_rate
 1
@@ -260,9 +260,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1190
+1095
 1210
-1295
+1200
 1243
 resources_tool
 resources_tool
@@ -283,7 +283,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-5.5
+8.0
 0.25
 1
 Celcius
@@ -353,9 +353,9 @@ HORIZONTAL
 
 SLIDER
 935
-1210
+1175
 1055
-1243
+1208
 stdev_group_size
 stdev_group_size
 0
@@ -368,9 +368,9 @@ HORIZONTAL
 
 SLIDER
 805
-1210
+1175
 935
-1243
+1208
 average_group_size
 average_group_size
 1
@@ -382,10 +382,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1100
-1085
-1235
-1118
+1055
+1175
+1190
+1208
 number_of_bands
 number_of_bands
 2
@@ -511,10 +511,10 @@ Assumptions
 1
 
 SLIDER
-1100
-1120
-1255
-1153
+805
+1210
+960
+1243
 maximum_days_moving
 maximum_days_moving
 0
@@ -526,10 +526,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1215
-1175
-1340
-1208
+1100
+1085
+1225
+1118
 max_food_patch
 max_food_patch
 0
@@ -541,10 +541,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1260
-1245
-1405
-1278
+1225
+1085
+1370
+1118
 max_resource_patch
 max_resource_patch
 0
@@ -556,15 +556,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-805
-1175
-1000
-1208
+1100
+1120
+1295
+1153
 max_altitude_food_available
 max_altitude_food_available
 1000
 5000
-2500.0
+2600.0
 100
 1
 m
@@ -697,10 +697,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [ count_known_locations_current ] of bands"
 
 SLIDER
-1370
-1085
-1525
-1118
+950
+1245
+1105
+1278
 cultural_capital_mutation
 cultural_capital_mutation
 1
@@ -712,9 +712,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1100
+1190
 1175
-1215
+1305
 1208
 merge_max_size
 merge_max_size
@@ -727,9 +727,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1000
+1305
 1175
-1100
+1405
 1208
 split_min_size
 split_min_size
@@ -742,9 +742,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1255
+1295
 1120
-1360
+1400
 1153
 growback_rate
 growback_rate
@@ -891,10 +891,10 @@ start_event
 Number
 
 SLIDER
-1390
-10
-1530
-43
+1185
+45
+1325
+78
 random_ash_fall
 random_ash_fall
 0
@@ -1232,9 +1232,9 @@ ticks
 HORIZONTAL
 
 SLIDER
-1055
+960
 1210
-1190
+1095
 1243
 mobility_size_factor
 mobility_size_factor
@@ -1337,7 +1337,7 @@ HORIZONTAL
 SLIDER
 320
 1335
-490
+495
 1368
 decay_exponent
 decay_exponent
@@ -1370,9 +1370,9 @@ if gradual
 1
 
 TEXTBOX
-495
+500
 1340
-645
+650
 1358
 if exponential\n
 11
@@ -1431,10 +1431,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [(length (known_locations_summer) + length (known_locations_fall) + length (known_locations_winter) + length (known_locations_spring)) / 4] of bands"
 
 SLIDER
-1090
-1245
-1262
-1278
+1200
+1210
+1372
+1243
 max_shared_locations
 max_shared_locations
 1
