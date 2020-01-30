@@ -283,7 +283,7 @@ optimal_temperature
 optimal_temperature
 0
 30
-5.5
+8.0
 0.25
 1
 Celcius
@@ -891,10 +891,10 @@ start_event
 Number
 
 SLIDER
-1390
-10
-1530
-43
+1185
+45
+1325
+78
 random_ash_fall
 random_ash_fall
 0

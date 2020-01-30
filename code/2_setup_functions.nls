@@ -99,12 +99,15 @@ to spread-population
   
   set fertile_patches fertile_patches with [pycor > 135 or pycor < 86 or pxcor > 70 ]
   let ireland_patches land_patches with [pycor < 135 and pycor > 86 and pxcor < 70]
+  if any? bands[
 
   ask n-of (number_of_bands - 1) fertile_patches [
     setup-agents
   ]
+  
   ask one-of ireland_patches with [food_available >= median_food][
     setup-agents
+  ]
   ]
 end
 
