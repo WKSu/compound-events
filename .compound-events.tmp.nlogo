@@ -556,10 +556,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1100
-1120
-1295
-1153
+1020
+1340
+1215
+1373
 max_altitude_food_available
 max_altitude_food_available
 1000
@@ -742,9 +742,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-1295
+1255
 1120
-1400
+1360
 1153
 growback_rate
 growback_rate
@@ -1337,7 +1337,7 @@ HORIZONTAL
 SLIDER
 320
 1335
-495
+490
 1368
 decay_exponent
 decay_exponent
@@ -1370,9 +1370,9 @@ if gradual
 1
 
 TEXTBOX
-500
+495
 1340
-650
+645
 1358
 if exponential\n
 11
