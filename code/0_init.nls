@@ -44,7 +44,6 @@ globals [
   technology_sharing_threshold
   first_threshold_connection
   second_threshold_connection
-  third_threshold_connection
   fourth_threshold_connection
   current_season
   time_available

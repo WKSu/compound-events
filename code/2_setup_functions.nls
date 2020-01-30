@@ -19,7 +19,6 @@ to setup-globals
   ; linear growth, the longer they are in close proximity, the more they will share
   set first_threshold_connection threshold_location_knowledge
   set second_threshold_connection 2 * threshold_location_knowledge
-  set third_threshold_connection 3 * threshold_location_knowledge
   set fourth_threshold_connection 4 * threshold_location_knowledge
 
   set max_move_time maximum_days_moving
