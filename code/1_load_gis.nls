@@ -70,9 +70,7 @@ end
 
 to setup-temperature
   ; loading GIS datasets
-  ; Precipitation data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
-  set europe_prec_djf gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_DJF.asc"
-  set europe_prec_mam gis:load-dataset "data/gis/PaleoView/precipitation/mean_prec_MAM.asc"
+  ; Temperature data comes from PaleoView V1.5 - Fordham, D. A., Saltré, F., Haythorne, S., Wigley, T. M., Otto‐Bliesner, B. L., Chan, K. C., & Brook, B. W. (2017). PaleoView: a tool for generating continuous climate projections spanning the last 21 000 years at regional and global scales. Ecography, 40(11), 1348-1358.
   set europe_temp_djf gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_DJF.asc"
   set europe_temp_mam gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_MAM.asc"
   set europe_temp_jja gis:load-dataset "data/gis/PaleoView/temperature/mean/mean_temp_JJA.asc"

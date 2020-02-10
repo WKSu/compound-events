@@ -849,7 +849,7 @@ INPUTBOX
 960
 80
 start_event
-2.0
+120.0
 1
 0
 Number
