@@ -37,21 +37,21 @@ The files below are the important ones for running this analysis and a short des
 
 ```
 ---\
-    code\  	 *Code Files used in compound-events.nlogo*
-		0_init.nls to 7_reporters.nls 
+    code\ *Code Files used in compound-events.nlogo*
+	 0_init.nls to 7_reporters.nls 
     data\
-		gis\ *contains altitude, terrain roughness, landmass shape, temperature, and precipitation data*
-			EPHA\
-			GEBCO\
-			Natural Earth 2\
-			PaleoView\
-		GISP2.csv *Climate Change Data*
+	 gis\ *contains altitude, terrain roughness, landmass shape, temperature, and precipitation data*
+	  EPHA\
+	  GEBCO\
+	  Natural Earth 2\
+	  PaleoView\
+	 GISP2.csv *Climate Change Data*
 	experiments\
-		Draft Experiments\ *Data Results from Experiments Run in NetLogo*
-			base-experiment-trendfalse
-			base-experiment-trendtrue
-		Analysis of Base Experiments.ipynb
-		Scenario_Analysis.ipynb *Stuctured Data Analysis of the Results*
+	 Draft Experiments\ *Data Results from Experiments Run in NetLogo*
+	  base-experiment-trendfalse
+	  base-experiment-trendtrue
+	 Analysis of Base Experiments.ipynb
+	 Scenario_Analysis.ipynb *Stuctured Data Analysis of the Results*
 	.gitignore
 	README.md
 	compound-events.nlogo
