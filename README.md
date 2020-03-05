@@ -52,7 +52,7 @@ The files below are the important ones for running this analysis and a short des
 	  base-experiment-trendtrue
 	 Analysis of Base Experiments.ipynb
 	 Scenario_Analysis.ipynb *Stuctured Data Analysis of the Results*
-	.gitignore
+    .gitignore
 	README.md
 	compound-events.nlogo
 ```
