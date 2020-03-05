@@ -24,10 +24,10 @@ For any further issues please contact the authors.
 The model code is split into seperate files which can be found in the "code/" folder to create a better overview of the codes. The main model "compound-events.nlogo" calls upon these files to be run. Furthermore, the model requires an abudance of GIS and climate data which are found in the "data/" folder.
 
 ### The Experiments
-The experiments are run headless, however, certain modifications had to be made to the Java environment. If you want to replicate these experiments, make sure to change these settings in your Netlogo folder "... " DO THIS AT HOME
+The experiments are run headless, however, certain modifications had to be made to the Java environment. If you want to replicate these experiments, make sure to change the netlogo-headless file in your NetLogo directory to allow for 3GB of RAM, see [this link](https://github.com/NetLogo/NetLogo/wiki/Optimizing-NetLogo-Runs)
 
 ### The Analysis
-The analysis files are executed in Jupyter Notebook files (.ipynb) running Python 3.6.5 using general data science packages, such as pandas, numpy, seaborn, and matplotlib, and scipy. The odd package out would be (ema_workbench)[https://emaworkbench.readthedocs.io/en/latest/], which is a package developed by the TU Delft for exploratory modelling and analysis. Ideally, we would have used Binder to set these environments up but because it is a private repository at the moment it is not possible. 
+The analysis files are executed in Jupyter Notebook files (.ipynb) running Python 3.6.5 using general data science packages, such as pandas, numpy, seaborn, and matplotlib, and scipy. The odd package out would be [ema_workbench](https://emaworkbench.readthedocs.io/en/latest/), which is a package developed by the TU Delft for exploratory modelling and analysis. Ideally, we would have used Binder to set these environments up but because it is a private repository at the moment it is not possible. 
 
 There are two analysis files: "experiments/Analysis of Base Experiments.ipynb" which is a very rough draft of the analysis performed, however, it includes our initial interpretation of the data. Furthermore, we have "experiments/Scenario_Analysis.ipynb" which follows the structure of the report in our analysis. 
 
@@ -46,13 +46,10 @@ The files below are the important ones for running this analysis and a short des
 	  Natural Earth 2\
 	  PaleoView\
 	 GISP2.csv *Climate Change Data*
-	experiments\
+    experiments\
 	 Draft Experiments\ *Data Results from Experiments Run in NetLogo*
 	  base-experiment-trendfalse
 	  base-experiment-trendtrue
 	 Analysis of Base Experiments.ipynb
 	 Scenario_Analysis.ipynb *Stuctured Data Analysis of the Results*
     .gitignore
-	README.md
-	compound-events.nlogo
-```
