@@ -1,4 +1,6 @@
 # Social Consequences of Past Compound Events
+![image](https://user-images.githubusercontent.com/49348667/111366901-699b4f80-8694-11eb-8a1a-c2661d646bb8.png)
+
 
 The aftermath of compound events will be analyzed with the help of Agent Based Modeling to gain a better understanding of the social consequences. 
 
